@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="select_a_seat.css">
+    <link rel="stylesheet" href="book_a_trip.css">
+</head>
+<body>
+<nav class="navbar">
+
+    <div class="logo">
+        <img src="img/ffs_bg_removal.png" alt="FSS LOGO">
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="book_a_trip.html">Book a Trip</a></li>
+        <li><a href="#">Routes</a></li>
+        <li><a href="#">Pickup Centers</a></li>
+        <li><a href="#">Courier</a></li>
+        <li><a href="#">Track</a></li>
+        <li><a href="#">About</a></li>
+    </ul>
+
+    <div class="nav-buttons">
+        <a href="#" class="signin">Sign In</a>
+        <a href="#" class="btn-primary">Get Started</a>
+    </div>
+
+    <div class="hamburger">
+        ☰
+    </div>
+
+</nav>
+<!--  -->
+<section class="seat-hero">
+
+    <div class="seat-hero-content">
+
+        <a href="available-trips.html" class="back-link">
+            ← Back to results
+        </a>
+
+        <h1>
+            Lagos → Abuja
+        </h1>
+
+        <p>
+            Mon, 22 Jun 2026 · 06:00 → 17:00 (11h 00m)
+            · Toyota Coaster Luxury Bus
+        </p>
+
+    </div>
+
+</section>
+<!--  -->
+    <section class="seat-selection-page">
+
+    <div class="seat-grid">
+
+        <!-- BUS INFO -->
+
+        <div class="bus-info-card">
+
+            <h3>🚌 Honda Odyssey</h3>
+
+            <p>FSS Executive 001</p>
+
+            <div class="bus-details">
+
+                <div class="detail-box">
+                    <span>Seats</span>
+                    <h4>28</h4>
+                </div>
+
+                <div class="detail-box">
+                    <span>Layout</span>
+                    <h4>2-2</h4>
+                </div>
+
+                <div class="detail-box">
+                    <span>A/C</span>
+                    <h4>Yes</h4>
+                </div>
+
+                <div class="detail-box">
+                    <span>Trip</span>
+                    <h4>Intercity Express</h4>
+                </div>
+
+            </div>
+
+            <div class="amenities">
+
+                <span>📶 WiFi</span>
+                <span>❄ Air Conditioning</span>
+                <span>🔌 USB Charging</span>
+                <span>☕ Refreshments</span>
+
+            </div>
+
+        </div>
+
+        
+
+        <!-- SEAT MAP -->
+
+        <div class="seat-map-card">
+
+            <div class="seat-legend">
+
+    <div class="legend-item">
+        <span class="legend-box available"></span>
+        <span>Available</span>
+    </div>
+
+    <div class="legend-item">
+        <span class="legend-box selected"></span>
+        <span>Selected</span>
+    </div>
+
+    <div class="legend-item">
+        <span class="legend-box occupied"></span>
+        <span>Occupied</span>
+    </div>
+
+    <div class="legend-item">
+        <span class="legend-box driver"></span>
+        <span>Driver</span>
+    </div>
+
+</div>
+
+            <h3>Choose Your Seats</h3>
+
+            <p>Select up to 1 seat</p>
+
+            <div class="seat-map">
+
+                <div class="driver-seat">
+                    🚌 Driver
+                </div>
+
+                <button class="seat">3</button>
+                <button class="seat">4</button>
+
+                <button class="seat">6</button>
+                <button class="seat occupied">5</button>
+
+                <button class="seat">7</button>
+                <button class="seat">8</button>
+
+                <button class="seat">10</button>
+                <button class="seat">11</button>
+
+                <button class="seat">14</button>
+                <button class="seat occupied">15</button>
+
+                <button class="seat">18</button>
+                <button class="seat occupied">19</button>
+
+                <button class="seat">20</button>
+                <button class="seat">21</button>
+
+                <button class="seat">22</button>
+                <button class="seat">23</button>
+
+                <button class="seat">24</button>
+                <button class="seat">25</button>
+
+                <button class="seat">26</button>
+                <button class="seat">27</button>
+
+                <button class="seat">28</button>
+                <button class="seat">29</button>
+
+            </div>
+
+
+            <button class="continue-btn">
+                Continue →
+            </button>
+
+        </div>
+
+        <!-- TRIP SUMMARY -->
+
+        <div class="summary-card">
+
+
+            <div class="summary-row">
+    <span>Selected Seat</span>
+    <strong id="selected-seat">None</strong>
+</div>
+
+<div class="pickup-box">
+
+    <label>
+        📍 Pickup Center
+    </label>
+
+    <select id="pickup-center">
+
+        <option>Jibowu Terminal</option>
+
+        <option>Ojota Terminal</option>
+
+        <option>Iyana Ipaja Terminal</option>
+
+        <option>Berger Terminal</option>
+
+    </select>
+
+</div>
+
+            <h3>Trip Summary</h3>
+
+            <div class="summary-row">
+                <span>Route</span>
+                <strong>Lagos → Abuja</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Date</span>
+                <strong>22 June 2026</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Departure</span>
+                <strong>06:00</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Arrival</span>
+                <strong>17:00</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Selected Seat</span>
+                <strong id="selected-seat">
+                    None
+                </strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Pickup Center</span>
+                <strong>
+                    Jibowu Terminal
+                </strong>
+            </div>
+
+            <hr>
+
+            <div class="summary-total">
+
+                <span>Total</span>
+
+                <h3>₦24,500</h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<script src="index.js"></script>
+<script src="select_a_seat.js"></script>
+</body>
+</html>
