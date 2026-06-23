@@ -31,6 +31,6 @@ continueBtn.addEventListener('click', () => {
         return;
     }
 
-    window.location.href = 'passenger-details.html';
+    window.location.href = 'passanger_detail.html';
 
 });

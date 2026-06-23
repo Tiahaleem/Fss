@@ -1,0 +1,195 @@
+/* =========================
+   PASSENGER PAGE
+========================= */
+
+.passenger-page{
+    padding:40px 6%;
+    background:#f8fafc;
+}
+
+.passenger-grid{
+    display:grid;
+    grid-template-columns:1.5fr .9fr;
+    gap:25px;
+}
+
+/* Cards */
+
+.passenger-card,
+.trip-summary-card{
+    background:#fff;
+    border:1px solid #e2e8f0;
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 5px 20px rgba(0,0,0,.05);
+}
+
+/* Headings */
+
+.passenger-card h2,
+.trip-summary-card h3{
+    font-size:1.4rem;
+    font-weight:700;
+    color:#0f172a;
+    margin-bottom:25px;
+}
+
+/* Form */
+
+.form-group{
+    margin-bottom:18px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-size:.9rem;
+    font-weight:600;
+    color:#334155;
+}
+
+.form-group input{
+    width:100%;
+    height:52px;
+    padding:0 15px;
+    border:1px solid #dbe2ea;
+    border-radius:12px;
+    font-family:inherit;
+    outline:none;
+}
+
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+/* Payment Box */
+
+.payment-box{
+    margin-top:20px;
+    padding:18px;
+    border-radius:14px;
+    background:#f1f5f9;
+    border:1px solid #dbe2ea;
+}
+
+.payment-box h3{
+    margin-bottom:10px;
+    color:#081f5c;
+}
+
+.payment-box p{
+    color:#64748b;
+    font-size:.9rem;
+    line-height:1.6;
+}
+
+/* Buttons */
+
+.form-actions{
+    margin-top:25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.back-btn{
+    text-decoration:none;
+    color:#0f172a;
+    background:#f1f5f9;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:600;
+}
+
+.pay-btn{
+    border:none;
+    background:#081f5c;
+    color:white;
+    padding:14px 24px;
+    border-radius:12px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+/* Summary */
+
+.summary-item{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:15px;
+    gap:15px;
+}
+
+.summary-item span{
+    color:#64748b;
+}
+
+.summary-item strong{
+    color:#0f172a;
+}
+
+.trip-summary-card hr{
+    margin:20px 0;
+    border:none;
+    border-top:1px solid #e2e8f0;
+}
+
+.summary-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.summary-total h2{
+    color:#081f5c;
+}
+
+/* Responsive */
+
+@media(max-width:992px){
+
+    .passenger-grid{
+        grid-template-columns:1fr;
+    }
+
+    .trip-summary-card{
+        order:-1;
+    }
+}
+
+@media(max-width:768px){
+
+    .passenger-page{
+        padding:25px 5%;
+    }
+
+    .form-row{
+        grid-template-columns:1fr;
+    }
+
+    .form-actions{
+        flex-direction:column;
+        gap:15px;
+    }
+
+    .back-btn,
+    .pay-btn{
+        width:100%;
+        text-align:center;
+    }
+}
+
+@media(max-width:480px){
+
+    .passenger-card,
+    .trip-summary-card{
+        padding:18px;
+    }
+
+    .passenger-card h2,
+    .trip-summary-card h3{
+        font-size:1.2rem;
+    }
+}
