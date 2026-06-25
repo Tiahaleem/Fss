@@ -1,0 +1,501 @@
+/*==========================
+COURIER FEATURES
+==========================*/
+
+.courier-features{
+
+    padding:70px 6% 40px;
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:24px;
+
+}
+
+.feature-card{
+
+    background:#fff;
+
+    border:1px solid #dbe2ea;
+
+    border-radius:18px;
+
+    padding:24px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.05);
+
+    transition:.3s;
+
+}
+
+.feature-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 18px 35px rgba(0,0,0,.08);
+
+}
+
+.feature-icon{
+
+    width:46px;
+
+    height:46px;
+
+    border-radius:50%;
+
+    background-image: linear-gradient(135deg, oklch(0.45 0.12 220), oklch(0.72 0.12 200));
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:white;
+
+    font-size:20px;
+
+    margin-bottom:18px;
+
+}
+
+.feature-card h3{
+
+    font-size:1.18rem;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+    margin-bottom:10px;
+
+}
+
+.feature-card p{
+
+    font-size:.95rem;
+
+    color:#64748b;
+
+    line-height:1.7;
+
+}
+
+/* Tablet */
+
+@media(max-width:992px){
+
+    .courier-features{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+}
+
+/* Mobile */
+
+@media(max-width:768px){
+
+    .courier-features{
+
+        grid-template-columns:1fr;
+
+        padding:50px 5% 30px;
+
+    }
+
+}
+
+/* =====================================
+   COURIER QUOTE SECTION
+===================================== */
+
+.quote-section{
+    padding:80px 6%;
+    background:#f8fafc;
+}
+
+.quote-container{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:30px;
+    align-items:start;
+}
+
+/* =====================================
+   LEFT CARD
+===================================== */
+
+.quote-form{
+
+    background:#fff;
+
+    padding:35px;
+
+    border-radius:20px;
+
+    border:1px solid #e2e8f0;
+
+    box-shadow:0 10px 30px rgba(15,23,42,.05);
+
+}
+
+.quote-form h2{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+    margin-bottom:30px;
+
+}
+
+/* =====================================
+   FORM GRID
+===================================== */
+
+.form-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:20px;
+
+}
+
+.form-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.form-group label{
+
+    font-size:.95rem;
+
+    font-weight:600;
+
+    color:#334155;
+
+    margin-bottom:8px;
+
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+
+    width:100%;
+
+    padding:14px 16px;
+
+    border:1px solid #dbe2ea;
+
+    border-radius:12px;
+
+    outline:none;
+
+    font-size:.95rem;
+
+    font-family:'Poppins',sans-serif;
+
+    transition:.3s;
+
+    background:white;
+
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+
+    border-color:#08b6d6;
+
+    box-shadow:0 0 0 4px rgba(8,182,214,.12);
+
+}
+
+.form-group textarea{
+
+    resize:none;
+
+}
+
+.full-width{
+
+    margin-top:20px;
+
+}
+
+/* =====================================
+   BUTTON
+===================================== */
+
+.quote-btn{
+
+    width:100%;
+
+    margin-top:30px;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#081f5c;
+
+    color:white;
+
+    font-size:1rem;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.quote-btn:hover{
+
+    background:#0b2b7a;
+
+}
+
+.quote-btn span{
+
+    color:#7dd3fc;
+
+}
+
+/* =====================================
+   SUMMARY CARD
+===================================== */
+
+.quote-summary{
+
+    background:white;
+
+    border-radius:20px;
+
+    border:1px solid #e2e8f0;
+
+    padding:30px;
+
+    position:sticky;
+
+    top:100px;
+
+    box-shadow:0 10px 30px rgba(15,23,42,.05);
+
+}
+
+.quote-summary h3{
+
+    font-size:1.5rem;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+    margin-bottom:25px;
+
+}
+
+/* =====================================
+   SUMMARY ITEMS
+===================================== */
+
+.summary-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:18px;
+
+}
+
+.summary-item span{
+
+    color:#64748b;
+
+    font-size:.95rem;
+
+}
+
+.summary-item strong{
+
+    color:#0f172a;
+
+    font-weight:600;
+
+}
+
+.quote-summary hr{
+
+    margin:25px 0;
+
+    border:none;
+
+    border-top:1px solid #e2e8f0;
+
+}
+
+/* =====================================
+   TOTAL
+===================================== */
+
+.summary-total{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.summary-total span{
+
+    font-size:1rem;
+
+    font-weight:600;
+
+    color:#334155;
+
+}
+
+.summary-total h2{
+
+    color:#08b6d6;
+
+    font-size:2rem;
+
+    font-weight:700;
+
+}
+
+/* =====================================
+   INPUT PLACEHOLDERS
+===================================== */
+
+::placeholder{
+
+    color:#94a3b8;
+
+}
+
+/* =====================================
+   TABLET
+===================================== */
+
+@media(max-width:992px){
+
+    .quote-container{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .quote-summary{
+
+        position:static;
+
+    }
+
+}
+
+/* =====================================
+   MOBILE
+===================================== */
+
+@media(max-width:768px){
+
+    .quote-section{
+
+        padding:60px 5%;
+
+    }
+
+    .quote-form{
+
+        padding:25px;
+
+    }
+
+    .quote-summary{
+
+        padding:25px;
+
+    }
+
+    .quote-form h2{
+
+        font-size:1.7rem;
+
+    }
+
+    .form-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+/* =====================================
+   SMALL PHONES
+===================================== */
+
+@media(max-width:480px){
+
+    .quote-section{
+
+        padding:45px 5%;
+
+    }
+
+    .quote-form{
+
+        padding:20px;
+
+    }
+
+    .quote-summary{
+
+        padding:20px;
+
+    }
+
+    .quote-form h2{
+
+        font-size:1.45rem;
+
+    }
+
+    .summary-total h2{
+
+        font-size:1.6rem;
+
+    }
+
+    .quote-btn{
+
+        padding:16px;
+
+    }
+
+}
