@@ -27,6 +27,10 @@
 
     /* Misc */
     --color-footer-icon: #697e94;
+    --color-cyan-light: #e0f7fa;
+    --color-occupied: #94a3b8;
+    --color-chip-bg: #f1f5f9;
+    --gradient-navy: linear-gradient(135deg, oklch(0.18 0.05 245) 0%, oklch(0.28 0.09 230) 45%, oklch(0.45 0.12 210) 100%);
 
     /* Layout */
     --navbar-height: 65px;
@@ -1708,7 +1712,7 @@ input:focus-visible {
     text-align: center;
 
     border-radius: var(--radius-xl);
-    background-image: linear-gradient(135deg, oklch(0.18 0.05 245) 0%, oklch(0.28 0.09 230) 45%, oklch(0.45 0.12 210) 100%);
+    background-image: var(--gradient-navy);
 }
 
 .cta-box h2 {
