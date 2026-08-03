@@ -118,7 +118,7 @@ faqItems.forEach(item => {
 });
 
 // =========================
-// BOOKING SEARCH
+// BOOKING SEARCH (index.html)
 // =========================
 // NOTE: these selects currently only have one hardcoded <option> each
 // (demo data). When the routes API is ready, populate them from
@@ -145,7 +145,7 @@ if (bookingBox) {
     }
 
     // Swap "From" and "To"
-    // Note: this only works because both selects now share the same
+    // Note: this only works because both selects share the same
     // list of cities (see index.html) — swapping to a value that
     // doesn't exist in the target select silently clears it.
     if (swapBtn && fromSelect && toSelect) {
@@ -192,5 +192,80 @@ if (bookingBox) {
 
             window.location.href = `book_a_trip.html?${params.toString()}`;
         });
+    }
+}
+
+// =========================
+// TRIP SEARCH RESULTS HEADER (book_a_trip.html)
+// =========================
+// Reads the ?from=&to=&date=&passengers= params the homepage search
+// sends over. The actual trip list is still demo data — once
+// GET /api/trips?from=&to=&date= exists, fetch it here and render
+// .trip-card markup from the response instead.
+const tripRouteInfo = document.querySelector(".trip-route-info");
+
+if (tripRouteInfo) {
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get("from");
+    const to = params.get("to");
+    const date = params.get("date");
+    const passengers = params.get("passengers");
+
+    if (from && to) {
+        const heading = tripRouteInfo.querySelector("h1");
+        if (heading) heading.textContent = `${from} → ${to}`;
+
+        const tripsCount = document.querySelector(".trips-header p");
+        if (tripsCount) {
+            tripsCount.textContent = `Trips found for ${from} → ${to}`;
+        }
+    }
+
+    if (date || passengers) {
+        const subtitle = tripRouteInfo.querySelector("p");
+
+        if (subtitle) {
+            const formattedDate = date
+                ? new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                })
+                : null;
+
+            const passengerLabel = passengers
+                ? `${passengers} passenger${passengers === "1" ? "" : "s"}`
+                : null;
+
+            subtitle.textContent = [formattedDate, passengerLabel].filter(Boolean).join(" • ");
+        }
+    }
+}
+
+// =========================
+// PASSENGER DETAIL SUMMARY (passenger_detail.html)
+// =========================
+// Reads the ?seat=&pickup= that select_a_seat.js sends over, and
+// fills in the Trip Summary card so the seat/pickup you actually
+// picked show up here instead of the static demo values. Route,
+// date, vehicle, and price are still static — book_a_trip.html
+// doesn't forward those to select_a_seat.html yet, so there's
+// nothing to carry further at this stage.
+const passengerPage = document.querySelector(".passenger-page");
+
+if (passengerPage) {
+    const params = new URLSearchParams(window.location.search);
+    const seat = params.get("seat");
+    const pickup = params.get("pickup");
+
+    if (seat) {
+        const seatField = passengerPage.querySelector('[data-field="seat"]');
+        if (seatField) seatField.textContent = seat;
+    }
+
+    if (pickup) {
+        const pickupField = passengerPage.querySelector('[data-field="pickup"]');
+        if (pickupField) pickupField.textContent = pickup;
     }
 }

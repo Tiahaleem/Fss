@@ -2,101 +2,116 @@
    TRACK HERO
 ========================= */
 
-.track-hero{
+.track-hero {
+    background-image: var(--gradient-navy);
 
-    /* background:
-        linear-gradient(
-            90deg,
-            #041d52,
-            #0a7b93
-        ); */
+    padding: 70px 6% 100px;
 
-    padding:120px 6% 180px;
+    text-align: center;
 
+    color: white;
 }
 
-.track-card{
+.track-hero h1 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
 
-    max-width:650px;
+.track-hero > p {
+    max-width: 600px;
+    margin: 0 auto 35px;
 
-    margin:auto;
+    font-size: 1rem;
+    color: rgba(255,255,255,.85);
+}
 
-    background:#fff;
+.track-card {
 
-    border-radius:18px;
+    max-width: 650px;
 
-    padding:20px;
+    margin: auto;
+
+    background: #fff;
+
+    border-radius: var(--radius-lg);
+
+    padding: 20px;
 
     box-shadow:
         0 15px 40px
         rgba(0,0,0,.12);
 
-}
-
-.track-card label{
-
-    display:block;
-
-    margin-bottom:10px;
-
-    font-size:.95rem;
-
-    font-weight:600;
-
-    color:#0f172a;
+    text-align: left;
 
 }
 
-.track-input{
+.track-card label {
 
-    display:flex;
+    display: block;
 
-    gap:12px;
+    margin-bottom: 10px;
 
-}
+    font-size: .95rem;
 
-.track-input input{
-    flex:1;
-    min-height:52px;      /* better than relying on padding */
-    border:1px solid #dbe2ea;
-    border-radius:12px;
-    padding:0 18px;
-    font-size:.95rem;
-    font-family:'Poppins',sans-serif;
-    outline:none;
-    transition:.3s;
-}
+    font-weight: 600;
 
-.track-input input:focus{
-
-    border-color:#08b6d6;
+    color: var(--color-text-dark);
 
 }
 
-.track-input button{
+.track-input {
 
-    border:none;
+    display: flex;
 
-    background:#081f5c;
+    gap: 12px;
 
-    color:white;
-
-    padding:0 28px;
-
-    border-radius:14px;
-
-    font-size:.95rem;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.3s;
 }
 
-.track-input button:hover{
+.track-input input {
+    flex: 1;
+    min-height: 52px;      /* better than relying on padding */
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    padding: 0 18px;
+    font-size: .95rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: border-color var(--transition-base);
+}
 
-    background:#0b2b7a;
+.track-input input:focus {
+
+    border-color: var(--color-cyan);
+
+}
+
+.track-input button {
+
+    border: none;
+
+    background: var(--color-navy-deep);
+
+    color: white;
+
+    padding: 0 28px;
+
+    border-radius: var(--radius-md);
+
+    font-size: .95rem;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background var(--transition-base);
+}
+
+/* Was lightening to #0b2b7a on hover — every other primary button
+   on the site darkens on hover, this brings it back in line. */
+.track-input button:hover {
+
+    background: var(--color-navy-hover);
 
 }
 
@@ -104,32 +119,36 @@
    TABLET
 ========================= */
 
-@media(max-width:768px){
+@media (max-width: 768px) {
 
-    .track-hero{
-        padding:100px 5% 120px;
+    .track-hero {
+        padding: 60px 5% 80px;
     }
 
-    .track-card{
-        padding:22px;
+    .track-hero h1 {
+        font-size: 2.1rem;
     }
 
-    .track-input{
-        flex-direction:column;
-        gap:15px;
+    .track-card {
+        padding: 22px;
     }
 
-    .track-input input{
-        width:100%;
-        height:56px;           /* add this */
-        font-size:1rem;
-        padding:0 18px;
+    .track-input {
+        flex-direction: column;
+        gap: 15px;
     }
 
-    .track-input button{
-        width:100%;
-        height:56px;
-        font-size:1rem;
+    .track-input input {
+        width: 100%;
+        height: 56px;           /* add this */
+        font-size: 1rem;
+        padding: 0 18px;
+    }
+
+    .track-input button {
+        width: 100%;
+        height: 56px;
+        font-size: 1rem;
     }
 
 }
@@ -138,27 +157,31 @@
    MOBILE
 ========================= */
 
-@media(max-width:480px){
+@media (max-width: 480px) {
 
-    .track-card{
-        padding:18px;
-        border-radius:16px;
+    .track-hero h1 {
+        font-size: 1.8rem;
     }
 
-    .track-card label{
-        font-size:.9rem;
-        margin-bottom:8px;
+    .track-card {
+        padding: 18px;
+        border-radius: var(--radius-md);
     }
 
-    .track-input input{
-        height:54px;          /* add this */
-        padding:0 16px;
-        border-radius:12px;
+    .track-card label {
+        font-size: .9rem;
+        margin-bottom: 8px;
     }
 
-    .track-input button{
-        height:54px;
-        border-radius:12px;
+    .track-input input {
+        height: 54px;          /* add this */
+        padding: 0 16px;
+        border-radius: var(--radius-sm);
+    }
+
+    .track-input button {
+        height: 54px;
+        border-radius: var(--radius-sm);
     }
 
 }
@@ -166,252 +189,253 @@
    TRACKING RESULT
 ========================= */
 
-.tracking-result{
+.tracking-result {
 
-    display:none;
+    display: none;
 
-    padding:0 6% 80px;
+    padding: 0 6% 80px;
 
-    /* background:#f8fafc; */
 }
 
-.tracking-card{
+.tracking-card {
 
-    max-width:900px;
+    max-width: 900px;
 
-    margin:auto;
+    margin: auto;
 
-    background:white;
+    background: white;
 
-    border-radius:20px;
+    border-radius: var(--radius-xl);
 
-    padding:30px;
+    padding: 30px;
 
-    border:1px solid #dbe2ea;
+    border: 1px solid var(--color-border-light);
 
-    box-shadow:0 10px 30px rgba(0,0,0,.06);
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
 }
 
 /* =========================
    HEADER
 ========================= */
 
-.tracking-header{
+.tracking-header {
 
-    display:flex;
+    display: flex;
 
-    justify-content:space-between;
+    justify-content: space-between;
 
-    align-items:flex-start;
+    align-items: flex-start;
 
-    margin-bottom:30px;
+    margin-bottom: 30px;
 }
 
-.tracking-label{
+.tracking-label {
 
-    font-size:.75rem;
+    font-size: .75rem;
 
-    letter-spacing:2px;
+    letter-spacing: 2px;
 
-    color:#64748b;
+    color: var(--color-text-muted);
 
-    font-weight:700;
+    font-weight: 700;
 }
 
-.tracking-header h2{
+.tracking-header h2 {
 
-    margin-top:8px;
+    margin-top: 8px;
 
-    font-size:2rem;
+    font-size: 2rem;
 
-    color:#0f172a;
+    color: var(--color-text-dark);
 
-    font-weight:700;
+    font-weight: 700;
 }
 
-.tracking-type{
+.tracking-type {
 
-    background:#e0f2fe;
+    background: #e0f2fe;
 
-    color:#0f172a;
+    color: var(--color-text-dark);
 
-    padding:8px 16px;
+    padding: 8px 16px;
 
-    border-radius:999px;
+    border-radius: 999px;
 
-    font-size:.85rem;
+    font-size: .85rem;
 
-    font-weight:600;
+    font-weight: 600;
 }
 
 /* =========================
    TIMELINE
 ========================= */
 
-.timeline{
+.timeline {
 
-    position:relative;
+    position: relative;
 }
 
-.timeline::before{
+.timeline::before {
 
-    content:"";
+    content: "";
 
-    position:absolute;
+    position: absolute;
 
-    left:18px;
+    left: 18px;
 
-    top:0;
+    top: 0;
 
-    bottom:0;
+    bottom: 0;
 
-    width:2px;
+    width: 2px;
 
-    background:#cbd5e1;
+    background: #cbd5e1;
 }
 
-.timeline-item{
+.timeline-item {
 
-    display:flex;
+    display: flex;
 
-    gap:20px;
+    gap: 20px;
 
-    position:relative;
+    position: relative;
 
-    margin-bottom:30px;
+    margin-bottom: 30px;
 }
 
-.timeline-dot{
+.timeline-dot {
 
-    width:38px;
+    width: 38px;
 
-    height:38px;
+    height: 38px;
 
-    border-radius:50%;
+    border-radius: 50%;
 
-    display:flex;
+    display: flex;
 
-    align-items:center;
+    align-items: center;
 
-    justify-content:center;
+    justify-content: center;
 
-    flex-shrink:0;
+    flex-shrink: 0;
 
-    z-index:2;
+    z-index: 2;
 
-    font-size:16px;
+    font-size: 16px;
 }
 
-.completed .timeline-dot{
+.completed .timeline-dot {
 
-    background:#0891b2;
+    background: #0891b2;
 
-    color:white;
+    color: white;
 }
 
-.active .timeline-dot{
+.active .timeline-dot {
 
-    background:#0284c7;
+    background: var(--color-cyan);
 
-    color:white;
+    color: white;
 }
 
-.pending .timeline-dot{
+.pending .timeline-dot {
 
-    background:#e2e8f0;
+    background: var(--color-border-light);
 
-    color:#64748b;
+    color: var(--color-text-muted);
 }
 
-.timeline-content h4{
+.timeline-content h4 {
 
-    font-size:1.1rem;
+    font-size: 1.1rem;
 
-    color:#0f172a;
+    color: var(--color-text-dark);
 
-    margin-bottom:5px;
+    margin-bottom: 5px;
 
-    font-weight:600;
+    font-weight: 600;
 }
 
-.timeline-content span{
+.timeline-content span {
 
-    color:#64748b;
+    color: var(--color-text-muted);
 
-    font-size:.9rem;
+    font-size: .9rem;
 }
 
 /* =========================
    RESPONSIVE
 ========================= */
 
-@media(max-width:768px){
+@media (max-width: 768px) {
 
-    .tracking-result{
+    .tracking-result {
 
-        padding:0 5% 60px;
+        padding: 0 5% 60px;
     }
 
-    .tracking-card{
+    .tracking-card {
 
-        padding:22px;
+        padding: 22px;
     }
 
-    .tracking-header{
+    .tracking-header {
 
-        flex-direction:column;
+        flex-direction: column;
 
-        gap:15px;
+        gap: 15px;
     }
 
-    .tracking-header h2{
+    .tracking-header h2 {
 
-        font-size:1.6rem;
+        font-size: 1.6rem;
     }
 
-    .timeline-content h4{
+    .timeline-content h4 {
 
-        font-size:1rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .tracking-card {
+
+        padding: 18px;
+    }
+
+    .timeline-item {
+
+        gap: 15px;
+    }
+
+    .timeline-dot {
+
+        width: 34px;
+        height: 34px;
+    }
+
+    .timeline-content h4 {
+
+        font-size: .95rem;
     }
 }
 
-@media(max-width:480px){
+.track-error {
 
-    .tracking-card{
+    display: none;
 
-        padding:18px;
-    }
+    margin-top: 12px;
 
-    .timeline-item{
+    color: #dc2626;
 
-        gap:15px;
-    }
+    font-size: .9rem;
 
-    .timeline-dot{
-
-        width:34px;
-        height:34px;
-    }
-
-    .timeline-content h4{
-
-        font-size:.95rem;
-    }
-}
-.track-error{
-
-    display:none;
-
-    margin-top:12px;
-
-    color:#dc2626;
-
-    font-size:.9rem;
-
-    font-weight:500;
+    font-weight: 500;
 
 }
-.input-error{
-    border-color:#dc2626 !important;
-    box-shadow:0 0 0 4px rgba(220,38,38,.1);
+
+.input-error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 4px rgba(220,38,38,.1);
 }

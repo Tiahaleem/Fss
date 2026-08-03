@@ -1,0 +1,264 @@
+/* =========================
+   PASSENGER HERO
+========================= */
+
+.passenger-hero {
+    background-image: var(--gradient-navy);
+
+    padding: 45px 6%;
+
+    color: white;
+}
+
+.passenger-hero-content {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.passenger-hero .back-link {
+    display: inline-block;
+
+    color: rgba(255,255,255,.85);
+
+    text-decoration: none;
+
+    font-size: .95rem;
+
+    margin-bottom: 18px;
+
+    transition: color var(--transition-base);
+}
+
+.passenger-hero .back-link:hover {
+    color: white;
+}
+
+.passenger-hero h1 {
+    font-size: 2rem;
+
+    font-weight: 700;
+
+    margin-bottom: 8px;
+}
+
+.passenger-hero p {
+    color: rgba(255,255,255,.85);
+
+    font-size: .95rem;
+
+    line-height: 1.7;
+}
+
+/* =========================
+   PASSENGER PAGE
+========================= */
+
+.passenger-page {
+    padding: 40px 6%;
+    background: var(--color-field-bg);
+}
+
+.passenger-grid {
+    display: grid;
+    grid-template-columns: 1.5fr .9fr;
+    gap: 25px;
+}
+
+/* Cards */
+
+.passenger-card,
+.trip-summary-card {
+    background: #fff;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl);
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.05);
+}
+
+/* Headings */
+
+.passenger-card h2,
+.trip-summary-card h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    margin-bottom: 25px;
+}
+
+/* Form */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.form-group input {
+    width: 100%;
+    height: 52px;
+    padding: 0 15px;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    outline: none;
+
+    transition: border-color var(--transition-base);
+}
+
+.form-group input:focus-visible {
+    border-color: var(--color-cyan);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Payment Box */
+
+.payment-box {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: var(--radius-md);
+    background: var(--color-chip-bg);
+    border: 1px solid var(--color-border-light);
+}
+
+.payment-box h3 {
+    margin-bottom: 10px;
+    color: var(--color-navy-deep);
+}
+
+.payment-box p {
+    color: var(--color-text-muted);
+    font-size: .9rem;
+    line-height: 1.6;
+}
+
+/* Buttons */
+
+.form-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.back-btn {
+    text-decoration: none;
+    color: var(--color-text-dark);
+    background: var(--color-chip-bg);
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+
+    transition: background var(--transition-base);
+}
+
+.back-btn:hover {
+    background: var(--color-border-light);
+}
+
+.pay-btn {
+    border: none;
+    background: var(--color-navy-deep);
+    color: white;
+    padding: 14px 24px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: background var(--transition-base);
+}
+
+.pay-btn:hover {
+    background: var(--color-navy-hover);
+}
+
+/* Summary */
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    gap: 15px;
+}
+
+.summary-item span {
+    color: var(--color-text-muted);
+}
+
+.summary-item strong {
+    color: var(--color-text-dark);
+}
+
+.trip-summary-card hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary-total h2 {
+    color: var(--color-navy-deep);
+}
+
+/* Responsive */
+
+@media (max-width: 992px) {
+
+    .passenger-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .trip-summary-card {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .passenger-page {
+        padding: 25px 5%;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .back-btn,
+    .pay-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .passenger-card,
+    .trip-summary-card {
+        padding: 18px;
+    }
+
+    .passenger-card h2,
+    .trip-summary-card h3 {
+        font-size: 1.2rem;
+    }
+}

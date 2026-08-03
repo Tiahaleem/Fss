@@ -215,20 +215,15 @@ form.addEventListener("submit", function(e){
 
     ){
 
-        alert("Please complete all required fields.");
+        showToast("Please complete all required fields.");
 
         return;
 
     }
 
-    alert(
-
-        "Courier booking created successfully!\n\nNext step: Payment."
-
-    );
+    showToast("Courier booking created — next step is payment.", "success");
 
     // Later
-
     // window.location.href = "payment.html";
 
 });

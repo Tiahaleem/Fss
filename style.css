@@ -144,6 +144,10 @@ input:focus-visible {
     border-left-color: #ef4444;
 }
 
+.toast-success {
+    border-left-color: #22c55e;
+}
+
 @media (max-width: 480px) {
 
     #toast-container {
@@ -236,11 +240,11 @@ input:focus-visible {
 
     text-decoration: none;
 
-    padding: 14px 24px;
+    padding: 14px 20px;
 
     border-radius: var(--radius-sm);
 
-    font-size: 15px;
+    font-size: 10px;
     font-weight: 600;
 
     transition: background var(--transition-base);
