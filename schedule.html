@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy | FSS Transport</title>
+    <title>Schedule | FSS Transport</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="pickup.css">
-    <link rel="stylesheet" href="legal.css">
+    <link rel="stylesheet" href="book_a_trip.css">
+    <link rel="stylesheet" href="schedule.css">
 </head>
 <body>
 <nav class="navbar">
@@ -23,7 +23,7 @@
     <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="book_a_trip.html">Book a Trip</a></li>
-        <li><a href="route.html">Routes</a></li>
+        <li><a href="route.html" class="active">Routes</a></li>
         <li><a href="pickup.html">Pickup Centers</a></li>
         <li><a href="courier.html">Courier</a></li>
         <li><a href="track.html">Track</a></li>
@@ -41,92 +41,35 @@
 
 </nav>
 
-<section class="pickup-hero">
+<!-- Reuses .trip-search-hero / .trip-route-info from book_a_trip.css.
+     index.js already updates the h1 from ?from=&to= on any page
+     using this markup, so no extra JS is needed for the heading. -->
+<section class="trip-search-hero">
 
-    <div class="pickup-hero-content">
+    <div class="trip-search-content">
 
-        <h1>Privacy Policy</h1>
+        <div class="trip-route-info">
 
-        <p>
-            How FSS Transport collects, uses, and protects your personal information.
-        </p>
+            <h1>Lagos → Abuja</h1>
+
+            <p>
+                Daily departure schedule
+            </p>
+
+        </div>
 
     </div>
 
 </section>
 
-<section class="legal-page">
+<section class="schedule-page">
 
-    <div class="legal-container">
-
-        <span class="legal-updated">Last updated: January 2026</span>
-
-        <h2>1. Information We Collect</h2>
-        <p>
-            When you book a trip, request a courier quote, or contact support, we collect information
-            such as your name, email address, phone number, government ID type (for boarding
-            verification), payment confirmation details, and — for courier bookings — sender and
-            recipient details.
-        </p>
-
-        <h2>2. How We Use Your Information</h2>
-        <ul>
-            <li>To process bookings, issue e-tickets, and confirm courier pickups and deliveries.</li>
-            <li>To send SMS and email updates about your trip or parcel status.</li>
-            <li>To verify your identity at boarding and prevent fraud.</li>
-            <li>To respond to customer support requests.</li>
-            <li>To improve our routes, pricing, and service quality.</li>
-        </ul>
-
-        <h2>3. Sharing of Information</h2>
-        <p>
-            We share the minimum information necessary with trusted third parties who help us
-            operate our services, including payment processors (Paystack, Flutterwave), SMS/email
-            delivery providers, and terminal staff for boarding verification. We do not sell your
-            personal information to advertisers or data brokers.
-        </p>
-
-        <h2>4. Data Security</h2>
-        <p>
-            We use industry-standard measures, including encrypted connections (HTTPS) and access
-            controls, to protect your data. No system is completely secure, and we continuously work
-            to strengthen our safeguards.
-        </p>
-
-        <h2>5. Your Rights</h2>
-        <p>
-            Under the Nigeria Data Protection Act (NDPA) and its regulations, you have the right to
-            request access to, correction of, or deletion of your personal data, subject to
-            legitimate business and legal record-keeping requirements (such as booking history for
-            dispute resolution).
-        </p>
-
-        <h2>6. Cookies</h2>
-        <p>
-            Our website uses cookies to keep you signed in, remember your preferences, and understand
-            how the site is used so we can improve it. You can control cookies through your browser
-            settings.
-        </p>
-
-        <h2>7. Children's Privacy</h2>
-        <p>
-            Our services are intended for users aged 18 and above. Minors may travel as passengers
-            under a booking made by an adult, but accounts are not created in a minor's name.
-        </p>
-
-        <h2>8. Changes to this Policy</h2>
-        <p>
-            We may update this Privacy Policy periodically. Material changes will be reflected by
-            updating the date at the top of this page.
-        </p>
-
-        <h2>9. Contact Us</h2>
-        <p>
-            For privacy questions or data requests, reach us at
-            <a href="mailto:hello@fss.ng">hello@fss.ng</a> or +234 800 123 4567.
-        </p>
-
+    <div class="schedule-header">
+        <h2>Available departures</h2>
+        <p id="schedule-count">Loading schedule…</p>
     </div>
+
+    <div class="schedule-list" id="schedule-list"></div>
 
 </section>
 
@@ -193,9 +136,9 @@
 
             <a href="pickup.html">Pickup Centers</a>
 
-            <a href="track.html">Track Parcel</a>
+            <a href="#">Track Parcel</a>
 
-            <a href="book_a_trip.html">My Bookings</a>
+            <a href="#">My Bookings</a>
 
         </div>
 
@@ -263,5 +206,6 @@
 
 </footer>
 <script src="index.js"></script>
+<script src="schedule.js"></script>
 </body>
 </html>
