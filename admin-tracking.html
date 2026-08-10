@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking | FSS Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin-body">
+
+<aside class="admin-sidebar">
+
+    <div class="admin-sidebar-logo">
+        <img src="img/ffs_bg_removal.png" alt="FSS">
+        <span>ADMIN</span>
+    </div>
+
+    <nav class="admin-nav">
+        <a href="admin-dashboard.html">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+            Dashboard
+        </a>
+        <a href="admin-routes.html">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+            Routes &amp; Pricing
+        </a>
+        <a href="admin-trips.html">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Trips &amp; Schedule
+        </a>
+        <a href="admin-pickup.html">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            Pickup Centers
+        </a>
+        <a href="admin-tracking.html" class="active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+            Tracking
+        </a>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+        <a href="#" id="admin-logout">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Log Out
+        </a>
+    </div>
+
+</aside>
+
+<div class="admin-main">
+
+    <div class="admin-topbar">
+
+        <div class="admin-topbar-left">
+            <button class="admin-hamburger" aria-label="Toggle menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <h1>Tracking</h1>
+        </div>
+
+        <div class="admin-user">
+            <div class="admin-user-avatar">A</div>
+            Admin
+        </div>
+
+    </div>
+
+    <div class="admin-content">
+
+        <div class="admin-card" style="margin-bottom:24px;">
+
+            <div class="admin-card-header">
+                <div>
+                    <h2>Bookings</h2>
+                    <p>Full details behind each reference — who booked it, and who to contact about it.</p>
+                </div>
+            </div>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Type</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Recipient</th>
+                            <th>Route</th>
+                            <th>Price</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookings-table-body">
+                        <!-- Rendered by admin-tracking.js -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="admin-card">
+
+            <div class="admin-card-header">
+                <div>
+                    <h2>Timeline Events</h2>
+                    <p>These feed the timeline shown on the public site's Track page for each reference number.</p>
+                </div>
+
+                <button class="admin-btn-primary" id="add-event-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Event
+                </button>
+            </div>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Order</th>
+                            <th>Event</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-table-body">
+                        <!-- Rendered by admin-tracking.js -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="admin-modal-overlay" id="event-modal-overlay">
+    <div class="admin-modal">
+
+        <div class="admin-modal-header">
+            <h3 id="event-modal-title">Add Event</h3>
+            <button class="admin-modal-close" id="event-modal-close">&times;</button>
+        </div>
+
+        <form id="event-form">
+
+            <input type="hidden" id="event-id">
+
+            <div class="admin-form-row">
+
+                <div class="admin-form-group">
+                    <label>Reference</label>
+                    <input type="text" id="event-reference" placeholder="SKY-DEMO">
+                </div>
+
+                <div class="admin-form-group">
+                    <label>Order</label>
+                    <input type="number" id="event-order" placeholder="1" min="1">
+                </div>
+
+            </div>
+
+            <div class="admin-form-group">
+                <label>Event Title</label>
+                <input type="text" id="event-title" placeholder="Boarding completed">
+            </div>
+
+            <div class="admin-form-row">
+
+                <div class="admin-form-group">
+                    <label>Time</label>
+                    <input type="text" id="event-time" placeholder="07:55">
+                </div>
+
+                <div class="admin-form-group">
+                    <label>Status</label>
+                    <select id="event-status">
+                        <option value="completed">Completed</option>
+                        <option value="active">Active (in progress)</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="admin-form-group">
+                <label>Icon</label>
+                <select id="event-icon">
+                    <option value="boarding">Boarding</option>
+                    <option value="departed">Departed</option>
+                    <option value="checkpoint">Checkpoint</option>
+                    <option value="location">Location update</option>
+                    <option value="arrival">Arrival</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+            </div>
+
+            <div class="admin-modal-actions">
+                <button type="button" class="admin-btn-secondary" id="event-cancel-btn">Cancel</button>
+                <button type="submit" class="admin-btn-primary">Save Event</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="admin-modal-overlay" id="delete-modal-overlay">
+    <div class="admin-modal">
+
+        <div class="admin-modal-header">
+            <h3>Delete this event?</h3>
+            <button class="admin-modal-close" id="delete-modal-close">&times;</button>
+        </div>
+
+        <p class="admin-confirm-text" id="delete-confirm-text">
+            This will remove the timeline event permanently. This can't be undone.
+        </p>
+
+        <div class="admin-modal-actions">
+            <button type="button" class="admin-btn-secondary" id="delete-cancel-btn">Cancel</button>
+            <button type="button" class="admin-icon-btn danger" id="delete-confirm-btn" style="width:auto;padding:10px 18px;background:#fee2e2;color:#dc2626;border-radius:8px;font-weight:600;font-size:.85rem;">
+                Delete
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script src="index.js"></script>
+<script src="admin.js"></script>
+<script src="admin-tracking.js"></script>
+</body>
+</html>

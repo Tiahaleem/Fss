@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings | FSS Transport</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+<nav class="navbar">
+
+    <div class="logo">
+        <img src="img/ffs_bg_removal.png" alt="FSS LOGO">
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="book_a_trip.html">Book a Trip</a></li>
+        <li><a href="route.html">Routes</a></li>
+        <li><a href="pickup.html">Pickup Centers</a></li>
+        <li><a href="courier.html">Courier</a></li>
+        <li><a href="track.html">Track</a></li>
+        <li><a href="about.html">About</a></li>
+    </ul>
+
+    <div class="nav-buttons">
+        <a href="login.html" class="signin">Sign In</a>
+        <a href="signup.html" class="btn-primary">Get Started</a>
+    </div>
+
+    <div class="hamburger">
+        ☰
+    </div>
+
+</nav>
+
+<section class="auth-page">
+
+    <div class="auth-card" style="max-width:460px;">
+
+        <div class="auth-logo">
+            <img src="img/ffs_bg_removal.png" alt="FSS Transport">
+        </div>
+
+        <h1>Account Settings</h1>
+        <p class="auth-subtitle">Update your profile details or change your password.</p>
+
+        <form id="settings-form">
+
+            <p class="settings-section-title">Profile</p>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="settings-name" placeholder="Your name">
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="settings-email" placeholder="you@example.com">
+            </div>
+
+            <p class="settings-section-title">Change Password</p>
+            <p class="settings-hint">Leave these blank if you don't want to change your password.</p>
+
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="settings-current-password" placeholder="••••••••">
+            </div>
+
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="settings-new-password" placeholder="At least 8 characters">
+            </div>
+
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="settings-confirm-password" placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="auth-submit">Save Changes</button>
+
+        </form>
+
+        <p class="auth-switch">
+            <a href="#" id="settings-logout-link">Log out</a>
+        </p>
+
+    </div>
+
+</section>
+
+<script src="index.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>

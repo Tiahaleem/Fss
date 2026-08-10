@@ -179,6 +179,32 @@ declaredValue.addEventListener("input", updateQuote);
 
 
 /* =====================================
+   TRACKING CODE GENERATOR
+===================================== */
+// TEMP DEMO: generates a plausible-looking code client-side.
+// Once a backend exists, the real code should come back from the
+// booking API response instead of being invented here — this is
+// just for showing the flow.
+
+function generateTrackingCode() {
+
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "FSS-";
+
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    return code;
+}
+
+const quoteFormView = document.getElementById("quote-form-view");
+const quoteConfirmationView = document.getElementById("quote-confirmation-view");
+const generatedTrackingCode = document.getElementById("generated-tracking-code");
+const trackParcelBtn = document.getElementById("track-parcel-btn");
+const bookAnotherBtn = document.getElementById("book-another-btn");
+
+/* =====================================
    FORM VALIDATION
 ===================================== */
 
@@ -221,12 +247,64 @@ form.addEventListener("submit", function(e){
 
     }
 
-    showToast("Courier booking created — next step is payment.", "success");
+    const trackingCode = generateTrackingCode();
+
+    // Full booking details — this is what shows up in the admin
+    // Bookings table, so support can actually see who's involved
+    // and what's being shipped, not just a bare reference code.
+    const bookings = getBookings();
+    bookings.push({
+        reference: trackingCode,
+        type: "parcel",
+        senderName: senderName.value.trim(),
+        senderPhone: senderPhone.value.trim(),
+        receiverName: receiverName.value.trim(),
+        receiverPhone: receiverPhone.value.trim(),
+        description: description.value.trim(),
+        from: from.value,
+        to: to.value,
+        weight: Number(weight.value),
+        declaredValue: Number(declaredValue.value),
+        price: summaryTotal.textContent.trim(),
+        createdAt: new Date().toISOString()
+    });
+    saveBookings(bookings);
+
+    // Seed a real starter event so tracking this code immediately
+    // shows something, instead of "no results found".
+    const allEvents = getTrackingEvents();
+    allEvents.push({
+        id: Date.now(),
+        reference: trackingCode,
+        order: 1,
+        title: "Pickup scheduled",
+        time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+        status: "active",
+        icon: "boarding"
+    });
+    saveTrackingEvents(allEvents);
+
+    generatedTrackingCode.textContent = trackingCode;
+    trackParcelBtn.href = `track.html?ref=${encodeURIComponent(trackingCode)}`;
+
+    quoteFormView.style.display = "none";
+    quoteConfirmationView.style.display = "block";
+
+    showToast("Pickup booked — here's your tracking code.", "success");
 
     // Later
     // window.location.href = "payment.html";
 
 });
+
+if (bookAnotherBtn) {
+    bookAnotherBtn.addEventListener("click", () => {
+        form.reset();
+        updateQuote();
+        quoteConfirmationView.style.display = "none";
+        quoteFormView.style.display = "block";
+    });
+}
 
 
 /* =====================================

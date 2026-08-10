@@ -137,6 +137,8 @@
 
         <div class="quote-form">
 
+            <div id="quote-form-view">
+
             <h2>Get an instant quote</h2>
 
             <form id="quote-form">
@@ -267,6 +269,33 @@
                 </button>
 
             </form>
+
+            </div>
+
+            <!-- Shown by courier.js after a successful "booking", hidden by default -->
+            <div id="quote-confirmation-view" style="display:none;">
+
+                <div class="confirmation-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+
+                <h2>Pickup booked!</h2>
+                <p>Save this tracking code — you'll need it to follow your parcel.</p>
+
+                <div class="tracking-code-box">
+                    <span id="generated-tracking-code">PCL-000000</span>
+                </div>
+
+                <div class="confirmation-actions">
+                    <a href="#" id="track-parcel-btn" class="quote-btn track-parcel-link">
+                        Track This Parcel →
+                    </a>
+                    <button type="button" id="book-another-btn" class="book-another-btn">
+                        Book Another Parcel
+                    </button>
+                </div>
+
+            </div>
 
         </div>
 
@@ -418,9 +447,9 @@
 
             <a href="pickup.html">Pickup Centers</a>
 
-            <a href="track.html">Track Parcel</a>
+            <a href="#">Track Parcel</a>
 
-            <a href="book_a_trip.html">My Bookings</a>
+            <a href="#">My Bookings</a>
 
         </div>
 
@@ -438,7 +467,7 @@
 
             <a href="courier.html">Courier Services</a>
 
-            <a href="terms.html">Terms &amp; Conditions</a>
+            <a href="terms.html">Terms & Conditions</a>
 
             <a href="privacy.html">Privacy Policy</a>
 

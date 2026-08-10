@@ -43,6 +43,19 @@ if (loginForm) {
             return;
         }
 
+        const users = getUsers();
+        const match = users.find(u =>
+            u.email.toLowerCase() === email.value.trim().toLowerCase() &&
+            u.password === password.value
+        );
+
+        if (!match) {
+            showToast("Incorrect email or password.");
+            return;
+        }
+
+        setCurrentUser(match);
+
         showToast("Signed in — redirecting…", "success");
 
         setTimeout(() => {
@@ -95,6 +108,27 @@ if (signupForm) {
             showToast("Please accept the Terms & Privacy Policy to continue.");
             return;
         }
+
+        const users = getUsers();
+        const alreadyExists = users.some(u => u.email.toLowerCase() === email.value.trim().toLowerCase());
+
+        if (alreadyExists) {
+            showToast("An account with that email already exists — try signing in instead.");
+            return;
+        }
+
+        // ⚠️ Plaintext password — demo only, see the warning in
+        // index.js's USERS STORE section.
+        const newUser = {
+            id: Date.now(),
+            name: name.value.trim(),
+            email: email.value.trim(),
+            password: password.value
+        };
+
+        users.push(newUser);
+        saveUsers(users);
+        setCurrentUser(newUser);
 
         showToast("Account created — redirecting…", "success");
 

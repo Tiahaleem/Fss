@@ -1,4 +1,328 @@
 // =========================
+// TRACKING STORE (shared)
+// =========================
+// Backed by localStorage so the admin Tracking panel and the public
+// track.html page stay in sync WITHIN THE SAME BROWSER. This is a
+// stand-in for a real database — it does not sync between different
+// visitors/devices. Once a backend exists, replace getTrackingEvents()
+// with a fetch('/api/tracking?ref=...') and saveTrackingEvents() with
+// the matching POST/PUT/DELETE calls.
+
+const TRACKING_STORAGE_KEY = "fss_tracking_events";
+
+function getTrackingEvents() {
+    try {
+        const raw = localStorage.getItem(TRACKING_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read tracking data:", err);
+    }
+
+    // Default demo seed, used the first time (nothing saved yet)
+    return [
+        { id: 1, reference: "FSS-DEMO", order: 1, title: "Boarding completed", time: "07:55", status: "completed", icon: "boarding" },
+        { id: 2, reference: "FSS-DEMO", order: 2, title: "Departed Jibowu Terminal", time: "08:02", status: "completed", icon: "departed" },
+        { id: 3, reference: "FSS-DEMO", order: 3, title: "Passed Berger checkpoint", time: "08:48", status: "completed", icon: "checkpoint" },
+        { id: 4, reference: "FSS-DEMO", order: 4, title: "Currently near Ibadan", time: "10:30", status: "active", icon: "location" },
+        { id: 5, reference: "FSS-DEMO", order: 5, title: "Expected arrival · Abuja", time: "18:15 (ETA)", status: "pending", icon: "arrival" }
+    ];
+}
+
+function saveTrackingEvents(events) {
+    try {
+        localStorage.setItem(TRACKING_STORAGE_KEY, JSON.stringify(events));
+    } catch (err) {
+        console.error("Couldn't save tracking data:", err);
+    }
+}
+
+// =========================
+// BOOKINGS STORE (shared)
+// =========================
+// Same idea as the tracking store above, but holds the actual
+// booking details (sender/receiver for parcels, passenger info for
+// trips) keyed by reference — the stuff a support agent would
+// actually need when a customer calls in about FSS-XXXXXX. Same
+// same-browser-only limitation as the tracking store.
+
+const BOOKINGS_STORAGE_KEY = "fss_bookings";
+
+function getBookings() {
+    try {
+        const raw = localStorage.getItem(BOOKINGS_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read booking data:", err);
+    }
+    return [];
+}
+
+function saveBookings(bookings) {
+    try {
+        localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookings));
+    } catch (err) {
+        console.error("Couldn't save booking data:", err);
+    }
+}
+
+// =========================
+// ROUTES STORE (shared)
+// =========================
+
+const ROUTES_STORAGE_KEY = "fss_routes";
+
+function getRoutes() {
+    try {
+        const raw = localStorage.getItem(ROUTES_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read route data:", err);
+    }
+
+    return [
+        { id: 1, from: "Lagos", to: "Abuja", distance: 760, duration: "11h 00m", price: 24500, status: "active" },
+        { id: 2, from: "Lagos", to: "Port Harcourt", distance: 610, duration: "9h 00m", price: 22000, status: "active" },
+        { id: 3, from: "Lagos", to: "Benin City", distance: 320, duration: "6h 00m", price: 14500, status: "active" },
+        { id: 4, from: "Lagos", to: "Enugu", distance: 540, duration: "9h 00m", price: 19500, status: "active" },
+        { id: 5, from: "Lagos", to: "Ibadan", distance: 130, duration: "2h 30m", price: 6500, status: "active" },
+        { id: 6, from: "Abuja", to: "Lagos", distance: 760, duration: "11h 00m", price: 24500, status: "active" }
+    ];
+}
+
+function saveRoutes(routes) {
+    try {
+        localStorage.setItem(ROUTES_STORAGE_KEY, JSON.stringify(routes));
+    } catch (err) {
+        console.error("Couldn't save route data:", err);
+    }
+}
+
+// =========================
+// TRIPS STORE (shared)
+// =========================
+
+const TRIPS_STORAGE_KEY = "fss_trips";
+
+function getTrips() {
+    try {
+        const raw = localStorage.getItem(TRIPS_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read trip data:", err);
+    }
+
+    const scheduleSeed = {
+        "Lagos-Abuja": ["06:00", "09:30", "13:00", "16:30", "20:00"],
+        "Lagos-Port Harcourt": ["06:30", "10:00", "14:00", "18:00"],
+        "Lagos-Benin City": ["07:00", "11:00", "15:00", "19:00"],
+        "Lagos-Enugu": ["06:00", "10:30", "15:00"],
+        "Lagos-Ibadan": ["06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"],
+        "Abuja-Lagos": ["06:00", "09:30", "13:00", "16:30", "20:00"]
+    };
+
+    const seeded = [];
+    let id = 1;
+
+    Object.entries(scheduleSeed).forEach(([routeKey, times]) => {
+        const [from, to] = routeKey.split("-");
+        times.forEach(time => {
+            seeded.push({ id: id++, from, to, time, vehicle: "Honda Odyssey", seats: 7, status: "active" });
+        });
+    });
+
+    return seeded;
+}
+
+function saveTrips(trips) {
+    try {
+        localStorage.setItem(TRIPS_STORAGE_KEY, JSON.stringify(trips));
+    } catch (err) {
+        console.error("Couldn't save trip data:", err);
+    }
+}
+
+// =========================
+// TERMINALS STORE (shared)
+// =========================
+
+const TERMINALS_STORAGE_KEY = "fss_terminals";
+
+function getTerminals() {
+    try {
+        const raw = localStorage.getItem(TERMINALS_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read terminal data:", err);
+    }
+
+    return [
+        { id: 1, city: "Lagos", name: "Jibowu Terminal", address: "23 Jibowu Street, Yaba, Lagos", phone: "+234 800 111 2201", hours: "5:00 – 22:00", status: "active" },
+        { id: 2, city: "Lagos", name: "Lekki Hub", address: "Plot 12, Admiralty Way, Lekki Phase 1", phone: "+234 800 111 2202", hours: "5:30 – 21:30", status: "active" },
+        { id: 3, city: "Abuja", name: "Utako Terminal", address: "Plot 45, Utako District, Abuja", phone: "+234 800 111 2203", hours: "5:00 – 22:00", status: "active" },
+        { id: 4, city: "Abuja", name: "Wuse Terminal", address: "Zone 5, Wuse, Abuja", phone: "+234 800 111 2204", hours: "5:00 – 22:00", status: "active" },
+        { id: 5, city: "Port Harcourt", name: "Mile 1 Terminal", address: "Ikwerre Road, Mile 1, Port Harcourt", phone: "+234 800 111 2205", hours: "5:30 – 21:30", status: "active" },
+        { id: 6, city: "Benin City", name: "Ring Road Terminal", address: "Ring Road, Benin City, Edo", phone: "+234 800 111 2206", hours: "5:00 – 21:00", status: "active" }
+    ];
+}
+
+function saveTerminals(terminals) {
+    try {
+        localStorage.setItem(TERMINALS_STORAGE_KEY, JSON.stringify(terminals));
+    } catch (err) {
+        console.error("Couldn't save terminal data:", err);
+    }
+}
+
+// =========================
+// USERS STORE (shared)
+// =========================
+// ⚠️ DEMO ONLY — passwords are stored as plain text here. This is
+// NOT acceptable in a real product under any circumstances. Once a
+// backend exists, passwords must be hashed server-side (bcrypt or
+// similar) and the plaintext value must never touch storage, logs,
+// or be sent back in a response — this whole store gets replaced by
+// real POST /api/auth/signup and /api/auth/login calls.
+
+const USERS_STORAGE_KEY = "fss_users";
+const SESSION_STORAGE_KEY = "fss_current_user";
+
+function getUsers() {
+    try {
+        const raw = localStorage.getItem(USERS_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read user data:", err);
+    }
+    return [];
+}
+
+function saveUsers(users) {
+    try {
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    } catch (err) {
+        console.error("Couldn't save user data:", err);
+    }
+}
+
+function getCurrentUser() {
+    try {
+        const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read session:", err);
+    }
+    return null;
+}
+
+function setCurrentUser(user) {
+    try {
+        // Never keep the password in the session record
+        const { password, ...safeUser } = user;
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(safeUser));
+    } catch (err) {
+        console.error("Couldn't save session:", err);
+    }
+}
+
+function clearCurrentUser() {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+}
+
+// =========================
+// ADMIN USERS STORE (shared)
+// =========================
+// Deliberately separate from the customer USERS STORE above — admin
+// accounts are staff, not customers, and shouldn't share a table
+// even in this demo. Same plaintext-password caveat applies: demo
+// only, never acceptable once there's a real backend.
+//
+// Seeded with one default login so admin-login.html isn't a dead
+// end before any admin account has been created:
+//   email: admin@fss.ng   password: admin1234
+// Change it from admin-settings.html after logging in.
+
+const ADMIN_USERS_STORAGE_KEY = "fss_admin_users";
+const ADMIN_SESSION_STORAGE_KEY = "fss_current_admin";
+
+function getAdminUsers() {
+    try {
+        const raw = localStorage.getItem(ADMIN_USERS_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read admin user data:", err);
+    }
+
+    return [
+        { id: 1, name: "Admin", email: "admin@fss.ng", password: "admin1234" }
+    ];
+}
+
+function saveAdminUsers(admins) {
+    try {
+        localStorage.setItem(ADMIN_USERS_STORAGE_KEY, JSON.stringify(admins));
+    } catch (err) {
+        console.error("Couldn't save admin user data:", err);
+    }
+}
+
+function getCurrentAdmin() {
+    try {
+        const raw = localStorage.getItem(ADMIN_SESSION_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read admin session:", err);
+    }
+    return null;
+}
+
+function setCurrentAdmin(admin) {
+    try {
+        const { password, ...safeAdmin } = admin;
+        localStorage.setItem(ADMIN_SESSION_STORAGE_KEY, JSON.stringify(safeAdmin));
+    } catch (err) {
+        console.error("Couldn't save admin session:", err);
+    }
+}
+
+function clearCurrentAdmin() {
+    localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+}
+
+// =========================
+// NAV AUTH STATE
+// =========================
+// Swaps "Sign In" / "Get Started" for the user's name + Settings +
+// Log Out, on every page that has a .nav-buttons element and isn't
+// already mid-auth-flow. Runs once, on load.
+
+(function applyNavAuthState() {
+    const navButtons = document.querySelector(".nav-buttons");
+    if (!navButtons) return;
+
+    const user = getCurrentUser();
+    if (!user) return;
+
+    const initial = user.name ? user.name.trim().charAt(0).toUpperCase() : "U";
+
+    navButtons.innerHTML = `
+        <a href="settings.html" class="signin" style="display:flex; align-items:center; gap:8px;">
+            <span style="width:26px; height:26px; border-radius:50%; background:var(--color-cyan); color:white; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">${initial}</span>
+            ${user.name ? user.name.split(" ")[0] : "Account"}
+        </a>
+        <a href="#" class="btn-primary" id="nav-logout-btn">Log Out</a>
+    `;
+
+    const logoutBtn = document.getElementById("nav-logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            clearCurrentUser();
+            window.location.href = "index.html";
+        });
+    }
+})();
+
+// =========================
 // TOAST NOTIFICATIONS
 // (custom replacement for alert() / confirm() popups)
 // =========================
