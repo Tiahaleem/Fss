@@ -253,6 +253,121 @@
 }
 
 /* =========================
+   SETTINGS PAGE (reuses the auth card)
+========================= */
+
+.settings-section-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+
+    margin: 30px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.settings-section-title:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.settings-hint {
+    font-size: .82rem;
+    color: var(--color-text-muted);
+    margin: -10px 0 18px;
+}
+
+/* =========================
+   EMAIL VERIFICATION STEP
+========================= */
+
+.verify-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 18px;
+
+    border-radius: 50%;
+    background: var(--color-chip-bg);
+    color: var(--color-navy-deep);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.verify-email-target {
+    font-weight: 700;
+    color: var(--color-text-dark);
+}
+
+.demo-code-banner {
+    background: var(--color-field-bg);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+
+    padding: 16px 18px;
+    margin: 20px 0 24px;
+
+    text-align: center;
+}
+
+.demo-code-banner p {
+    margin: 0 0 8px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.demo-code-banner span {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--color-navy-deep);
+}
+
+.otp-input {
+    width: 100%;
+    height: 56px;
+
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 8px;
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+
+    font-family: inherit;
+    outline: none;
+
+    transition: border-color var(--transition-base);
+}
+
+.otp-input:focus-visible {
+    border-color: var(--color-cyan);
+}
+
+.resend-link {
+    background: none;
+    border: none;
+    padding: 0;
+
+    color: var(--color-cyan);
+    font-weight: 600;
+    font-size: .85rem;
+    font-family: inherit;
+
+    cursor: pointer;
+}
+
+.resend-link:hover {
+    text-decoration: underline;
+}
+
+/* =========================
    RESPONSIVE
 ========================= */
 

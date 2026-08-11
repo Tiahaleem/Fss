@@ -256,6 +256,7 @@ form.addEventListener("submit", function(e){
     bookings.push({
         reference: trackingCode,
         type: "parcel",
+        ownerEmail: getCurrentUser() ? getCurrentUser().email : null,
         senderName: senderName.value.trim(),
         senderPhone: senderPhone.value.trim(),
         receiverName: receiverName.value.trim(),

@@ -48,11 +48,15 @@
             <img src="img/ffs_bg_removal.png" alt="FSS Transport">
         </div>
 
+        <div id="signup-form-view">
+
         <h1>Create your account</h1>
-        <p class="auth-subtitle">Book trips and send parcels in a couple of taps.</p>
+        <!-- <p class="auth-subtitle">Book trips and send parcels in a couple of taps.</p> -->
 
         <!-- Placeholder until Google OAuth (Client ID + backend token
-             exchange) is set up — see auth.js -->
+             exchange) is set up — see auth.js. Once connected, Google
+             sign-ups skip the email verification step below entirely,
+             since Google already confirms the email address. -->
         <button type="button" class="google-btn">
             <svg width="20" height="20" viewBox="0 0 48 48">
                 <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
@@ -99,6 +103,49 @@
         <p class="auth-switch">
             Already have an account? <a href="login.html">Sign in</a>
         </p>
+
+        </div>
+
+        <!-- Shown by auth.js after the signup form passes validation.
+             Real implementation: the code is generated server-side and
+             emailed via the same service used for the receipt/reminder
+             emails (e.g. Resend), never shown on screen. Since that
+             service isn't connected yet, it's displayed here instead
+             so the flow can be tested end to end. -->
+        <div id="verify-view" style="display:none;">
+
+            <div class="verify-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+            </div>
+
+            <h1 style="text-align:center;">Verify your email</h1>
+            <p class="auth-subtitle" style="text-align:center;">
+                We sent a 6-digit code to <span class="verify-email-target" id="verify-email-target"></span>
+            </p>
+
+            <div class="demo-code-banner">
+                <p>Demo mode — no email service connected yet</p>
+                <span id="demo-code-display">000000</span>
+            </div>
+
+            <form id="verify-form">
+
+                <div class="form-group">
+                    <label>Verification Code</label>
+                    <input type="text" id="verify-code-input" class="otp-input" maxlength="6" inputmode="numeric" placeholder="······">
+                </div>
+
+                <button type="submit" class="auth-submit">Verify &amp; Create Account</button>
+
+            </form>
+
+            <p class="auth-switch">
+                Didn't get it? <button type="button" class="resend-link" id="resend-code-btn">Resend code</button>
+                &nbsp;·&nbsp;
+                <a href="#" id="change-email-link">Change email</a>
+            </p>
+
+        </div>
 
     </div>
 

@@ -56,6 +56,18 @@ if (passengerForm) {
         }
 
         const bookingCode = generateBookingCode();
+
+        // Finalize the seat hold from select_a_seat.js into a
+        // permanent booking, right at the moment payment succeeds —
+        // not before. If the customer had abandoned checkout instead
+        // of reaching this point, the hold would have simply expired
+        // on its own and the seat would already be available again.
+        const seatNumber = seatField ? seatField.textContent.trim() : "";
+        if (seatNumber) {
+            const holds = getSeatHolds();
+            holds[seatNumber] = { status: "booked" };
+            saveSeatHolds(holds);
+        }
         const pickup = pickupField ? pickupField.textContent.trim() : "Jibowu Terminal";
 
         // Booking details — lighter than the parcel version (no
@@ -65,6 +77,7 @@ if (passengerForm) {
         bookings.push({
             reference: bookingCode,
             type: "passenger",
+            ownerEmail: getCurrentUser() ? getCurrentUser().email : null,
             passengerName: nameField.value.trim(),
             passengerEmail: emailField.value.trim(),
             passengerPhone: phoneField.value.trim(),

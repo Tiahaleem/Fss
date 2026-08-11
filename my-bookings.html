@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schedule | FSS Transport</title>
+    <title>My Bookings | FSS Transport</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="book_a_trip.css">
-    <link rel="stylesheet" href="schedule.css">
+    <link rel="stylesheet" href="pickup.css">
+    <link rel="stylesheet" href="my-bookings.css">
 </head>
 <body>
 <nav class="navbar">
@@ -23,7 +23,7 @@
     <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="book_a_trip.html">Book a Trip</a></li>
-        <li><a href="route.html" class="active">Routes</a></li>
+        <li><a href="route.html">Routes</a></li>
         <li><a href="pickup.html">Pickup Centers</a></li>
         <li><a href="courier.html">Courier</a></li>
         <li><a href="track.html">Track</a></li>
@@ -41,35 +41,25 @@
 
 </nav>
 
-<!-- Reuses .trip-search-hero / .trip-route-info from book_a_trip.css.
-     index.js already updates the h1 from ?from=&to= on any page
-     using this markup, so no extra JS is needed for the heading. -->
-<section class="trip-search-hero">
+<section class="pickup-hero">
 
-    <div class="trip-search-content">
+    <div class="pickup-hero-content">
 
-        <div class="trip-route-info">
+        <h1>My Bookings</h1>
 
-            <h1>Lagos → Abuja</h1>
-
-            <p>
-                Daily departure schedule
-            </p>
-
-        </div>
+        <p>
+            Every trip and parcel you've booked while signed in, all in one place.
+        </p>
 
     </div>
 
 </section>
 
-<section class="schedule-page">
+<section class="bookings-page">
 
-    <div class="schedule-header">
-        <h2>Available departures</h2>
-        <p id="schedule-count">Loading schedule…</p>
+    <div class="bookings-list" id="bookings-list">
+        <!-- Rendered by my-bookings.js -->
     </div>
-
-    <div class="schedule-list" id="schedule-list"></div>
 
 </section>
 
@@ -170,13 +160,13 @@
 
             <h4>Contact</h4>
 
-            <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+            <a href="tel:+2348001234567"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
 	<path d="M0 0h24v24H0z" fill="none" />
 	<path fill="#697e94" d="M19.95 21q-3.125 0-6.187-1.35T8.2 15.8t-3.85-5.55T3 4.05V3h5.9l.925 5.025l-2.85 2.875q.55.975 1.225 1.85t1.45 1.625q.725.725 1.588 1.388T13.1 17l2.9-2.9l5 1.025V21zM6.025 9l1.65-1.65L7.25 5H5.025q.125 1.125.375 2.113T6.025 9m8.95 8.95q1 .425 2.013.675T19 18.95v-2.2l-2.35-.475zm0 0" />
 </svg>
  +234 800 123 4567</a>
 
-            <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+            <a href="mailto:hello@fss.ng"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
 	<path d="M0 0h24v24H0z" fill="none" />
 	<path fill="#697e94" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm8-7L4 8v10h16V8zm0-2l8-5H4zM4 8V6v12z" />
 </svg>
@@ -206,6 +196,6 @@
 
 </footer>
 <script src="index.js"></script>
-<script src="schedule.js"></script>
+<script src="my-bookings.js"></script>
 </body>
 </html>

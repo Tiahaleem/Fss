@@ -252,9 +252,15 @@ function getAdminUsers() {
         console.error("Couldn't read admin user data:", err);
     }
 
-    return [
+    // First time ever loading this — save the seed immediately so
+    // it's not just sitting in memory until someone happens to
+    // trigger a write. Removes any ambiguity about what's actually
+    // in storage.
+    const seed = [
         { id: 1, name: "Admin", email: "admin@fss.ng", password: "admin1234" }
     ];
+    saveAdminUsers(seed);
+    return seed;
 }
 
 function saveAdminUsers(admins) {
@@ -286,6 +292,82 @@ function setCurrentAdmin(admin) {
 
 function clearCurrentAdmin() {
     localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+}
+
+// =========================
+// SEAT HOLDS (shared) — the double-booking groundwork
+// =========================
+// Real hold → book mechanic, backed by localStorage. This makes
+// seat selection genuinely work correctly across multiple tabs on
+// THE SAME BROWSER — hold a seat in one tab, it locks in another.
+// It does NOT prevent two different customers on two different
+// devices from both grabbing the same seat — that needs a real
+// backend with a database that both of them talk to. This is the
+// exact mechanic that logic will use once it exists; only the
+// storage calls change (these functions become fetch() calls).
+//
+// Currently scoped to the single demo trip (Lagos → Abuja) shown on
+// select_a_seat.html, since that's the only page with a real seat
+// map. Seat 4 is seeded as permanently booked to match the original
+// demo. Seat 1 (the driver) isn't part of this — it's structurally
+// locked in the HTML/JS, never selectable.
+
+const SEAT_HOLDS_KEY = "fss_seat_holds";
+const SEAT_HOLD_MINUTES = 10;
+
+function getSeatHolds() {
+    try {
+        const raw = localStorage.getItem(SEAT_HOLDS_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (err) {
+        console.error("Couldn't read seat hold data:", err);
+    }
+    return { "4": { status: "booked" } };
+}
+
+function saveSeatHolds(holds) {
+    try {
+        localStorage.setItem(SEAT_HOLDS_KEY, JSON.stringify(holds));
+    } catch (err) {
+        console.error("Couldn't save seat hold data:", err);
+    }
+}
+
+// Reads the holds, silently drops any expired ones, and persists
+// that cleanup — so an abandoned seat really does become available
+// again after the hold window passes.
+function getActiveSeatHolds() {
+    const holds = getSeatHolds();
+    const now = Date.now();
+    let changed = false;
+
+    Object.keys(holds).forEach(seat => {
+        const hold = holds[seat];
+        if (hold.status === "held" && hold.expiresAt && new Date(hold.expiresAt).getTime() < now) {
+            delete holds[seat];
+            changed = true;
+        }
+    });
+
+    if (changed) saveSeatHolds(holds);
+    return holds;
+}
+
+// One ID per browser TAB (sessionStorage, not localStorage) — this
+// is what lets the UI tell "you're holding this seat" apart from
+// "someone else (another tab) is holding this seat".
+function getTabSessionId() {
+    try {
+        let id = sessionStorage.getItem("fss_tab_session");
+        if (!id) {
+            id = "tab-" + Math.random().toString(36).slice(2, 10);
+            sessionStorage.setItem("fss_tab_session", id);
+        }
+        return id;
+    } catch (err) {
+        console.error("Couldn't read/set tab session:", err);
+        return "tab-fallback";
+    }
 }
 
 // =========================
