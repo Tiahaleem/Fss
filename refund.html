@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bookings | FSS Transport</title>
+    <title>Refund Policy | FSS Transport</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +11,7 @@
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="pickup.css">
-    <link rel="stylesheet" href="my-bookings.css">
+    <link rel="stylesheet" href="legal.css">
 </head>
 <body>
 <nav class="navbar">
@@ -45,20 +45,75 @@
 
     <div class="pickup-hero-content">
 
-        <h1>My Bookings</h1>
+        <h1>Refund Policy</h1>
 
         <p>
-            Every trip and parcel you've booked while signed in, all in one place.
+            Clear timeframes for bus ticket and courier refunds, and how long they take to process.
         </p>
 
     </div>
 
 </section>
 
-<section class="bookings-page">
+<section class="legal-page">
 
-    <div class="bookings-list" id="bookings-list">
-        <!-- Rendered by my-bookings.js -->
+    <div class="legal-container">
+
+        <span class="legal-updated">Last updated: January 2026</span>
+
+        <h2>1. Bus Ticket Cancellations</h2>
+        <p>
+            Refund eligibility for bus tickets depends on how far ahead of departure you cancel:
+        </p>
+        <ul>
+            <li><strong>More than 6 hours before departure:</strong> full refund, minus a small processing fee.</li>
+            <li><strong>Less than 6 hours before departure:</strong> not eligible for a cash refund, but may be converted to travel credit at our discretion.</li>
+            <li><strong>No-show (missed departure):</strong> not eligible for a refund or credit.</li>
+        </ul>
+
+        <h2>2. Delays &amp; Service Disruptions</h2>
+        <p>
+            If your trip is delayed by more than 90 minutes due to a cause within our control, or
+            cancelled by FSS Transport for any reason, you're entitled to a full refund or a free
+            rebooking onto the next available departure, whichever you prefer.
+        </p>
+
+        <h2>3. Courier &amp; Parcel Refunds</h2>
+        <p>
+            If a parcel is lost or arrives damaged due to our handling, we'll refund the shipping fee
+            and compensate up to the declared value you provided at booking, capped at ₦500,000 per
+            parcel. Refunds for cancelled courier pickups follow the same timing rules as bus tickets
+            above, measured from the scheduled pickup time.
+        </p>
+
+        <h2>4. How Refunds Are Processed</h2>
+        <p>
+            Approved refunds are returned to your original payment method via Paystack or
+            Flutterwave, and typically arrive within <strong>3–5 business days</strong>. Bank
+            transfer refunds can occasionally take a little longer depending on your bank's own
+            processing times — this part is outside our control.
+        </p>
+
+        <h2>5. Non-Refundable Items</h2>
+        <ul>
+            <li>Payment processor transaction fees, where applicable.</li>
+            <li>Any portion of a trip already completed (e.g. cancelling partway through a multi-stop journey).</li>
+            <li>Items declined for courier shipment due to prohibited contents.</li>
+        </ul>
+
+        <h2>6. How to Request a Refund</h2>
+        <p>
+            Cancel directly from your dashboard where possible — this is the fastest route. For
+            anything the dashboard can't handle, contact support with your booking or tracking
+            reference and we'll process it manually.
+        </p>
+
+        <h2>7. Contact Us</h2>
+        <p>
+            Refund questions can be sent to <a href="mailto:hello@fss.ng">hello@fss.ng</a> or by
+            calling +234 800 123 4567.
+        </p>
+
     </div>
 
 </section>
@@ -126,7 +181,7 @@
 
             <a href="pickup.html">Pickup Centers</a>
 
-            <a href="track.html">Track Parcel</a>
+            <a href="#">Track Parcel</a>
 
             <a href="my-bookings.html">My Bookings</a>
 
@@ -160,13 +215,13 @@
 
             <h4>Contact</h4>
 
-            <a href="tel:+2348001234567"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+            <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
 	<path d="M0 0h24v24H0z" fill="none" />
 	<path fill="#697e94" d="M19.95 21q-3.125 0-6.187-1.35T8.2 15.8t-3.85-5.55T3 4.05V3h5.9l.925 5.025l-2.85 2.875q.55.975 1.225 1.85t1.45 1.625q.725.725 1.588 1.388T13.1 17l2.9-2.9l5 1.025V21zM6.025 9l1.65-1.65L7.25 5H5.025q.125 1.125.375 2.113T6.025 9m8.95 8.95q1 .425 2.013.675T19 18.95v-2.2l-2.35-.475zm0 0" />
 </svg>
  +234 800 123 4567</a>
 
-            <a href="mailto:hello@fss.ng"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+            <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
 	<path d="M0 0h24v24H0z" fill="none" />
 	<path fill="#697e94" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm8-7L4 8v10h16V8zm0-2l8-5H4zM4 8V6v12z" />
 </svg>
@@ -196,6 +251,5 @@
 
 </footer>
 <script src="index.js"></script>
-<script src="my-bookings.js"></script>
 </body>
 </html>

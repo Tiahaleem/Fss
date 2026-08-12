@@ -1,0 +1,299 @@
+/* =========================
+   ABOUT HERO
+========================= */
+
+.about-hero {
+    background-image: var(--gradient-navy);
+
+    padding: 110px 6%;
+
+    display: flex;
+    justify-content: flex-end;
+
+    color: white;
+}
+
+.about-hero-content {
+    max-width: 640px;
+}
+
+.about-hero .section-tag {
+    display: block;
+}
+
+.about-hero h1 {
+    font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+    font-weight: 700;
+    line-height: 1.25;
+
+    margin: 14px 0 18px;
+}
+
+.about-hero p {
+    color: rgba(255,255,255,.85);
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+/* =========================
+   ABOUT STATS
+========================= */
+
+.about-stats {
+    padding: 70px 6% 30px;
+    background: var(--color-bg-soft);
+}
+
+.about-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+
+    max-width: 1100px;
+    margin: 0 auto 70px;
+}
+
+.about-stat-card {
+    background: #fff;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+
+    padding: 26px 20px;
+
+    text-align: center;
+
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.about-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.06);
+}
+
+.about-stat-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    margin-bottom: 6px;
+}
+
+.about-stat-card p {
+    color: var(--color-text-muted);
+    font-size: .9rem;
+}
+
+/* =========================
+   VALUES HEADING
+   (cards below reuse .services-grid / .service-card
+   from style.css — same visual language as the homepage)
+========================= */
+
+.values-heading {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+
+    margin-bottom: 35px;
+}
+
+.about-values {
+    padding-bottom: 70px;
+}
+
+/* =========================
+   LEADERSHIP
+========================= */
+
+.leadership {
+    padding: 20px 6% 70px;
+    background: var(--color-bg-soft);
+}
+
+.leadership-heading {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+
+    margin-bottom: 35px;
+}
+
+.leadership-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+
+    max-width: 1100px;
+    margin: 0 auto 30px;
+}
+
+.leader-card {
+    background: #fff;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+
+    padding: 28px 18px;
+
+    text-align: center;
+
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.leader-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.06);
+}
+
+.leader-avatar {
+    width: 56px;
+    height: 56px;
+
+    margin: 0 auto 16px;
+
+    border-radius: 50%;
+
+    background: var(--color-cyan);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.leader-card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    margin-bottom: 4px;
+}
+
+.leader-card span {
+    font-size: .85rem;
+    color: var(--color-cyan);
+    font-weight: 500;
+}
+
+/* =========================
+   JOIN THE TEAM BANNER
+========================= */
+
+.join-banner {
+    max-width: 1100px;
+    margin: 0 auto;
+
+    background: var(--color-navy-deep);
+    border-radius: var(--radius-lg);
+
+    padding: 30px 35px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+
+    color: white;
+}
+
+.join-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.join-left svg,
+.join-right svg {
+    flex-shrink: 0;
+    color: var(--color-cyan);
+    margin-top: 3px;
+}
+
+.join-left h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.join-left p {
+    font-size: .9rem;
+    color: rgba(255,255,255,.8);
+    line-height: 1.6;
+}
+
+.join-right {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    text-align: right;
+
+    font-size: .9rem;
+    color: rgba(255,255,255,.85);
+    line-height: 1.6;
+
+    max-width: 320px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 992px) {
+
+    .about-hero {
+        justify-content: flex-start;
+    }
+
+    .about-stats-grid,
+    .leadership-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .join-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .join-right {
+        text-align: left;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .about-hero {
+        padding: 70px 5%;
+    }
+
+    .about-stats {
+        padding: 50px 5% 20px;
+    }
+
+    .leadership {
+        padding: 10px 5% 50px;
+    }
+
+    .about-stats-grid {
+        grid-template-columns: 1fr;
+        margin-bottom: 50px;
+    }
+
+    .leadership-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .values-heading,
+    .leadership-heading {
+        font-size: 1.35rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .join-banner {
+        padding: 24px 20px;
+    }
+}

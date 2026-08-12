@@ -31,8 +31,8 @@
     </ul>
 
     <div class="nav-buttons">
-        <a href="#" class="signin">Sign In</a>
-        <a href="#" class="btn-primary">Get Started</a>
+        <a href="login.html" class="signin">Sign In</a>
+        <a href="signup.html" class="btn-primary">Get Started</a>
     </div>
 
     <div class="hamburger">
@@ -164,9 +164,10 @@
             <!-- Honda Odyssey, 7 seats total: Seat 1 is always the
                  driver — shown in the numbering, permanently locked,
                  never selectable. Passenger seats are 2-7.
-                 TEMP DEMO DATA: occupied seat hardcoded here.
-                 Once GET /api/trips/:id/seats exists, render this
-                 from that response instead. -->
+                 Seat state (available/held/booked) is now rendered
+                 entirely by select_a_seat.js from the shared holds
+                 store in index.js — nothing is hardcoded here
+                 anymore. See getSeatHolds() there for the seed. -->
             <div class="seat-map">
 
                 <!-- Front row: driver (seat 1) + front passenger (seat 2) -->
@@ -184,7 +185,7 @@
                 <!-- Middle row: 2 captain's chairs, walkway between them -->
                 <div class="seat-row">
                     <button class="seat">3</button>
-                    <button class="seat occupied" disabled aria-label="Seat 4, occupied">4</button>
+                    <button class="seat">4</button>
                 </div>
 
                 <!-- Rear bench: 3 seats together, no walkway -->
@@ -231,6 +232,11 @@
             <div class="summary-row">
                 <span>Selected Seat</span>
                 <strong id="selected-seat">None</strong>
+            </div>
+
+            <div class="summary-row hold-timer-row" id="hold-timer-row" style="display:none;">
+                <span></span>
+                <strong id="hold-timer-text" style="color:var(--color-cyan);">Seat held for 10:00</strong>
             </div>
 
             <div class="pickup-box">
@@ -335,7 +341,7 @@
 
             <a href="pickup.html">Pickup Centers</a>
 
-            <a href="track.html">Track Parcel</a>
+            <a href="#">Track Parcel</a>
 
             <a href="my-bookings.html">My Bookings</a>
 
@@ -355,7 +361,7 @@
 
             <a href="courier.html">Courier Services</a>
 
-            <a href="terms.html">Terms &amp; Conditions</a>
+            <a href="terms.html">Terms & Conditions</a>
 
             <a href="privacy.html">Privacy Policy</a>
 

@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Passenger Details | FSS Transport</title>
+    <title>Contact Us | FSS Transport</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="passenger_detail.css">
+    <link rel="stylesheet" href="pickup.css">
+    <link rel="stylesheet" href="contact.css">
 </head>
 <body>
 <nav class="navbar">
@@ -21,7 +22,7 @@
 
     <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
-        <li><a href="book_a_trip.html" class="active">Book a Trip</a></li>
+        <li><a href="book_a_trip.html">Book a Trip</a></li>
         <li><a href="route.html">Routes</a></li>
         <li><a href="pickup.html">Pickup Centers</a></li>
         <li><a href="courier.html">Courier</a></li>
@@ -40,183 +41,176 @@
 
 </nav>
 
-<!-- Passenger Details Heading -->
- <section class="passenger-hero">
+<section class="pickup-hero">
 
-    <div class="passenger-hero-content">
+    <div class="pickup-hero-content">
 
-        <a href="select_a_seat.html" class="back-link">
-            ← Back to seat selection
-        </a>
-
-        <h1>Passenger Details</h1>
+        <h1>Get in touch</h1>
 
         <p>
-            Lagos → Abuja · Mon, 22 Jun 2026
+            Questions about a booking, a parcel, or a partnership — we're here to help.
         </p>
 
     </div>
 
 </section>
 
-    <section class="passenger-page">
+<section class="contact-page">
 
-    <div class="passenger-grid">
+    <div class="contact-grid">
 
-        <!-- Passenger Details -->
+        <!-- CONTACT FORM -->
 
-        <div class="passenger-card">
+        <div class="contact-card">
 
-            <div id="payment-form-view">
+            <h2>Send us a message</h2>
 
-            <h2>Passenger Details</h2>
+            <p>We usually reply within 24 hours.</p>
 
-            <form id="passenger-form">
+            <form id="contact-form">
 
-                <div class="form-group full">
+                <div class="form-group">
                     <label>Full Name</label>
-                    <input
-                        type="text"
-                        id="passenger-name"
-                        placeholder="As on government ID"
-                    >
+                    <input type="text" id="contact-name" placeholder="Your name">
                 </div>
 
                 <div class="form-row">
 
                     <div class="form-group">
                         <label>Email</label>
-                        <input
-                            type="email"
-                            id="passenger-email"
-                            placeholder="you@example.com"
-                        >
+                        <input type="email" id="contact-email" placeholder="you@example.com">
                     </div>
 
                     <div class="form-group">
-                        <label>Phone</label>
-                        <input
-                            type="tel"
-                            id="passenger-phone"
-                            placeholder="+234 800 000 0000"
-                        >
+                        <label>Phone (optional)</label>
+                        <input type="tel" id="contact-phone" placeholder="+234 800 000 0000">
                     </div>
 
                 </div>
 
-                <div class="payment-box">
-
-                    <h3>💳 Payment</h3>
-
-                    <p>
-                        Proceed securely with Paystack or
-                        Flutterwave to complete your booking.
-                    </p>
-
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select id="contact-subject">
+                        <option value="General Inquiry">General Inquiry</option>
+                        <option value="Booking Support">Booking Support</option>
+                        <option value="Courier Support">Courier Support</option>
+                        <option value="Partnership">Partnership</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
 
-                <!-- Validates + generates a demo booking reference and
-                     pushes a starter tracking event — see passenger_detail.js.
-                     Later: hand off to the real Paystack/Flutterwave SDK
-                     first, and only run this once payment actually succeeds. -->
-                <div class="form-actions">
-
-                    <a href="select_a_seat.html"
-                        class="back-btn">
-                        ← Back
-                    </a>
-
-                    <button
-                        type="submit"
-                        class="pay-btn">
-                        Pay ₦24,500
-                    </button>
-
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="contact-message" rows="6" placeholder="How can we help?"></textarea>
                 </div>
+
+                <button type="submit" class="send-btn">
+                    Send Message
+                </button>
 
             </form>
 
-            </div>
-
-            <!-- Shown by passenger_detail.js after "payment", hidden by default -->
-            <div id="payment-confirmation-view" style="display:none;">
-
-                <div class="confirmation-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                </div>
-
-                <h2>Booking confirmed!</h2>
-                <p>Save this reference — you'll need it to track your trip.</p>
-
-                <div class="tracking-code-box">
-                    <span id="generated-booking-code">FSS-000000</span>
-                </div>
-
-                <div class="confirmation-actions">
-                    <a href="#" id="track-trip-btn" class="pay-btn track-trip-link">
-                        Track This Trip →
-                    </a>
-                    <a href="index.html" class="book-another-btn" style="display:block; text-decoration:none; text-align:center;">
-                        Back to Home
-                    </a>
-                </div>
-
-            </div>
-
         </div>
 
-        <!-- Trip Summary -->
+        <!-- CONTACT INFO -->
 
-        <div class="trip-summary-card">
+        <div class="contact-info-card">
 
-            <h3>Trip Summary</h3>
+            <h3>Other ways to reach us</h3>
 
-            <div class="summary-item">
-                <span>Route</span>
-                <strong>Lagos → Abuja</strong>
+            <p>
+                Prefer to talk directly? Our support team is available every day of the week.
+            </p>
+
+            <div class="info-item">
+
+                <div class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<path fill="currentColor" d="M19.95 21q-3.125 0-6.187-1.35T8.2 15.8t-3.85-5.55T3 4.05V3h5.9l.925 5.025l-2.85 2.875q.55.975 1.225 1.85t1.45 1.625q.725.725 1.588 1.388T13.1 17l2.9-2.9l5 1.025V21zM6.025 9l1.65-1.65L7.25 5H5.025q.125 1.125.375 2.113T6.025 9m8.95 8.95q1 .425 2.013.675T19 18.95v-2.2l-2.35-.475zm0 0" />
+</svg>
+                </div>
+
+                <div>
+                    <h4>Phone</h4>
+                    <p>+234 800 123 4567</p>
+                </div>
+
             </div>
 
-            <div class="summary-item">
-                <span>Date</span>
-                <strong>Mon, 22 Jun 2026</strong>
+            <div class="info-item">
+
+                <div class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<path fill="currentColor" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm8-7L4 8v10h16V8zm0-2l8-5H4zM4 8V6v12z" />
+</svg>
+                </div>
+
+                <div>
+                    <h4>Email</h4>
+                    <p>hello@fss.ng</p>
+                </div>
+
             </div>
 
-            <div class="summary-item">
-                <span>Departure</span>
-                <strong>06:00</strong>
+            <div class="info-item">
+
+                <div class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<path fill="currentColor" d="M11.42 21.81c.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82c0-4.41-3.59-8-8-8s-8 3.59-8 8c-.03 6.44 7.12 11.6 7.42 11.82M12 4c3.31 0 6 2.69 6 6c.02 4.44-4.39 8.43-6 9.74c-1.61-1.31-6.02-5.29-6-9.74c0-3.31 2.69-6 6-6" />
+</svg>
+                </div>
+
+                <div>
+                    <h4>Head Office</h4>
+                    <p>23 Jibowu Street, Yaba, Lagos, Nigeria</p>
+                </div>
+
             </div>
 
-            <div class="summary-item">
-                <span>Arrival</span>
-                <strong>17:00</strong>
+            <div class="info-item">
+
+                <div class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<path fill="currentColor" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
+</svg>
+                </div>
+
+                <div>
+                    <h4>Support Hours</h4>
+                    <p>24/7 Customer Support</p>
+                </div>
+
             </div>
 
-            <div class="summary-item">
-                <span>Vehicle</span>
-                <strong>Honda Odyssey</strong>
-            </div>
+            <div class="info-divider"></div>
 
-            <!-- data-field values below get overwritten by index.js
-                 from the ?seat=&pickup= query string sent by
-                 select_a_seat.js. Text here is just the fallback
-                 for a direct visit to this page. -->
-            <div class="summary-item">
-                <span>Pickup</span>
-                <strong data-field="pickup">Jibowu Terminal</strong>
-            </div>
+            <div class="social-links">
 
-            <div class="summary-item">
-                <span>Seat</span>
-                <strong data-field="seat">3</strong>
-            </div>
+                <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<path fill="#697e94" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95" />
+</svg>
+</a>
 
-            <hr>
-
-            <div class="summary-total">
-
-                <span>Total</span>
-
-                <h2>₦24,500</h2>
+                <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<g fill="none" stroke="#697e94" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+		<path stroke-dasharray="66" d="M16 3c2.76 0 5 2.24 5 5v8c0 2.76 -2.24 5 -5 5h-8c-2.76 0 -5 -2.24 -5 -5v-8c0 -2.76 2.24 -5 5 -5h4Z">
+			<animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="66;0" />
+		</path>
+		<path stroke-dasharray="28" stroke-dashoffset="28" d="M12 8c2.21 0 4 1.79 4 4c0 2.21 -1.79 4 -4 4c-2.21 0 -4 -1.79 -4 -4c0 -2.21 1.79 -4 4 -4">
+			<animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.6s" to="0" />
+		</path>
+	</g>
+	<circle cx="17" cy="7" r="1.5" fill="#697e94" opacity="0">
+		<animate fill="freeze" attributeName="opacity" begin="1.3s" dur="0.2s" to="1" />
+	</circle>
+</svg>
+</a>
 
             </div>
 
@@ -225,6 +219,7 @@
     </div>
 
 </section>
+
 <!-- Footer Section -->
  <footer class="footer">
 
@@ -308,7 +303,7 @@
 
             <a href="courier.html">Courier Services</a>
 
-            <a href="terms.html">Terms & Conditions</a>
+            <a href="terms.html">Terms &amp; Conditions</a>
 
             <a href="privacy.html">Privacy Policy</a>
 
@@ -358,6 +353,6 @@
 
 </footer>
 <script src="index.js"></script>
-<script src="passenger_detail.js"></script>
+<script src="contact.js"></script>
 </body>
 </html>
