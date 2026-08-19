@@ -2,21 +2,46 @@
 // ADMIN SHELL
 // (shared across every admin-*.html page except admin-login.html)
 // =========================
+// The session check is now a real network request — "is this token
+// still genuinely valid, according to the server?" — instead of an
+// instant, trust-it-blindly localStorage read. That's slightly
+// slower (a brief moment before the page fully "unlocks"), but it's
+// the real thing: a stale or tampered token now gets caught here.
 
-// Guard: bounce to login if there's no admin session. This runs on
-// every page that loads admin.js, which is every admin page except
-// the login page itself.
-const currentAdmin = getCurrentAdmin();
+let currentAdmin = null; // populated once the check below finishes
 
-if (!currentAdmin) {
-    window.location.href = "admin-login.html";
-} else {
-    const nameEl = document.getElementById("admin-user-name");
-    const avatarEl = document.getElementById("admin-avatar-initial");
+(async function checkAdminSession() {
+    const token = getAdminToken();
 
-    if (nameEl) nameEl.textContent = currentAdmin.name || "Admin";
-    if (avatarEl) avatarEl.textContent = (currentAdmin.name || "A").trim().charAt(0).toUpperCase();
-}
+    if (!token) {
+        window.location.href = "admin-login.html";
+        return;
+    }
+
+    try {
+        currentAdmin = await apiFetch("/api/auth/me");
+
+        if (currentAdmin.role !== "admin") {
+            clearAdminToken();
+            window.location.href = "admin-login.html";
+            return;
+        }
+
+        const nameEl = document.getElementById("admin-user-name");
+        const avatarEl = document.getElementById("admin-avatar-initial");
+
+        if (nameEl) nameEl.textContent = currentAdmin.name || "Admin";
+        if (avatarEl) avatarEl.textContent = (currentAdmin.name || "A").trim().charAt(0).toUpperCase();
+
+        // Let other admin-*.js files know it's safe to run anything
+        // that depends on currentAdmin being populated.
+        document.dispatchEvent(new CustomEvent("admin-session-ready"));
+    } catch (err) {
+        // apiFetch already redirects to login on a real 401 — this
+        // catches the "server unreachable" case specifically.
+        showToast("Couldn't verify your session — is the server running?");
+    }
+})();
 
 const adminSidebar = document.querySelector(".admin-sidebar");
 const adminHamburger = document.querySelector(".admin-hamburger");
@@ -34,13 +59,13 @@ if (adminSidebar && adminHamburger) {
     });
 }
 
-// Logout — clears the real admin session now
+// Logout — clears the real login token
 const adminLogout = document.getElementById("admin-logout");
 
 if (adminLogout) {
     adminLogout.addEventListener("click", (e) => {
         e.preventDefault();
-        clearCurrentAdmin();
+        clearAdminToken();
         window.location.href = "admin-login.html";
     });
 }

@@ -132,18 +132,11 @@
 
             <input type="hidden" id="trip-id">
 
-            <div class="admin-form-row">
-
-                <div class="admin-form-group">
-                    <label>From</label>
-                    <input type="text" id="trip-from" placeholder="Lagos">
-                </div>
-
-                <div class="admin-form-group">
-                    <label>To</label>
-                    <input type="text" id="trip-to" placeholder="Abuja">
-                </div>
-
+            <div class="admin-form-group">
+                <label>Route</label>
+                <select id="trip-route">
+                    <option value="">Loading routes…</option>
+                </select>
             </div>
 
             <div class="admin-form-row">
@@ -211,6 +204,7 @@
 </div>
 
 <script src="index.js"></script>
+<script src="api.js"></script>
 <script src="admin.js"></script>
 <script src="admin-trips.js"></script>
 </body>

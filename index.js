@@ -297,35 +297,40 @@ function clearCurrentAdmin() {
 // =========================
 // SEAT HOLDS (shared) — the double-booking groundwork
 // =========================
+// Now keyed by TRIP first, then seat number — so each departure
+// (each specific trip ID from getTrips()) has its own independent
+// seat data. Booking seat 3 on the 06:00 trip has zero effect on
+// seat 3 for the 09:30 trip — same as two different cinema showings
+// having separate bookings even for the same seat number.
+//
+// Shape: { "5": { "4": { status: "booked" } }, "12": { ... } }
+//                 ^trip id      ^seat number
+//
 // Real hold → book mechanic, backed by localStorage. This makes
 // seat selection genuinely work correctly across multiple tabs on
 // THE SAME BROWSER — hold a seat in one tab, it locks in another.
 // It does NOT prevent two different customers on two different
-// devices from both grabbing the same seat — that needs a real
-// backend with a database that both of them talk to. This is the
-// exact mechanic that logic will use once it exists; only the
-// storage calls change (these functions become fetch() calls).
-//
-// Currently scoped to the single demo trip (Lagos → Abuja) shown on
-// select_a_seat.html, since that's the only page with a real seat
-// map. Seat 4 is seeded as permanently booked to match the original
-// demo. Seat 1 (the driver) isn't part of this — it's structurally
-// locked in the HTML/JS, never selectable.
+// devices from both grabbing the same seat on the same trip — that
+// needs a real backend with a database that both of them talk to.
+// This is the exact mechanic that logic will use once it exists;
+// only the storage calls change (these functions become fetch() calls).
 
 const SEAT_HOLDS_KEY = "fss_seat_holds";
 const SEAT_HOLD_MINUTES = 10;
 
-function getSeatHolds() {
+function getAllSeatHolds() {
     try {
         const raw = localStorage.getItem(SEAT_HOLDS_KEY);
         if (raw) return JSON.parse(raw);
     } catch (err) {
         console.error("Couldn't read seat hold data:", err);
     }
-    return { "4": { status: "booked" } };
+    // Demo seed: seat 4 booked on trip id 1 (the 06:00 Lagos→Abuja
+    // trip), matching the original single-seat-map demo.
+    return { "1": { "4": { status: "booked" } } };
 }
 
-function saveSeatHolds(holds) {
+function saveAllSeatHolds(holds) {
     try {
         localStorage.setItem(SEAT_HOLDS_KEY, JSON.stringify(holds));
     } catch (err) {
@@ -333,24 +338,35 @@ function saveSeatHolds(holds) {
     }
 }
 
-// Reads the holds, silently drops any expired ones, and persists
-// that cleanup — so an abandoned seat really does become available
-// again after the hold window passes.
-function getActiveSeatHolds() {
-    const holds = getSeatHolds();
+// Reads one trip's seat holds, silently drops any expired ones, and
+// persists that cleanup — so an abandoned seat really does become
+// available again after the hold window passes, for that trip only.
+function getActiveSeatHoldsForTrip(tripId) {
+    const allHolds = getAllSeatHolds();
+    const tripHolds = allHolds[tripId] || {};
     const now = Date.now();
     let changed = false;
 
-    Object.keys(holds).forEach(seat => {
-        const hold = holds[seat];
+    Object.keys(tripHolds).forEach(seat => {
+        const hold = tripHolds[seat];
         if (hold.status === "held" && hold.expiresAt && new Date(hold.expiresAt).getTime() < now) {
-            delete holds[seat];
+            delete tripHolds[seat];
             changed = true;
         }
     });
 
-    if (changed) saveSeatHolds(holds);
-    return holds;
+    if (changed) {
+        allHolds[tripId] = tripHolds;
+        saveAllSeatHolds(allHolds);
+    }
+
+    return tripHolds;
+}
+
+function saveSeatHoldsForTrip(tripId, tripHolds) {
+    const allHolds = getAllSeatHolds();
+    allHolds[tripId] = tripHolds;
+    saveAllSeatHolds(allHolds);
 }
 
 // One ID per browser TAB (sessionStorage, not localStorage) — this

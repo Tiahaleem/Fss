@@ -129,7 +129,7 @@
                     <button
                         type="submit"
                         class="pay-btn">
-                        Pay ₦24,500
+                        Pay <span data-field="pay-amount">₦24,500</span>
                     </button>
 
                 </div>
@@ -173,7 +173,7 @@
 
             <div class="summary-item">
                 <span>Route</span>
-                <strong>Lagos → Abuja</strong>
+                <strong data-field="route">Lagos → Abuja</strong>
             </div>
 
             <div class="summary-item">
@@ -183,23 +183,23 @@
 
             <div class="summary-item">
                 <span>Departure</span>
-                <strong>06:00</strong>
+                <strong data-field="departure">06:00</strong>
             </div>
 
             <div class="summary-item">
                 <span>Arrival</span>
-                <strong>17:00</strong>
+                <strong data-field="arrival">17:00</strong>
             </div>
 
             <div class="summary-item">
                 <span>Vehicle</span>
-                <strong>Honda Odyssey</strong>
+                <strong data-field="vehicle">Honda Odyssey</strong>
             </div>
 
-            <!-- data-field values below get overwritten by index.js
-                 from the ?seat=&pickup= query string sent by
-                 select_a_seat.js. Text here is just the fallback
-                 for a direct visit to this page. -->
+            <!-- data-field values below get overwritten by
+                 passenger_detail.js, reading the specific trip named
+                 in the ?trip= query string sent by select_a_seat.js.
+                 Text here is just the fallback for a direct visit. -->
             <div class="summary-item">
                 <span>Pickup</span>
                 <strong data-field="pickup">Jibowu Terminal</strong>
@@ -216,7 +216,7 @@
 
                 <span>Total</span>
 
-                <h2>₦24,500</h2>
+                <h2 data-field="total-amount">₦24,500</h2>
 
             </div>
 

@@ -18,6 +18,47 @@ function generateBookingCode() {
     return code;
 }
 
+function addMinutesToTime(time, durationText) {
+    const [h, m] = time.split(":").map(Number);
+    const durationMatch = durationText.match(/(\d+)h\s*(\d+)?m?/);
+    const durHours = durationMatch ? Number(durationMatch[1]) : 0;
+    const durMinutes = durationMatch && durationMatch[2] ? Number(durationMatch[2]) : 0;
+
+    const totalMinutes = (h * 60 + m + durHours * 60 + durMinutes) % (24 * 60);
+    const arriveH = Math.floor(totalMinutes / 60);
+    const arriveM = totalMinutes % 60;
+
+    return `${String(arriveH).padStart(2, "0")}:${String(arriveM).padStart(2, "0")}`;
+}
+
+// Reads the specific trip (via ?trip=ID, forwarded from
+// select_a_seat.js) and fills the summary with its real route,
+// times, and vehicle — instead of the old hardcoded demo text.
+const tripIdFromUrl = new URLSearchParams(window.location.search).get("trip") || "1";
+const currentTrip = getTrips().find(t => String(t.id) === String(tripIdFromUrl));
+const currentRoute = currentTrip ? getRoutes().find(r =>
+    r.from.toLowerCase() === currentTrip.from.toLowerCase() &&
+    r.to.toLowerCase() === currentTrip.to.toLowerCase()
+) : null;
+
+if (currentTrip && currentRoute) {
+    const routeField = document.querySelector('[data-field="route"]');
+    const departureField = document.querySelector('[data-field="departure"]');
+    const arrivalField = document.querySelector('[data-field="arrival"]');
+    const vehicleField = document.querySelector('[data-field="vehicle"]');
+    const payAmountField = document.querySelector('[data-field="pay-amount"]');
+    const totalAmountField = document.querySelector('[data-field="total-amount"]');
+
+    const priceText = `₦${Number(currentRoute.price).toLocaleString()}`;
+
+    if (routeField) routeField.textContent = `${currentTrip.from} → ${currentTrip.to}`;
+    if (departureField) departureField.textContent = currentTrip.time;
+    if (arrivalField) arrivalField.textContent = addMinutesToTime(currentTrip.time, currentRoute.duration);
+    if (vehicleField) vehicleField.textContent = currentTrip.vehicle;
+    if (payAmountField) payAmountField.textContent = priceText;
+    if (totalAmountField) totalAmountField.textContent = priceText;
+}
+
 const passengerForm = document.getElementById("passenger-form");
 
 if (passengerForm) {
@@ -62,11 +103,16 @@ if (passengerForm) {
         // not before. If the customer had abandoned checkout instead
         // of reaching this point, the hold would have simply expired
         // on its own and the seat would already be available again.
+        // Finalize the seat hold from select_a_seat.js into a
+        // permanent booking, right at the moment payment succeeds —
+        // not before. Scoped to this specific trip's own seat data,
+        // so it never touches any other trip's availability.
         const seatNumber = seatField ? seatField.textContent.trim() : "";
+        const tripIdParam = new URLSearchParams(window.location.search).get("trip") || "1";
         if (seatNumber) {
-            const holds = getSeatHolds();
+            const holds = getActiveSeatHoldsForTrip(tripIdParam);
             holds[seatNumber] = { status: "booked" };
-            saveSeatHolds(holds);
+            saveSeatHoldsForTrip(tripIdParam, holds);
         }
         const pickup = pickupField ? pickupField.textContent.trim() : "Jibowu Terminal";
 
@@ -81,10 +127,10 @@ if (passengerForm) {
             passengerName: nameField.value.trim(),
             passengerEmail: emailField.value.trim(),
             passengerPhone: phoneField.value.trim(),
-            route: "Lagos → Abuja",
+            route: currentTrip ? `${currentTrip.from} → ${currentTrip.to}` : "Lagos → Abuja",
             pickup: pickup,
             seat: seatField ? seatField.textContent.trim() : "",
-            price: "₦24,500",
+            price: currentRoute ? `₦${Number(currentRoute.price).toLocaleString()}` : "₦24,500",
             createdAt: new Date().toISOString()
         });
         saveBookings(bookings);

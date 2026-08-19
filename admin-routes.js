@@ -1,14 +1,11 @@
 // =========================
 // ROUTES & PRICING (admin)
 // =========================
-// Reads/writes the shared routes store in index.js (localStorage
-// under the hood), so edits persist across page reloads within the
-// same browser. Once a backend exists, getRoutes()/saveRoutes()
-// there become real API calls instead.
+// Now talks to the real backend (GET/POST/PUT/DELETE /api/routes)
+// instead of localStorage. IDs are real UUIDs from the database now,
+// not the old auto-incrementing numbers.
 
-let routes = getRoutes();
-
-let nextId = routes.length ? Math.max(...routes.map(r => r.id)) + 1 : 1;
+let routes = [];
 let deleteTargetId = null;
 
 const tableBody = document.getElementById("routes-table-body");
@@ -30,6 +27,16 @@ const deleteConfirmText = document.getElementById("delete-confirm-text");
 
 function money(value) {
     return "₦" + Number(value).toLocaleString();
+}
+
+async function loadRoutes() {
+    try {
+        routes = await apiFetch("/api/routes");
+        renderRoutes();
+    } catch (err) {
+        showToast(err.message);
+        tableBody.innerHTML = `<tr><td colspan="7"><div class="admin-empty">Couldn't load routes.</div></td></tr>`;
+    }
 }
 
 function renderRoutes() {
@@ -97,7 +104,7 @@ routeModal.addEventListener("click", (e) => {
     if (e.target === routeModal) closeRouteModal();
 });
 
-routeForm.addEventListener("submit", (e) => {
+routeForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     if (
@@ -111,7 +118,7 @@ routeForm.addEventListener("submit", (e) => {
         return;
     }
 
-    const editingId = routeIdField.value ? Number(routeIdField.value) : null;
+    const editingId = routeIdField.value || null;
 
     const routeData = {
         from: routeFromField.value.trim(),
@@ -122,17 +129,26 @@ routeForm.addEventListener("submit", (e) => {
         status: routeStatusField.value
     };
 
-    if (editingId) {
-        routes = routes.map(r => r.id === editingId ? { ...r, ...routeData } : r);
-        showToast("Route updated.", "success");
-    } else {
-        routes.push({ id: nextId++, ...routeData });
-        showToast("Route added.", "success");
-    }
+    try {
+        if (editingId) {
+            await apiFetch(`/api/routes/${editingId}`, {
+                method: "PUT",
+                body: JSON.stringify(routeData)
+            });
+            showToast("Route updated.", "success");
+        } else {
+            await apiFetch("/api/routes", {
+                method: "POST",
+                body: JSON.stringify(routeData)
+            });
+            showToast("Route added.", "success");
+        }
 
-    saveRoutes(routes);
-    renderRoutes();
-    closeRouteModal();
+        await loadRoutes();
+        closeRouteModal();
+    } catch (err) {
+        showToast(err.message);
+    }
 });
 
 // Edit / delete buttons (event delegation — works for rows added later too)
@@ -141,12 +157,12 @@ tableBody.addEventListener("click", (e) => {
     const deleteBtn = e.target.closest("[data-delete]");
 
     if (editBtn) {
-        const route = routes.find(r => r.id === Number(editBtn.dataset.edit));
+        const route = routes.find(r => r.id === editBtn.dataset.edit);
         if (route) openRouteModal(route);
     }
 
     if (deleteBtn) {
-        deleteTargetId = Number(deleteBtn.dataset.delete);
+        deleteTargetId = deleteBtn.dataset.delete;
         const route = routes.find(r => r.id === deleteTargetId);
         if (route) {
             deleteConfirmText.textContent =
@@ -168,12 +184,15 @@ deleteModal.addEventListener("click", (e) => {
     if (e.target === deleteModal) deleteModal.classList.remove("show");
 });
 
-document.getElementById("delete-confirm-btn").addEventListener("click", () => {
-    routes = routes.filter(r => r.id !== deleteTargetId);
-    saveRoutes(routes);
-    deleteModal.classList.remove("show");
-    renderRoutes();
-    showToast("Route deleted.", "success");
+document.getElementById("delete-confirm-btn").addEventListener("click", async () => {
+    try {
+        await apiFetch(`/api/routes/${deleteTargetId}`, { method: "DELETE" });
+        deleteModal.classList.remove("show");
+        await loadRoutes();
+        showToast("Route deleted.", "success");
+    } catch (err) {
+        showToast(err.message);
+    }
 });
 
-renderRoutes();
+loadRoutes();

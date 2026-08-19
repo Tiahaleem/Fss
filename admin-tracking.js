@@ -1,59 +1,67 @@
 // =========================
 // TRACKING (admin)
 // =========================
-// Reads/writes the shared tracking store in index.js (localStorage
-// under the hood), so edits here actually show up on track.html —
-// within the same browser. Once a backend exists, getTrackingEvents()
-// and saveTrackingEvents() there become real API calls instead.
+// Bookings table: GET /api/bookings (admin-only, read-only — bookings
+// only get created by real customer checkouts, never invented here).
+// Timeline Events table: full CRUD via /api/events, but every event
+// must belong to a real, existing booking reference — no more typing
+// any reference you like.
 
-let events = getTrackingEvents();
-
-let nextId = events.length ? Math.max(...events.map(ev => ev.id)) + 1 : 1;
+let events = [];
 let deleteTargetId = null;
 
 const bookingsTableBody = document.getElementById("bookings-table-body");
 
-function renderBookings() {
-    const bookings = getBookings();
+function money(kobo) {
+    return "₦" + (Number(kobo) / 100).toLocaleString();
+}
 
-    if (bookings.length === 0) {
-        bookingsTableBody.innerHTML = `
-            <tr>
-                <td colspan="8">
-                    <div class="admin-empty">No bookings yet — they'll show up here as customers pay on the courier and passenger pages.</div>
-                </td>
-            </tr>
-        `;
-        return;
+async function loadBookings() {
+    try {
+        const bookings = await apiFetch("/api/bookings");
+
+        if (bookings.length === 0) {
+            bookingsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="admin-empty">No bookings yet — they'll show up here as customers pay on the courier and passenger pages.</div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        const sorted = [...bookings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        bookingsTableBody.innerHTML = sorted.map(b => {
+            const isParcel = b.type === "parcel";
+
+            const customer = isParcel ? b.sender_name : b.passenger_name;
+            const phone = isParcel ? b.sender_phone : b.passenger_phone;
+            const recipient = isParcel ? `${b.receiver_name}<br><span style="color:var(--color-text-muted); font-size:.8rem;">${b.receiver_phone}</span>` : "—";
+            const route = isParcel ? `${b.from_city} → ${b.to_city}` : "—";
+
+            return `
+                <tr>
+                    <td>${b.reference}</td>
+                    <td><span class="status-badge ${isParcel ? "inactive" : "active"}">${isParcel ? "Parcel" : "Passenger"}</span></td>
+                    <td>${customer}</td>
+                    <td>${phone}</td>
+                    <td>${recipient}</td>
+                    <td>${route}</td>
+                    <td>${money(b.price_kobo)}</td>
+                    <td>
+                        <button class="admin-btn-secondary" data-manage="${b.reference}" style="white-space:nowrap;">
+                            Manage Timeline
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    } catch (err) {
+        showToast(err.message);
+        bookingsTableBody.innerHTML = `<tr><td colspan="8"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
     }
-
-    const sorted = [...bookings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    bookingsTableBody.innerHTML = sorted.map(b => {
-        const isParcel = b.type === "parcel";
-
-        const customer = isParcel ? b.senderName : b.passengerName;
-        const phone = isParcel ? b.senderPhone : b.passengerPhone;
-        const recipient = isParcel ? `${b.receiverName}<br><span style="color:var(--color-text-muted); font-size:.8rem;">${b.receiverPhone}</span>` : "—";
-        const route = isParcel ? `${b.from} → ${b.to}` : b.route;
-
-        return `
-            <tr>
-                <td>${b.reference}</td>
-                <td><span class="status-badge ${isParcel ? "inactive" : "active"}">${isParcel ? "Parcel" : "Passenger"}</span></td>
-                <td>${customer}</td>
-                <td>${phone}</td>
-                <td>${recipient}</td>
-                <td>${route}</td>
-                <td>${b.price}</td>
-                <td>
-                    <button class="admin-btn-secondary" data-manage="${b.reference}" style="white-space:nowrap;">
-                        Manage Timeline
-                    </button>
-                </td>
-            </tr>
-        `;
-    }).join("");
 }
 
 bookingsTableBody.addEventListener("click", (e) => {
@@ -69,8 +77,6 @@ bookingsTableBody.addEventListener("click", (e) => {
         ? Math.max(...existingForRef.map(ev => ev.order)) + 1
         : 1;
 });
-
-renderBookings();
 
 const tableBody = document.getElementById("events-table-body");
 
@@ -93,6 +99,16 @@ function statusLabel(status) {
     if (status === "completed") return "Completed";
     if (status === "active") return "Active";
     return "Pending";
+}
+
+async function loadEvents() {
+    try {
+        events = await apiFetch("/api/events");
+        renderEvents();
+    } catch (err) {
+        showToast(err.message);
+        tableBody.innerHTML = `<tr><td colspan="6"><div class="admin-empty">Couldn't load events.</div></td></tr>`;
+    }
 }
 
 function renderEvents() {
@@ -137,6 +153,7 @@ function openEventModal(event) {
         eventModalTitle.textContent = "Edit Event";
         eventIdField.value = event.id;
         eventReferenceField.value = event.reference;
+        eventReferenceField.disabled = true; // which booking an event belongs to can't be changed once created
         eventOrderField.value = event.order;
         eventTitleField.value = event.title;
         eventTimeField.value = event.time;
@@ -146,6 +163,7 @@ function openEventModal(event) {
         eventModalTitle.textContent = "Add Event";
         eventForm.reset();
         eventIdField.value = "";
+        eventReferenceField.disabled = false;
         eventIconField.value = "location";
     }
 
@@ -164,7 +182,7 @@ eventModal.addEventListener("click", (e) => {
     if (e.target === eventModal) closeEventModal();
 });
 
-eventForm.addEventListener("submit", (e) => {
+eventForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     if (
@@ -177,7 +195,7 @@ eventForm.addEventListener("submit", (e) => {
         return;
     }
 
-    const editingId = eventIdField.value ? Number(eventIdField.value) : null;
+    const editingId = eventIdField.value || null;
 
     const eventData = {
         reference: eventReferenceField.value.trim(),
@@ -188,17 +206,28 @@ eventForm.addEventListener("submit", (e) => {
         icon: eventIconField.value
     };
 
-    if (editingId) {
-        events = events.map(ev => ev.id === editingId ? { ...ev, ...eventData } : ev);
-        showToast("Event updated.", "success");
-    } else {
-        events.push({ id: nextId++, ...eventData });
-        showToast("Event added.", "success");
-    }
+    try {
+        if (editingId) {
+            // reference can't change on an edit — leave it out of the PUT body
+            const { reference, ...editableFields } = eventData;
+            await apiFetch(`/api/events/${editingId}`, {
+                method: "PUT",
+                body: JSON.stringify(editableFields)
+            });
+            showToast("Event updated.", "success");
+        } else {
+            await apiFetch("/api/events", {
+                method: "POST",
+                body: JSON.stringify(eventData)
+            });
+            showToast("Event added.", "success");
+        }
 
-    saveTrackingEvents(events);
-    renderEvents();
-    closeEventModal();
+        await loadEvents();
+        closeEventModal();
+    } catch (err) {
+        showToast(err.message);
+    }
 });
 
 // Edit / delete buttons (event delegation)
@@ -207,12 +236,12 @@ tableBody.addEventListener("click", (e) => {
     const deleteBtn = e.target.closest("[data-delete]");
 
     if (editBtn) {
-        const event = events.find(ev => ev.id === Number(editBtn.dataset.edit));
+        const event = events.find(ev => ev.id === editBtn.dataset.edit);
         if (event) openEventModal(event);
     }
 
     if (deleteBtn) {
-        deleteTargetId = Number(deleteBtn.dataset.delete);
+        deleteTargetId = deleteBtn.dataset.delete;
         const event = events.find(ev => ev.id === deleteTargetId);
         if (event) {
             deleteConfirmText.textContent =
@@ -234,12 +263,16 @@ deleteModal.addEventListener("click", (e) => {
     if (e.target === deleteModal) deleteModal.classList.remove("show");
 });
 
-document.getElementById("delete-confirm-btn").addEventListener("click", () => {
-    events = events.filter(ev => ev.id !== deleteTargetId);
-    saveTrackingEvents(events);
-    deleteModal.classList.remove("show");
-    renderEvents();
-    showToast("Event deleted.", "success");
+document.getElementById("delete-confirm-btn").addEventListener("click", async () => {
+    try {
+        await apiFetch(`/api/events/${deleteTargetId}`, { method: "DELETE" });
+        deleteModal.classList.remove("show");
+        await loadEvents();
+        showToast("Event deleted.", "success");
+    } catch (err) {
+        showToast(err.message);
+    }
 });
 
-renderEvents();
+loadBookings();
+loadEvents();

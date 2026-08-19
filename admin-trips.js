@@ -1,14 +1,14 @@
 // =========================
 // TRIPS & SCHEDULE (admin)
 // =========================
-// Reads/writes the shared trips store in index.js (localStorage
-// under the hood), so edits persist across page reloads within the
-// same browser. Once a backend exists, getTrips()/saveTrips() there
-// become real API calls instead.
+// Now talks to the real backend (GET/POST/PUT/DELETE /api/trips)
+// instead of localStorage. Each trip belongs to a real route via
+// routeId — the form now uses a dropdown of actual existing routes
+// instead of free-text From/To boxes, so there's no way to create a
+// trip for a route that doesn't exist or has a typo.
 
-let trips = getTrips();
-
-let nextId = trips.length ? Math.max(...trips.map(t => t.id)) + 1 : 1;
+let trips = [];
+let availableRoutes = [];
 let deleteTargetId = null;
 
 const tableBody = document.getElementById("trips-table-body");
@@ -18,8 +18,7 @@ const tripModalTitle = document.getElementById("trip-modal-title");
 const tripForm = document.getElementById("trip-form");
 
 const tripIdField = document.getElementById("trip-id");
-const tripFromField = document.getElementById("trip-from");
-const tripToField = document.getElementById("trip-to");
+const tripRouteField = document.getElementById("trip-route");
 const tripTimeField = document.getElementById("trip-time");
 const tripVehicleField = document.getElementById("trip-vehicle");
 const tripSeatsField = document.getElementById("trip-seats");
@@ -27,6 +26,34 @@ const tripStatusField = document.getElementById("trip-status");
 
 const deleteModal = document.getElementById("delete-modal-overlay");
 const deleteConfirmText = document.getElementById("delete-confirm-text");
+
+async function loadRoutesForDropdown() {
+    try {
+        availableRoutes = await apiFetch("/api/routes");
+
+        if (availableRoutes.length === 0) {
+            tripRouteField.innerHTML = `<option value="">No routes exist yet — add one first</option>`;
+            return;
+        }
+
+        tripRouteField.innerHTML = availableRoutes
+            .map(r => `<option value="${r.id}">${r.from} → ${r.to}</option>`)
+            .join("");
+    } catch (err) {
+        tripRouteField.innerHTML = `<option value="">Couldn't load routes</option>`;
+        showToast(err.message);
+    }
+}
+
+async function loadTrips() {
+    try {
+        trips = await apiFetch("/api/trips");
+        renderTrips();
+    } catch (err) {
+        showToast(err.message);
+        tableBody.innerHTML = `<tr><td colspan="6"><div class="admin-empty">Couldn't load trips.</div></td></tr>`;
+    }
+}
 
 function renderTrips() {
     if (trips.length === 0) {
@@ -40,7 +67,6 @@ function renderTrips() {
         return;
     }
 
-    // Group visually by route order, then by time, for a readable table
     const sorted = [...trips].sort((a, b) => {
         const routeA = `${a.from}-${a.to}`;
         const routeB = `${b.from}-${b.to}`;
@@ -73,8 +99,7 @@ function openTripModal(trip) {
     if (trip) {
         tripModalTitle.textContent = "Edit Trip";
         tripIdField.value = trip.id;
-        tripFromField.value = trip.from;
-        tripToField.value = trip.to;
+        tripRouteField.value = trip.routeId;
         tripTimeField.value = trip.time;
         tripVehicleField.value = trip.vehicle;
         tripSeatsField.value = trip.seats;
@@ -102,12 +127,11 @@ tripModal.addEventListener("click", (e) => {
     if (e.target === tripModal) closeTripModal();
 });
 
-tripForm.addEventListener("submit", (e) => {
+tripForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     if (
-        tripFromField.value.trim() === "" ||
-        tripToField.value.trim() === "" ||
+        !tripRouteField.value ||
         tripTimeField.value.trim() === "" ||
         tripVehicleField.value.trim() === "" ||
         tripSeatsField.value.trim() === ""
@@ -116,28 +140,36 @@ tripForm.addEventListener("submit", (e) => {
         return;
     }
 
-    const editingId = tripIdField.value ? Number(tripIdField.value) : null;
+    const editingId = tripIdField.value || null;
 
     const tripData = {
-        from: tripFromField.value.trim(),
-        to: tripToField.value.trim(),
+        routeId: tripRouteField.value,
         time: tripTimeField.value,
         vehicle: tripVehicleField.value.trim(),
         seats: Number(tripSeatsField.value),
         status: tripStatusField.value
     };
 
-    if (editingId) {
-        trips = trips.map(t => t.id === editingId ? { ...t, ...tripData } : t);
-        showToast("Trip updated.", "success");
-    } else {
-        trips.push({ id: nextId++, ...tripData });
-        showToast("Trip added.", "success");
-    }
+    try {
+        if (editingId) {
+            await apiFetch(`/api/trips/${editingId}`, {
+                method: "PUT",
+                body: JSON.stringify(tripData)
+            });
+            showToast("Trip updated.", "success");
+        } else {
+            await apiFetch("/api/trips", {
+                method: "POST",
+                body: JSON.stringify(tripData)
+            });
+            showToast("Trip added.", "success");
+        }
 
-    saveTrips(trips);
-    renderTrips();
-    closeTripModal();
+        await loadTrips();
+        closeTripModal();
+    } catch (err) {
+        showToast(err.message);
+    }
 });
 
 // Edit / delete buttons (event delegation)
@@ -146,12 +178,12 @@ tableBody.addEventListener("click", (e) => {
     const deleteBtn = e.target.closest("[data-delete]");
 
     if (editBtn) {
-        const trip = trips.find(t => t.id === Number(editBtn.dataset.edit));
+        const trip = trips.find(t => t.id === editBtn.dataset.edit);
         if (trip) openTripModal(trip);
     }
 
     if (deleteBtn) {
-        deleteTargetId = Number(deleteBtn.dataset.delete);
+        deleteTargetId = deleteBtn.dataset.delete;
         const trip = trips.find(t => t.id === deleteTargetId);
         if (trip) {
             deleteConfirmText.textContent =
@@ -173,12 +205,16 @@ deleteModal.addEventListener("click", (e) => {
     if (e.target === deleteModal) deleteModal.classList.remove("show");
 });
 
-document.getElementById("delete-confirm-btn").addEventListener("click", () => {
-    trips = trips.filter(t => t.id !== deleteTargetId);
-    saveTrips(trips);
-    deleteModal.classList.remove("show");
-    renderTrips();
-    showToast("Trip deleted.", "success");
+document.getElementById("delete-confirm-btn").addEventListener("click", async () => {
+    try {
+        await apiFetch(`/api/trips/${deleteTargetId}`, { method: "DELETE" });
+        deleteModal.classList.remove("show");
+        await loadTrips();
+        showToast("Trip deleted.", "success");
+    } catch (err) {
+        showToast(err.message);
+    }
 });
 
-renderTrips();
+loadRoutesForDropdown();
+loadTrips();

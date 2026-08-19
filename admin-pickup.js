@@ -1,14 +1,10 @@
 // =========================
 // PICKUP CENTERS (admin)
 // =========================
-// Reads/writes the shared terminals store in index.js (localStorage
-// under the hood), so edits persist across page reloads within the
-// same browser. Once a backend exists, getTerminals()/saveTerminals()
-// there become real API calls instead.
+// Now talks to the real backend (GET/POST/PUT/DELETE /api/terminals)
+// instead of localStorage. IDs are real UUIDs now.
 
-let terminals = getTerminals();
-
-let nextId = terminals.length ? Math.max(...terminals.map(t => t.id)) + 1 : 1;
+let terminals = [];
 let deleteTargetId = null;
 
 const tableBody = document.getElementById("terminals-table-body");
@@ -27,6 +23,16 @@ const terminalStatusField = document.getElementById("terminal-status");
 
 const deleteModal = document.getElementById("delete-modal-overlay");
 const deleteConfirmText = document.getElementById("delete-confirm-text");
+
+async function loadTerminals() {
+    try {
+        terminals = await apiFetch("/api/terminals");
+        renderTerminals();
+    } catch (err) {
+        showToast(err.message);
+        tableBody.innerHTML = `<tr><td colspan="7"><div class="admin-empty">Couldn't load terminals.</div></td></tr>`;
+    }
+}
 
 function renderTerminals() {
     if (terminals.length === 0) {
@@ -97,7 +103,7 @@ terminalModal.addEventListener("click", (e) => {
     if (e.target === terminalModal) closeTerminalModal();
 });
 
-terminalForm.addEventListener("submit", (e) => {
+terminalForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     if (
@@ -111,7 +117,7 @@ terminalForm.addEventListener("submit", (e) => {
         return;
     }
 
-    const editingId = terminalIdField.value ? Number(terminalIdField.value) : null;
+    const editingId = terminalIdField.value || null;
 
     const terminalData = {
         city: terminalCityField.value.trim(),
@@ -122,17 +128,26 @@ terminalForm.addEventListener("submit", (e) => {
         status: terminalStatusField.value
     };
 
-    if (editingId) {
-        terminals = terminals.map(t => t.id === editingId ? { ...t, ...terminalData } : t);
-        showToast("Terminal updated.", "success");
-    } else {
-        terminals.push({ id: nextId++, ...terminalData });
-        showToast("Terminal added.", "success");
-    }
+    try {
+        if (editingId) {
+            await apiFetch(`/api/terminals/${editingId}`, {
+                method: "PUT",
+                body: JSON.stringify(terminalData)
+            });
+            showToast("Terminal updated.", "success");
+        } else {
+            await apiFetch("/api/terminals", {
+                method: "POST",
+                body: JSON.stringify(terminalData)
+            });
+            showToast("Terminal added.", "success");
+        }
 
-    saveTerminals(terminals);
-    renderTerminals();
-    closeTerminalModal();
+        await loadTerminals();
+        closeTerminalModal();
+    } catch (err) {
+        showToast(err.message);
+    }
 });
 
 // Edit / delete buttons (event delegation)
@@ -141,12 +156,12 @@ tableBody.addEventListener("click", (e) => {
     const deleteBtn = e.target.closest("[data-delete]");
 
     if (editBtn) {
-        const terminal = terminals.find(t => t.id === Number(editBtn.dataset.edit));
+        const terminal = terminals.find(t => t.id === editBtn.dataset.edit);
         if (terminal) openTerminalModal(terminal);
     }
 
     if (deleteBtn) {
-        deleteTargetId = Number(deleteBtn.dataset.delete);
+        deleteTargetId = deleteBtn.dataset.delete;
         const terminal = terminals.find(t => t.id === deleteTargetId);
         if (terminal) {
             deleteConfirmText.textContent =
@@ -168,12 +183,15 @@ deleteModal.addEventListener("click", (e) => {
     if (e.target === deleteModal) deleteModal.classList.remove("show");
 });
 
-document.getElementById("delete-confirm-btn").addEventListener("click", () => {
-    terminals = terminals.filter(t => t.id !== deleteTargetId);
-    saveTerminals(terminals);
-    deleteModal.classList.remove("show");
-    renderTerminals();
-    showToast("Terminal deleted.", "success");
+document.getElementById("delete-confirm-btn").addEventListener("click", async () => {
+    try {
+        await apiFetch(`/api/terminals/${deleteTargetId}`, { method: "DELETE" });
+        deleteModal.classList.remove("show");
+        await loadTerminals();
+        showToast("Terminal deleted.", "success");
+    } catch (err) {
+        showToast(err.message);
+    }
 });
 
-renderTerminals();
+loadTerminals();

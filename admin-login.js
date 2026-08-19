@@ -1,14 +1,14 @@
 // =========================
 // ADMIN LOGIN
 // =========================
-// Checks against the seeded/stored admin accounts in index.js
-// (getAdminUsers()). Default login: admin@fss.ng / admin1234.
-// Once real auth exists, replace this with a proper fetch() call.
+// Calls the real backend now — checks a real bcrypt-hashed password
+// against your Supabase database, and stores a real login token
+// (JWT) instead of the old browser-only "session".
 
 const adminLoginForm = document.getElementById("admin-login-form");
 
 if (adminLoginForm) {
-    adminLoginForm.addEventListener("submit", (e) => {
+    adminLoginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const email = document.getElementById("admin-email");
@@ -25,23 +25,29 @@ if (adminLoginForm) {
             return;
         }
 
-        const admins = getAdminUsers();
-        const match = admins.find(a =>
-            a.email.toLowerCase() === email.value.trim().toLowerCase() &&
-            a.password === password.value
-        );
+        try {
+            const data = await apiFetch("/api/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: email.value.trim(),
+                    password: password.value
+                })
+            });
 
-        if (!match) {
-            showToast("Incorrect email or password.");
-            return;
+            if (data.user.role !== "admin") {
+                showToast("This account doesn't have admin access.");
+                return;
+            }
+
+            setAdminToken(data.token);
+
+            showToast("Signed in — redirecting…", "success");
+
+            setTimeout(() => {
+                window.location.href = "admin-dashboard.html";
+            }, 900);
+        } catch (err) {
+            showToast(err.message);
         }
-
-        setCurrentAdmin(match);
-
-        showToast("Signed in — redirecting…", "success");
-
-        setTimeout(() => {
-            window.location.href = "admin-dashboard.html";
-        }, 900);
     });
 }

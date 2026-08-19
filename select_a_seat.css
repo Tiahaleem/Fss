@@ -524,13 +524,21 @@
 
 @media (max-width: 480px) {
 
+    .seat-map {
+        padding: 16px 10px;
+    }
+
     .seat-row {
-        gap: 16px;
+        gap: 14px;
+    }
+
+    .seat-row.rear-row {
+        gap: 6px;
     }
 
     .seat {
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         font-size: .85rem;
     }
 

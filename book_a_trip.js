@@ -7,11 +7,9 @@
 // that was missing before: adding/editing a trip or route in admin
 // now actually changes what shows here.
 //
-// One honest limitation: "Select Seats" still links to the single
-// demo seat map on select_a_seat.html regardless of which trip card
-// was clicked — per-trip seat maps don't exist yet. That's a bigger
-// piece of work than this pass (it needs a seat map per vehicle,
-// not just per route), worth flagging as the next natural step.
+// "Select Seats" now carries this specific trip's ID forward, so
+// select_a_seat.html shows THAT trip's own independent seat
+// availability — not a single shared demo seat map for every trip.
 
 const tripsCountEl = document.getElementById("trips-count");
 const tripCardsList = document.getElementById("trip-cards-list");
@@ -90,7 +88,7 @@ if (tripCardsList) {
                     <div class="trip-price">
                         <small>From</small>
                         <h3>₦${Number(route.price).toLocaleString()}</h3>
-                        <a href="select_a_seat.html" class="seat-btn">Select Seats →</a>
+                        <a href="select_a_seat.html?trip=${trip.id}" class="seat-btn">Select Seats →</a>
                     </div>
 
                 </div>
