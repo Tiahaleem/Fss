@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>API Test — Routes</title>
+<style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    h1 { font-size: 1.3rem; }
+    label { display: block; margin-top: 12px; font-weight: bold; font-size: .9rem; }
+    input, select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
+    button { margin-top: 16px; padding: 10px 20px; background: #081f5c; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #0b2a80; }
+    #result, #list { margin-top: 20px; padding: 12px; background: #f4f4f4; border-radius: 6px; white-space: pre-wrap; font-family: monospace; font-size: .85rem; }
+    .refresh-btn { background: #08b6d6; }
+</style>
+</head>
+<body>
+
+<h1>Test: Create a Route</h1>
+<p>This talks to your real backend at <code>http://localhost:4000</code>. Make sure your terminal (npm start) is still running.</p>
+
+<form id="route-form">
+    <label>From</label>
+    <input type="text" id="from" value="Lagos">
+
+    <label>To</label>
+    <input type="text" id="to" value="Abuja">
+
+    <label>Distance (km)</label>
+    <input type="number" id="distance" value="760">
+
+    <label>Duration</label>
+    <input type="text" id="duration" value="11h 00m">
+
+    <label>Price (₦)</label>
+    <input type="number" id="price" value="24500">
+
+    <label>Status</label>
+    <select id="status">
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+    </select>
+
+    <button type="submit">Create Route</button>
+</form>
+
+<div id="result"></div>
+
+<h1>Test: List All Routes</h1>
+<button class="refresh-btn" id="refresh-btn">Refresh List</button>
+<div id="list"></div>
+
+<script>
+const API = "http://localhost:4000";
+
+document.getElementById("route-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const body = {
+        from: document.getElementById("from").value,
+        to: document.getElementById("to").value,
+        distance: Number(document.getElementById("distance").value),
+        duration: document.getElementById("duration").value,
+        price: Number(document.getElementById("price").value),
+        status: document.getElementById("status").value
+    };
+
+    const resultBox = document.getElementById("result");
+    resultBox.textContent = "Sending...";
+
+    try {
+        const res = await fetch(`${API}/api/routes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        resultBox.textContent = `Status: ${res.status}\n\n${JSON.stringify(data, null, 2)}`;
+
+        if (res.ok) loadList();
+    } catch (err) {
+        resultBox.textContent = "ERROR: " + err.message + "\n\nIs your server actually running? Check your terminal window.";
+    }
+});
+
+async function loadList() {
+    const listBox = document.getElementById("list");
+    listBox.textContent = "Loading...";
+
+    try {
+        const res = await fetch(`${API}/api/routes`);
+        const data = await res.json();
+        listBox.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+        listBox.textContent = "ERROR: " + err.message;
+    }
+}
+
+document.getElementById("refresh-btn").addEventListener("click", loadList);
+
+loadList();
+</script>
+
+</body>
+</html>

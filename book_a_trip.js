@@ -2,14 +2,13 @@
 // AVAILABLE TRIPS
 // =========================
 // Renders one card per active trip matching the searched ?from=&to=,
-// pulling times from getTrips() and price/duration from getRoutes()
-// — both from the shared stores in index.js. This is the connection
-// that was missing before: adding/editing a trip or route in admin
-// now actually changes what shows here.
+// now from the REAL backend (/api/trips, /api/routes). Adding/
+// editing a trip or route in admin now actually changes what a real
+// customer sees here.
 //
-// "Select Seats" now carries this specific trip's ID forward, so
-// select_a_seat.html shows THAT trip's own independent seat
-// availability — not a single shared demo seat map for every trip.
+// "Select Seats" carries this specific trip's real database ID
+// forward, so select_a_seat.html can show THAT trip's own
+// independent seat availability once it's connected too.
 
 const tripsCountEl = document.getElementById("trips-count");
 const tripCardsList = document.getElementById("trip-cards-list");
@@ -19,52 +18,56 @@ const acIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
 const usbIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none" /><path fill="#81dade" d="M10.588 21.413Q10 20.825 10 20q0-.525.275-.975T11 18.3V16H8q-.825 0-1.412-.587T6 14v-2.3q-.45-.225-.725-.675T5 10q0-.825.588-1.413T7 8t1.413.588T9 10q0 .575-.275 1T8 11.7V14h3V6H9l3-4l3 4h-2v8h3v-2h-1V8h4v4h-1v2q0 .825-.587 1.413T16 16h-3v2.3q.475.25.738.7T14 20q0 .825-.587 1.413T12 22t-1.412-.587"/></svg>';
 const refreshIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 50 50"><path d="M0 0h50v50H0z" fill="none" /><path fill="#81dade" d="M48.894 15.154L44.959 46H31.668l-3.919-31h16.226l3.207-11.077L49 4.471l-3.077 10.66zM25.87 33s.497-4-6.395-4H8.499c-6.882 0-6.395 4-6.395 4zM2.104 42s-.487 4 6.395 4h10.977c6.892 0 6.395-4 6.395-4zm22.735-2c1.128 0 2.039-1.114 2.039-2.499c0-1.393-.911-2.501-2.039-2.501H3.04C1.917 35 1 36.108 1 37.501C1 38.886 1.917 40 3.04 40z"/></svg>';
 
-if (tripCardsList) {
+function addMinutesToTime(time, durationText) {
+    const [h, m] = time.split(":").map(Number);
+    const durationMatch = durationText.match(/(\d+)h\s*(\d+)?m?/);
+    const durHours = durationMatch ? Number(durationMatch[1]) : 0;
+    const durMinutes = durationMatch && durationMatch[2] ? Number(durationMatch[2]) : 0;
+
+    const totalMinutes = (h * 60 + m + durHours * 60 + durMinutes) % (24 * 60);
+    const arriveH = Math.floor(totalMinutes / 60);
+    const arriveM = totalMinutes % 60;
+
+    return `${String(arriveH).padStart(2, "0")}:${String(arriveM).padStart(2, "0")}`;
+}
+
+async function loadTrips() {
+    if (!tripCardsList) return;
+
     const params = new URLSearchParams(window.location.search);
     const from = params.get("from") || "Lagos";
     const to = params.get("to") || "Abuja";
 
-    const route = getRoutes().find(r =>
-        r.from.toLowerCase() === from.toLowerCase() &&
-        r.to.toLowerCase() === to.toLowerCase() &&
-        r.status === "active"
-    );
+    try {
+        const [allRoutes, trips] = await Promise.all([
+            apiFetch("/api/routes"),
+            apiFetch(`/api/trips?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&status=active`)
+        ]);
 
-    const trips = getTrips()
-        .filter(t =>
-            t.from.toLowerCase() === from.toLowerCase() &&
-            t.to.toLowerCase() === to.toLowerCase() &&
-            t.status === "active"
-        )
-        .sort((a, b) => a.time.localeCompare(b.time));
+        const route = allRoutes.find(r =>
+            r.from.toLowerCase() === from.toLowerCase() &&
+            r.to.toLowerCase() === to.toLowerCase() &&
+            r.status === "active"
+        );
 
-    if (!route || trips.length === 0) {
-        if (tripsCountEl) tripsCountEl.textContent = `No trips found for ${from} → ${to}`;
-        tripCardsList.innerHTML = `
-            <div class="admin-empty">
-                No trips are currently scheduled on this route.
-                <a href="route.html">Browse all routes</a>
-            </div>
-        `;
-    } else {
+        const sortedTrips = [...trips].sort((a, b) => a.time.localeCompare(b.time));
+
+        if (!route || sortedTrips.length === 0) {
+            if (tripsCountEl) tripsCountEl.textContent = `No trips found for ${from} → ${to}`;
+            tripCardsList.innerHTML = `
+                <div class="admin-empty">
+                    No trips are currently scheduled on this route.
+                    <a href="route.html">Browse all routes</a>
+                </div>
+            `;
+            return;
+        }
+
         if (tripsCountEl) {
-            tripsCountEl.textContent = `${trips.length} trip${trips.length === 1 ? "" : "s"} found for ${from} → ${to}`;
+            tripsCountEl.textContent = `${sortedTrips.length} trip${sortedTrips.length === 1 ? "" : "s"} found for ${from} → ${to}`;
         }
 
-        function addMinutesToTime(time, durationText) {
-            const [h, m] = time.split(":").map(Number);
-            const durationMatch = durationText.match(/(\d+)h\s*(\d+)?m?/);
-            const durHours = durationMatch ? Number(durationMatch[1]) : 0;
-            const durMinutes = durationMatch && durationMatch[2] ? Number(durationMatch[2]) : 0;
-
-            const totalMinutes = (h * 60 + m + durHours * 60 + durMinutes) % (24 * 60);
-            const arriveH = Math.floor(totalMinutes / 60);
-            const arriveM = totalMinutes % 60;
-
-            return `${String(arriveH).padStart(2, "0")}:${String(arriveM).padStart(2, "0")}`;
-        }
-
-        tripCardsList.innerHTML = trips.map(trip => `
+        tripCardsList.innerHTML = sortedTrips.map(trip => `
             <div class="trip-card">
 
                 <div class="trip-top">
@@ -103,5 +106,12 @@ if (tripCardsList) {
 
             </div>
         `).join("");
+    } catch (err) {
+        if (tripsCountEl) tripsCountEl.textContent = "Couldn't load trips";
+        tripCardsList.innerHTML = `
+            <div class="admin-empty">Couldn't load trips right now. Please try again shortly.</div>
+        `;
     }
 }
+
+loadTrips();
