@@ -37,6 +37,7 @@ async function loadTrips() {
     const params = new URLSearchParams(window.location.search);
     const from = params.get("from") || "Lagos";
     const to = params.get("to") || "Abuja";
+    const passengers = params.get("passengers") || "1";
 
     try {
         const [allRoutes, trips] = await Promise.all([
@@ -91,7 +92,7 @@ async function loadTrips() {
                     <div class="trip-price">
                         <small>From</small>
                         <h3>₦${Number(route.price).toLocaleString()}</h3>
-                        <a href="select_a_seat.html?trip=${trip.id}" class="seat-btn">Select Seats →</a>
+                        <a href="select_a_seat.html?trip=${trip.id}&passengers=${passengers}" class="seat-btn">Select Seats →</a>
                     </div>
 
                 </div>

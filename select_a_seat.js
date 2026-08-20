@@ -1,12 +1,11 @@
 // =========================
-// SEAT SELECTION — per-trip, hold-based
+// SEAT SELECTION — real backend, multi-seat
 // =========================
-// Reads ?trip=ID from the URL and operates ONLY on that trip's own
-// seat holds (getActiveSeatHoldsForTrip/saveSeatHoldsForTrip in
-// index.js) — booking seat 3 on trip A has zero effect on seat 3 for
-// trip B, same as two different showings at a cinema. Falls back to
-// trip 1 (the demo 06:00 Lagos→Abuja trip) if no ID is in the URL,
-// so a direct visit to this page still shows something sensible.
+// Reads ?trip=ID&passengers=N from the URL. Lets the customer select
+// up to N seats (matching what they searched for on the homepage),
+// each one a real hold via the API. Continuing requires exactly N
+// seats selected — matches the group up with what they're actually
+// paying for.
 
 const seatMap = document.querySelector('.seat-map');
 const selectedSeatText = document.getElementById('selected-seat');
@@ -14,15 +13,14 @@ const continueBtn = document.querySelector('.continue-btn');
 const pickupSelect = document.getElementById('pickup-center');
 const holdTimerRow = document.getElementById('hold-timer-row');
 const holdTimerText = document.getElementById('hold-timer-text');
+const seatLimitText = document.getElementById('seat-limit-text');
 
-// Elements on the seat-hero + summary card that show which trip
-// this actually is — updated below instead of staying hardcoded.
 const heroHeading = document.querySelector('.seat-hero h1');
 const heroSubtitle = document.querySelector('.seat-hero p');
 const summaryRoute = document.querySelector('.summary-row:nth-child(1) strong');
-const summaryDate = document.querySelector('.summary-row:nth-child(2) strong');
 const summaryDeparture = document.querySelector('.summary-row:nth-child(3) strong');
 const summaryArrival = document.querySelector('.summary-row:nth-child(4) strong');
+const summaryTotal = document.querySelector('[data-field="seat-total"]');
 
 function addMinutesToTime(time, durationText) {
     const [h, m] = time.split(":").map(Number);
@@ -39,44 +37,83 @@ function addMinutesToTime(time, durationText) {
 
 if (seatMap && continueBtn) {
 
-    const params = new URLSearchParams(window.location.search);
-    const tripId = params.get('trip') || '1';
-
-    const trip = getTrips().find(t => String(t.id) === String(tripId));
-    const route = trip ? getRoutes().find(r =>
-        r.from.toLowerCase() === trip.from.toLowerCase() &&
-        r.to.toLowerCase() === trip.to.toLowerCase()
-    ) : null;
-
-    // Show this specific trip's real details instead of the old
-    // hardcoded "Lagos → Abuja · 06:00 → 17:00" text
-    if (trip && route) {
-        const arrival = addMinutesToTime(trip.time, route.duration);
-
-        if (heroHeading) heroHeading.textContent = `${trip.from} → ${trip.to}`;
-        if (heroSubtitle) {
-            heroSubtitle.textContent = `${trip.time} → ${arrival} (${route.duration}) · ${trip.vehicle}`;
-        }
-        if (summaryRoute) summaryRoute.textContent = `${trip.from} → ${trip.to}`;
-        if (summaryDeparture) summaryDeparture.textContent = trip.time;
-        if (summaryArrival) summaryArrival.textContent = arrival;
-    }
-
+    const urlParams = new URLSearchParams(window.location.search);
+    const tripId = urlParams.get('trip');
+    const seatLimit = Math.max(1, Number(urlParams.get('passengers')) || 1);
     const tabId = getTabSessionId();
+
     let countdownInterval = null;
+    let currentRoute = null;
+
+    if (seatLimitText) {
+        seatLimitText.textContent = seatLimit === 1 ? "Select 1 seat" : `Select ${seatLimit} seats`;
+    }
 
     function seatButtons() {
         return Array.from(seatMap.querySelectorAll('.seat:not(.driver)'));
     }
 
-    function releaseMyHold(holds) {
-        Object.keys(holds).forEach(seatNum => {
-            if (holds[seatNum].status === 'held' && holds[seatNum].heldBy === tabId) {
-                delete holds[seatNum];
-            }
-        });
+    function mySelectedSeats() {
+        return seatButtons().filter(b => b.classList.contains('selected')).map(b => b.textContent.trim());
     }
 
+    async function loadTripDetails() {
+        if (!tripId) {
+            showToast("No trip specified.");
+            return;
+        }
+
+        try {
+            const [trip, allRoutes] = await Promise.all([
+                apiFetch(`/api/trips/${tripId}`),
+                apiFetch("/api/routes")
+            ]);
+
+            currentRoute = allRoutes.find(r =>
+                r.from.toLowerCase() === trip.from.toLowerCase() &&
+                r.to.toLowerCase() === trip.to.toLowerCase()
+            );
+
+            if (currentRoute) {
+                const arrival = addMinutesToTime(trip.time, currentRoute.duration);
+
+                if (heroHeading) heroHeading.textContent = `${trip.from} → ${trip.to}`;
+                if (heroSubtitle) heroSubtitle.textContent = `${trip.time} → ${arrival} (${currentRoute.duration}) · ${trip.vehicle}`;
+                if (summaryRoute) summaryRoute.textContent = `${trip.from} → ${trip.to}`;
+                if (summaryDeparture) summaryDeparture.textContent = trip.time;
+                if (summaryArrival) summaryArrival.textContent = arrival;
+            }
+
+            const terminals = await apiFetch(`/api/terminals?city=${encodeURIComponent(trip.from)}&status=active`);
+
+            if (terminals.length === 0) {
+                pickupSelect.innerHTML = `<option value="">No pickup centers set up for ${trip.from} yet</option>`;
+            } else {
+                pickupSelect.innerHTML = terminals.map(t => `<option value="${t.id}">${t.name}</option>`).join("");
+            }
+        } catch (err) {
+            showToast(err.message);
+        }
+    }
+
+    function updateSummary() {
+        const mySeats = mySelectedSeats();
+
+        if (selectedSeatText) {
+            selectedSeatText.textContent = mySeats.length > 0 ? mySeats.join(', ') : 'None';
+        }
+
+        if (summaryTotal && currentRoute) {
+            const total = Number(currentRoute.price) * mySeats.length;
+            summaryTotal.textContent = `₦${total.toLocaleString()}`;
+        }
+
+        continueBtn.disabled = mySeats.length !== seatLimit;
+    }
+
+    // Countdown shows time remaining on whichever of your held seats
+    // expires soonest — if any one goes, the whole group needs
+    // re-picking, so that's the number that actually matters.
     function startCountdown(expiresAt) {
         clearInterval(countdownInterval);
 
@@ -85,7 +122,7 @@ if (seatMap && continueBtn) {
 
             if (msLeft <= 0) {
                 clearInterval(countdownInterval);
-                renderSeats();
+                loadSeats();
                 return;
             }
 
@@ -94,88 +131,125 @@ if (seatMap && continueBtn) {
             const seconds = totalSeconds % 60;
 
             if (holdTimerText) {
-                holdTimerText.textContent = `Seat held for ${minutes}:${String(seconds).padStart(2, '0')}`;
+                const label = mySelectedSeats().length > 1 ? "Seats held for" : "Seat held for";
+                holdTimerText.textContent = `${label} ${minutes}:${String(seconds).padStart(2, '0')}`;
             }
         }, 1000);
     }
 
-    function renderSeats() {
-        const holds = getActiveSeatHoldsForTrip(tripId);
+    async function loadSeats() {
+        try {
+            const seatStates = await apiFetch(`/api/trips/${tripId}/seats`);
+            const holds = {};
+            seatStates.forEach(s => { holds[s.seatNumber] = s; });
 
-        seatButtons().forEach(btn => {
-            const seatNum = btn.textContent.trim();
-            const hold = holds[seatNum];
+            let earliestMyExpiry = null;
 
-            btn.classList.remove('selected', 'occupied');
-            btn.disabled = false;
-            btn.removeAttribute('aria-label');
+            seatButtons().forEach(btn => {
+                const seatNum = btn.textContent.trim();
+                const hold = holds[seatNum];
 
-            if (!hold) {
-                return;
-            }
+                btn.classList.remove('selected', 'occupied');
+                btn.disabled = false;
+                btn.removeAttribute('aria-label');
 
-            if (hold.status === 'booked') {
-                btn.classList.add('occupied');
-                btn.disabled = true;
-                btn.setAttribute('aria-label', `Seat ${seatNum}, booked`);
-            } else if (hold.status === 'held' && hold.heldBy === tabId) {
-                btn.classList.add('selected');
-                if (selectedSeatText) selectedSeatText.textContent = seatNum;
-                continueBtn.disabled = false;
+                if (!hold) return;
+
+                if (hold.status === 'booked') {
+                    btn.classList.add('occupied');
+                    btn.disabled = true;
+                    btn.setAttribute('aria-label', `Seat ${seatNum}, booked`);
+                } else if (hold.status === 'held' && hold.heldBy === tabId) {
+                    btn.classList.add('selected');
+                    if (!earliestMyExpiry || new Date(hold.expiresAt) < new Date(earliestMyExpiry)) {
+                        earliestMyExpiry = hold.expiresAt;
+                    }
+                } else if (hold.status === 'held') {
+                    btn.classList.add('occupied');
+                    btn.disabled = true;
+                    btn.setAttribute('aria-label', `Seat ${seatNum}, temporarily held by another customer`);
+                }
+            });
+
+            if (earliestMyExpiry) {
                 if (holdTimerRow) holdTimerRow.style.display = 'flex';
-                startCountdown(hold.expiresAt);
-            } else if (hold.status === 'held') {
-                // Held by a different tab (or a different customer on
-                // this same trip) — temporarily unavailable
-                btn.classList.add('occupied');
-                btn.disabled = true;
-                btn.setAttribute('aria-label', `Seat ${seatNum}, temporarily held by another customer`);
+                startCountdown(earliestMyExpiry);
+            } else {
+                if (holdTimerRow) holdTimerRow.style.display = 'none';
+                clearInterval(countdownInterval);
             }
-        });
+
+            updateSummary();
+        } catch (err) {
+            showToast(err.message);
+        }
     }
 
-    seatMap.addEventListener('click', (e) => {
+    seatMap.addEventListener('click', async (e) => {
         const seat = e.target.closest('.seat');
-        if (!seat || seat.classList.contains('driver') || seat.classList.contains('occupied') || seat.disabled) return;
+        if (!seat || seat.classList.contains('driver') || seat.disabled) return;
 
         const seatNum = seat.textContent.trim();
-        const holds = getActiveSeatHoldsForTrip(tripId);
+        const isMine = seat.classList.contains('selected');
 
-        // Release whatever this tab was previously holding on THIS
-        // trip — only one seat per session per trip
-        releaseMyHold(holds);
-
-        const expiresAt = new Date(Date.now() + SEAT_HOLD_MINUTES * 60 * 1000).toISOString();
-        holds[seatNum] = { status: 'held', heldBy: tabId, expiresAt };
-
-        saveSeatHoldsForTrip(tripId, holds);
-        renderSeats();
-    });
-
-    continueBtn.addEventListener('click', () => {
-        const holds = getActiveSeatHoldsForTrip(tripId);
-        const mySeat = Object.keys(holds).find(seatNum =>
-            holds[seatNum].status === 'held' && holds[seatNum].heldBy === tabId
-        );
-
-        if (!mySeat) {
-            showToast('Please select a seat first.');
+        // Clicking one of your own selected seats again releases it
+        if (isMine) {
+            try {
+                await apiFetch(`/api/trips/${tripId}/seats/${seatNum}/hold`, {
+                    method: "DELETE",
+                    body: JSON.stringify({ sessionId: tabId })
+                });
+                await loadSeats();
+            } catch (err) {
+                showToast(err.message);
+            }
             return;
         }
 
-        // The hold stays "held" (not yet booked) through checkout —
-        // passenger_detail.js finalizes it to "booked" only once
-        // payment actually succeeds. If the customer abandons
-        // checkout, the hold simply expires on its own.
+        // Someone else's seat (already disabled/occupied) — click does nothing
+        if (seat.classList.contains('occupied')) return;
+
+        // Already at the limit — tell them instead of silently failing
+        if (mySelectedSeats().length >= seatLimit) {
+            showToast(`You can only select ${seatLimit} seat${seatLimit === 1 ? '' : 's'} for this search. Deselect one first to change your pick.`);
+            return;
+        }
+
+        try {
+            await apiFetch(`/api/trips/${tripId}/seats/${seatNum}/hold`, {
+                method: "POST",
+                body: JSON.stringify({ sessionId: tabId })
+            });
+            await loadSeats();
+        } catch (err) {
+            showToast(err.message);
+            await loadSeats(); // refresh in case someone else just took it
+        }
+    });
+
+    continueBtn.addEventListener('click', () => {
+        const mySeats = mySelectedSeats();
+
+        if (mySeats.length !== seatLimit) {
+            showToast(`Please select ${seatLimit} seat${seatLimit === 1 ? '' : 's'} to continue.`);
+            return;
+        }
+
+        if (!pickupSelect.value) {
+            showToast('Please choose a pickup center.');
+            return;
+        }
+
         const searchParams = new URLSearchParams({
             trip: tripId,
-            seat: mySeat,
-            pickup: pickupSelect ? pickupSelect.value : ''
+            seats: mySeats.join(','),
+            terminal: pickupSelect.value
         });
 
         window.location.href = `passenger_detail.html?${searchParams.toString()}`;
     });
 
     continueBtn.disabled = true;
-    renderSeats();
+    loadTripDetails();
+    loadSeats();
 }

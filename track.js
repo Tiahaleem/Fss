@@ -1,11 +1,10 @@
 // =========================
-// TRACK PAGE
+// TRACK PAGE — real backend
 // =========================
-// Renders the timeline dynamically from the shared tracking store
-// (see getTrackingEvents()/saveTrackingEvents() in index.js), which
-// the admin Tracking panel writes to. Within the same browser, admin
-// edits now actually show up here. Once a backend exists, replace
-// getTrackingEvents() with fetch(`/api/tracking?ref=${code}`).
+// Fetches from GET /api/bookings/track/:reference — a real,
+// permanent database lookup. Admin edits in admin-tracking.html now
+// show up here for real, for anyone, on any device — not just
+// within one browser like the old localStorage version.
 
 const trackBtn = document.getElementById("track-btn");
 const trackingInput = document.getElementById("tracking-number");
@@ -36,12 +35,22 @@ function iconSvg(type) {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
 }
 
-function renderTimeline(code) {
-    const events = getTrackingEvents()
-        .filter(ev => ev.reference.trim().toUpperCase() === code.trim().toUpperCase())
-        .sort((a, b) => a.order - b.order);
+async function renderTimeline(code) {
+    let data;
 
-    if (events.length === 0) {
+    try {
+        data = await apiFetch(`/api/bookings/track/${encodeURIComponent(code.trim().toUpperCase())}`);
+    } catch (err) {
+        // 404 (no booking with that reference) lands here, same as
+        // any other failure — either way, show the not-found state.
+        notFoundState.style.display = "block";
+        resultState.style.display = "none";
+        return;
+    }
+
+    const events = data.events;
+
+    if (!events || events.length === 0) {
         notFoundState.style.display = "block";
         resultState.style.display = "none";
         return;
@@ -50,7 +59,7 @@ function renderTimeline(code) {
     notFoundState.style.display = "none";
     resultState.style.display = "block";
 
-    document.getElementById("tracking-id").textContent = code.toUpperCase();
+    document.getElementById("tracking-id").textContent = data.reference;
 
     // Overall status
     const hasActive = events.some(ev => ev.status === "active");
@@ -87,7 +96,7 @@ function renderTimeline(code) {
             </div>
             <div class="timeline-content">
                 <h4>${ev.title}</h4>
-                <span>${ev.time}</span>
+                <span>${ev.event_time}</span>
             </div>
         </div>
     `).join("");
@@ -128,7 +137,7 @@ function updateTimelineFillLine(events) {
 }
 
 if (trackBtn) {
-    trackBtn.addEventListener("click", function () {
+    trackBtn.addEventListener("click", async function () {
         const code = trackingInput.value.trim();
 
         trackError.style.display = "none";
@@ -141,7 +150,7 @@ if (trackBtn) {
             return;
         }
 
-        renderTimeline(code);
+        await renderTimeline(code);
 
         trackingResult.style.display = "block";
 
@@ -160,15 +169,4 @@ if (trackBtn) {
         trackingInput.value = refParam;
         trackBtn.click();
     }
-}
-
-// "Try the demo" link inside the not-found state
-const tryDemoLink = document.getElementById("try-demo-link");
-
-if (tryDemoLink) {
-    tryDemoLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        trackingInput.value = "FSS-DEMO";
-        trackBtn.click();
-    });
 }

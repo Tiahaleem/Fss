@@ -386,39 +386,37 @@ function getTabSessionId() {
     }
 }
 
+// Note: the "show my name in the nav if I'm signed in" logic used to
+// live here, reading getCurrentUser() from localStorage. It's now in
+// api.js instead, since it needs apiFetch() to check a REAL session
+// with the backend — and api.js loads after this file, so it couldn't
+// live here anymore without breaking load order.
+
+
 // =========================
-// NAV AUTH STATE
+// PASSWORD SHOW/HIDE TOGGLE
 // =========================
-// Swaps "Sign In" / "Get Started" for the user's name + Settings +
-// Log Out, on every page that has a .nav-buttons element and isn't
-// already mid-auth-flow. Runs once, on load.
+// Works on any password field wrapped in <div class="password-field">
+// with a <button class="password-toggle-btn"> right after the input
+// — no per-page JS needed, this runs everywhere index.js loads.
 
-(function applyNavAuthState() {
-    const navButtons = document.querySelector(".nav-buttons");
-    if (!navButtons) return;
+const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 11 7 11 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 7 11 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" y1="2" x2="22" y2="22"></line></svg>';
 
-    const user = getCurrentUser();
-    if (!user) return;
+document.querySelectorAll(".password-toggle-btn").forEach(btn => {
+    btn.innerHTML = eyeIcon;
+    btn.setAttribute("aria-label", "Show password");
 
-    const initial = user.name ? user.name.trim().charAt(0).toUpperCase() : "U";
+    btn.addEventListener("click", () => {
+        const input = btn.previousElementSibling;
+        if (!input) return;
 
-    navButtons.innerHTML = `
-        <a href="settings.html" class="signin" style="display:flex; align-items:center; gap:8px;">
-            <span style="width:26px; height:26px; border-radius:50%; background:var(--color-cyan); color:white; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">${initial}</span>
-            ${user.name ? user.name.split(" ")[0] : "Account"}
-        </a>
-        <a href="#" class="btn-primary" id="nav-logout-btn">Log Out</a>
-    `;
-
-    const logoutBtn = document.getElementById("nav-logout-btn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            clearCurrentUser();
-            window.location.href = "index.html";
-        });
-    }
-})();
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        btn.innerHTML = showing ? eyeIcon : eyeOffIcon;
+        btn.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+    });
+});
 
 // =========================
 // TOAST NOTIFICATIONS

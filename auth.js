@@ -1,10 +1,12 @@
 // =========================
-// AUTH (login.html + signup.html)
+// AUTH (login.html + signup.html) — real backend
 // =========================
-// TEMP DEMO: no real backend yet. Forms validate client-side only
-// and simulate success with a toast + redirect. Once auth exists
-// (e.g. POST /api/auth/login, POST /api/auth/signup), replace the
-// showToast+redirect blocks with real fetch() calls.
+// Same two-step signup flow as before (details → email verification)
+// — but now creates a real account with a real bcrypt-hashed
+// password. The "demo code" box still shows the actual code, since
+// there's still no email service wired up to send it for real —
+// that's the backend's own _devCode field, not something invented
+// here anymore.
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -13,16 +15,6 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // the token for a session; that doesn't exist yet, so this is a
 // clearly-labeled placeholder rather than something that pretends
 // to work.
-//
-// How it plugs into the account system already built here: once
-// Google confirms the user's email, the backend checks it against
-// the same users table getUsers()/saveUsers() represents now — an
-// existing email logs in, a new one auto-creates an account (no
-// password needed, Google already verified them). Either way it
-// ends at the same setCurrentUser() call the email/password flow
-// uses below, so the navbar/session logic in index.js needs zero
-// changes to support it — Google auth is a second door into the
-// same account system, not a separate one.
 const googleBtn = document.querySelector(".google-btn");
 
 if (googleBtn) {
@@ -37,7 +29,7 @@ if (googleBtn) {
 const loginForm = document.getElementById("login-form");
 
 if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
+    loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const email = document.getElementById("login-email");
@@ -53,24 +45,26 @@ if (loginForm) {
             return;
         }
 
-        const users = getUsers();
-        const match = users.find(u =>
-            u.email.toLowerCase() === email.value.trim().toLowerCase() &&
-            u.password === password.value
-        );
+        try {
+            const data = await apiFetch("/api/auth/login", {
+                method: "POST",
+                asCustomer: true,
+                body: JSON.stringify({
+                    email: email.value.trim(),
+                    password: password.value
+                })
+            });
 
-        if (!match) {
-            showToast("Incorrect email or password.");
-            return;
+            setCustomerToken(data.token);
+
+            showToast("Signed in — redirecting…", "success");
+
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 900);
+        } catch (err) {
+            showToast(err.message);
         }
-
-        setCurrentUser(match);
-
-        showToast("Signed in — redirecting…", "success");
-
-        setTimeout(() => {
-            window.location.href = "index.html";
-        }, 900);
     });
 }
 
@@ -87,16 +81,10 @@ const verifyCodeInput = document.getElementById("verify-code-input");
 const resendCodeBtn = document.getElementById("resend-code-btn");
 const changeEmailLink = document.getElementById("change-email-link");
 
-// Holds the not-yet-created account while the code is being
-// verified. Nothing is written to the users store until the code
-// checks out.
-let pendingSignup = null;
-
-function generateCode() {
-    return String(Math.floor(100000 + Math.random() * 900000));
-}
+let pendingEmail = null;
 
 function showVerifyStep(email, code) {
+    pendingEmail = email;
     verifyEmailTarget.textContent = email;
     demoCodeDisplay.textContent = code;
     verifyCodeInput.value = "";
@@ -107,7 +95,7 @@ function showVerifyStep(email, code) {
 }
 
 if (signupForm) {
-    signupForm.addEventListener("submit", (e) => {
+    signupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const name = document.getElementById("signup-name");
@@ -146,83 +134,83 @@ if (signupForm) {
             return;
         }
 
-        const users = getUsers();
-        const alreadyExists = users.some(u => u.email.toLowerCase() === email.value.trim().toLowerCase());
+        try {
+            // Nothing is "logged in" yet — the account exists on the
+            // server now (unverified), but no session starts until
+            // the code below is confirmed.
+            const result = await apiFetch("/api/auth/signup", {
+                method: "POST",
+                body: JSON.stringify({
+                    name: name.value.trim(),
+                    email: email.value.trim(),
+                    password: password.value
+                })
+            });
 
-        if (alreadyExists) {
-            showToast("An account with that email already exists — try signing in instead.");
-            return;
+            showVerifyStep(email.value.trim(), result._devCode);
+        } catch (err) {
+            showToast(err.message);
         }
-
-        // Nothing saved yet — the account is only created once the
-        // code below is verified.
-        pendingSignup = {
-            name: name.value.trim(),
-            email: email.value.trim(),
-            password: password.value,
-            code: generateCode()
-        };
-
-        showVerifyStep(pendingSignup.email, pendingSignup.code);
     });
 }
 
 if (verifyForm) {
-    verifyForm.addEventListener("submit", (e) => {
+    verifyForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        if (!pendingSignup) {
+        if (!pendingEmail) {
             showToast("Something went wrong — please start over.");
             return;
         }
 
-        if (verifyCodeInput.value.trim() !== pendingSignup.code) {
-            showToast("Incorrect code. Check your email and try again.");
-            return;
+        try {
+            const data = await apiFetch("/api/auth/verify", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: pendingEmail,
+                    code: verifyCodeInput.value.trim()
+                })
+            });
+
+            setCustomerToken(data.token);
+            pendingEmail = null;
+
+            showToast("Email verified — redirecting…", "success");
+
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 900);
+        } catch (err) {
+            showToast(err.message);
         }
-
-        // ⚠️ Plaintext password — demo only, see the warning in
-        // index.js's USERS STORE section.
-        const newUser = {
-            id: Date.now(),
-            name: pendingSignup.name,
-            email: pendingSignup.email,
-            password: pendingSignup.password,
-            verified: true
-        };
-
-        const users = getUsers();
-        users.push(newUser);
-        saveUsers(users);
-        setCurrentUser(newUser);
-
-        pendingSignup = null;
-
-        showToast("Email verified — redirecting…", "success");
-
-        setTimeout(() => {
-            window.location.href = "index.html";
-        }, 900);
     });
 }
 
 if (resendCodeBtn) {
-    resendCodeBtn.addEventListener("click", () => {
-        if (!pendingSignup) return;
+    resendCodeBtn.addEventListener("click", async () => {
+        if (!pendingEmail) return;
 
-        pendingSignup.code = generateCode();
-        demoCodeDisplay.textContent = pendingSignup.code;
-        verifyCodeInput.value = "";
-        verifyCodeInput.focus();
+        try {
+            const result = await apiFetch("/api/auth/resend-code", {
+                method: "POST",
+                body: JSON.stringify({ email: pendingEmail })
+            });
 
-        showToast("New code generated.", "success");
+            demoCodeDisplay.textContent = result._devCode;
+            verifyCodeInput.value = "";
+            verifyCodeInput.focus();
+
+            showToast("New code generated.", "success");
+        } catch (err) {
+            showToast(err.message);
+        }
     });
 }
 
 if (changeEmailLink) {
     changeEmailLink.addEventListener("click", (e) => {
         e.preventDefault();
-        pendingSignup = null;
+        pendingEmail = null;
         verifyView.style.display = "none";
         signupFormView.style.display = "block";
     });

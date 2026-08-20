@@ -1,16 +1,9 @@
 // =========================
-// ACCOUNT SETTINGS
+// ACCOUNT SETTINGS — real backend
 // =========================
-// ⚠️ Same plaintext-password caveat as auth.js/index.js — this is
-// demo-only. A real implementation checks/updates passwords on the
-// server, never compares them in the browser.
-
-const currentUser = getCurrentUser();
-
-// Not signed in — nothing to show here
-if (!currentUser) {
-    window.location.href = "login.html";
-}
+// Same plaintext-in-the-browser caveat no longer applies here —
+// passwords are hashed server-side now (bcrypt), and this page only
+// ever sends the new password over the wire, never stores it.
 
 const settingsForm = document.getElementById("settings-form");
 const nameField = document.getElementById("settings-name");
@@ -20,12 +13,27 @@ const newPasswordField = document.getElementById("settings-new-password");
 const confirmPasswordField = document.getElementById("settings-confirm-password");
 const logoutLink = document.getElementById("settings-logout-link");
 
-if (settingsForm && currentUser) {
-    // Pre-fill with the signed-in user's current info
-    nameField.value = currentUser.name || "";
-    emailField.value = currentUser.email || "";
+async function loadSettings() {
+    if (!settingsForm) return;
 
-    settingsForm.addEventListener("submit", (e) => {
+    if (!getCustomerToken()) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        const user = await apiFetch("/api/auth/me", { asCustomer: true });
+        nameField.value = user.name || "";
+        emailField.value = user.email || "";
+    } catch (err) {
+        window.location.href = "login.html";
+    }
+}
+
+loadSettings();
+
+if (settingsForm) {
+    settingsForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,73 +48,43 @@ if (settingsForm && currentUser) {
             return;
         }
 
-        const users = getUsers();
-        const userIndex = users.findIndex(u => u.id === currentUser.id);
-
-        if (userIndex === -1) {
-            showToast("Something went wrong finding your account.");
-            return;
-        }
-
-        // Email changed to one already used by a different account
-        const emailTaken = users.some(u =>
-            u.id !== currentUser.id &&
-            u.email.toLowerCase() === emailField.value.trim().toLowerCase()
-        );
-
-        if (emailTaken) {
-            showToast("That email is already in use by another account.");
-            return;
-        }
-
         const wantsPasswordChange =
             currentPasswordField.value.trim() !== "" ||
             newPasswordField.value.trim() !== "" ||
             confirmPasswordField.value.trim() !== "";
 
-        let newPassword = users[userIndex].password;
-
-        if (wantsPasswordChange) {
-            if (currentPasswordField.value !== users[userIndex].password) {
-                showToast("Current password is incorrect.");
-                return;
-            }
-
-            if (newPasswordField.value.length < 8) {
-                showToast("New password must be at least 8 characters.");
-                return;
-            }
-
-            if (newPasswordField.value !== confirmPasswordField.value) {
-                showToast("New passwords don't match.");
-                return;
-            }
-
-            newPassword = newPasswordField.value;
+        if (wantsPasswordChange && newPasswordField.value !== confirmPasswordField.value) {
+            showToast("New passwords don't match.");
+            return;
         }
 
-        users[userIndex] = {
-            ...users[userIndex],
-            name: nameField.value.trim(),
-            email: emailField.value.trim(),
-            password: newPassword
-        };
+        try {
+            await apiFetch("/api/auth/me", {
+                method: "PUT",
+                asCustomer: true,
+                body: JSON.stringify({
+                    name: nameField.value.trim(),
+                    email: emailField.value.trim(),
+                    currentPassword: wantsPasswordChange ? currentPasswordField.value : undefined,
+                    newPassword: wantsPasswordChange ? newPasswordField.value : undefined
+                })
+            });
 
-        saveUsers(users);
-        setCurrentUser(users[userIndex]);
+            currentPasswordField.value = "";
+            newPasswordField.value = "";
+            confirmPasswordField.value = "";
 
-        currentPasswordField.value = "";
-        newPasswordField.value = "";
-        confirmPasswordField.value = "";
-
-        showToast("Settings saved.", "success");
+            showToast("Settings saved.", "success");
+        } catch (err) {
+            showToast(err.message);
+        }
     });
 }
 
 if (logoutLink) {
     logoutLink.addEventListener("click", (e) => {
         e.preventDefault();
-        clearCurrentUser();
+        clearCustomerToken();
         window.location.href = "index.html";
     });
 }

@@ -159,7 +159,7 @@
 
             <h3>Choose Your Seats</h3>
 
-            <p>Select up to 1 seat</p>
+            <p id="seat-limit-text">Select up to 1 seat</p>
 
             <!-- Honda Odyssey, 7 seats total: Seat 1 is always the
                  driver — shown in the numbering, permanently locked,
@@ -250,15 +250,7 @@
                 </label>
 
                 <select id="pickup-center">
-
-                    <option>Jibowu Terminal</option>
-
-                    <option>Ojota Terminal</option>
-
-                    <option>Iyana Ipaja Terminal</option>
-
-                    <option>Berger Terminal</option>
-
+                    <option value="">Loading pickup centers…</option>
                 </select>
 
             </div>
@@ -269,7 +261,7 @@
 
                 <span>Total</span>
 
-                <h3>₦24,500</h3>
+                <h3 data-field="seat-total">₦24,500</h3>
 
             </div>
 
@@ -411,6 +403,7 @@
 
 </footer>
 <script src="index.js"></script>
+<script src="api.js"></script>
 <script src="select_a_seat.js"></script>
 </body>
 </html>

@@ -90,6 +90,8 @@ function money(value){
    UPDATE QUOTE
 ===================================== */
 
+let lastQuoteTotal = 0;
+
 function updateQuote(){
 
     const key = `${from.value}-${to.value}`;
@@ -109,6 +111,8 @@ function updateQuote(){
         summaryTotal.textContent = "₦0";
 
         buttonTotal.textContent = "₦0";
+
+        lastQuoteTotal = 0;
 
         return;
 
@@ -162,6 +166,8 @@ function updateQuote(){
     buttonTotal.textContent =
         money(total);
 
+    lastQuoteTotal = total;
+
 }
 
 
@@ -179,24 +185,8 @@ declaredValue.addEventListener("input", updateQuote);
 
 
 /* =====================================
-   TRACKING CODE GENERATOR
+   VIEW REFERENCES
 ===================================== */
-// TEMP DEMO: generates a plausible-looking code client-side.
-// Once a backend exists, the real code should come back from the
-// booking API response instead of being invented here — this is
-// just for showing the flow.
-
-function generateTrackingCode() {
-
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let code = "FSS-";
-
-    for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    return code;
-}
 
 const quoteFormView = document.getElementById("quote-form-view");
 const quoteConfirmationView = document.getElementById("quote-confirmation-view");
@@ -208,7 +198,7 @@ const bookAnotherBtn = document.getElementById("book-another-btn");
    FORM VALIDATION
 ===================================== */
 
-form.addEventListener("submit", function(e){
+form.addEventListener("submit", async function(e){
 
     e.preventDefault();
 
@@ -247,54 +237,46 @@ form.addEventListener("submit", function(e){
 
     }
 
-    const trackingCode = generateTrackingCode();
+    if (!routes[`${from.value}-${to.value}`]) {
+        showToast("Please choose a valid route.");
+        return;
+    }
 
-    // Full booking details — this is what shows up in the admin
-    // Bookings table, so support can actually see who's involved
-    // and what's being shipped, not just a bare reference code.
-    const bookings = getBookings();
-    bookings.push({
-        reference: trackingCode,
-        type: "parcel",
-        ownerEmail: getCurrentUser() ? getCurrentUser().email : null,
-        senderName: senderName.value.trim(),
-        senderPhone: senderPhone.value.trim(),
-        receiverName: receiverName.value.trim(),
-        receiverPhone: receiverPhone.value.trim(),
-        description: description.value.trim(),
-        from: from.value,
-        to: to.value,
-        weight: Number(weight.value),
-        declaredValue: Number(declaredValue.value),
-        price: summaryTotal.textContent.trim(),
-        createdAt: new Date().toISOString()
-    });
-    saveBookings(bookings);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
 
-    // Seed a real starter event so tracking this code immediately
-    // shows something, instead of "no results found".
-    const allEvents = getTrackingEvents();
-    allEvents.push({
-        id: Date.now(),
-        reference: trackingCode,
-        order: 1,
-        title: "Pickup scheduled",
-        time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-        status: "active",
-        icon: "boarding"
-    });
-    saveTrackingEvents(allEvents);
+    try {
+        // One real API call: saves the booking, creates the parcel
+        // details, and seeds the starter tracking event — all as one
+        // transaction on the server, same pattern as passenger bookings.
+        const result = await apiFetch("/api/bookings/parcel", {
+            method: "POST",
+            asCustomer: true,
+            body: JSON.stringify({
+                fromCity: from.value,
+                toCity: to.value,
+                senderName: senderName.value.trim(),
+                senderPhone: senderPhone.value.trim(),
+                receiverName: receiverName.value.trim(),
+                receiverPhone: receiverPhone.value.trim(),
+                description: description.value.trim(),
+                weightKg: Number(weight.value),
+                declaredValueKobo: Math.round(Number(declaredValue.value) * 100),
+                priceKobo: Math.round(lastQuoteTotal * 100)
+            })
+        });
 
-    generatedTrackingCode.textContent = trackingCode;
-    trackParcelBtn.href = `track.html?ref=${encodeURIComponent(trackingCode)}`;
+        generatedTrackingCode.textContent = result.reference;
+        trackParcelBtn.href = `track.html?ref=${encodeURIComponent(result.reference)}`;
 
-    quoteFormView.style.display = "none";
-    quoteConfirmationView.style.display = "block";
+        quoteFormView.style.display = "none";
+        quoteConfirmationView.style.display = "block";
 
-    showToast("Pickup booked — here's your tracking code.", "success");
-
-    // Later
-    // window.location.href = "payment.html";
+        showToast("Pickup booked — here's your tracking code.", "success");
+    } catch (err) {
+        showToast(err.message);
+        if (submitBtn) submitBtn.disabled = false;
+    }
 
 });
 

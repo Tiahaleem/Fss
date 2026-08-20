@@ -1,22 +1,12 @@
 // =========================
-// PASSENGER PAYMENT (demo)
+// PASSENGER PAYMENT — real backend
 // =========================
-// TEMP DEMO: this simulates a successful payment client-side and
-// generates a booking reference locally. Once Paystack/Flutterwave
-// is wired up, the real flow is: hand off to their SDK first, and
-// only run the "success" block below once their webhook/callback
-// confirms payment actually went through — never before.
-
-function generateBookingCode() {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let code = "FSS-";
-
-    for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    return code;
-}
+// TEMP: still simulates payment succeeding immediately (no
+// Paystack/Flutterwave yet — same honest gap as before), but
+// everything AFTER "payment succeeds" is now completely real: the
+// seat gets permanently booked, the booking is saved to Supabase,
+// and starter tracking events are created — all in one database
+// transaction handled server-side by POST /api/bookings/passenger.
 
 function addMinutesToTime(time, durationText) {
     const [h, m] = time.split(":").map(Number);
@@ -31,33 +21,67 @@ function addMinutesToTime(time, durationText) {
     return `${String(arriveH).padStart(2, "0")}:${String(arriveM).padStart(2, "0")}`;
 }
 
-// Reads the specific trip (via ?trip=ID, forwarded from
-// select_a_seat.js) and fills the summary with its real route,
-// times, and vehicle — instead of the old hardcoded demo text.
-const tripIdFromUrl = new URLSearchParams(window.location.search).get("trip") || "1";
-const currentTrip = getTrips().find(t => String(t.id) === String(tripIdFromUrl));
-const currentRoute = currentTrip ? getRoutes().find(r =>
-    r.from.toLowerCase() === currentTrip.from.toLowerCase() &&
-    r.to.toLowerCase() === currentTrip.to.toLowerCase()
-) : null;
+const params = new URLSearchParams(window.location.search);
+const tripId = params.get("trip");
+const seatNumbers = (params.get("seats") || "").split(",").filter(Boolean);
+const terminalId = params.get("terminal");
 
-if (currentTrip && currentRoute) {
-    const routeField = document.querySelector('[data-field="route"]');
-    const departureField = document.querySelector('[data-field="departure"]');
-    const arrivalField = document.querySelector('[data-field="arrival"]');
-    const vehicleField = document.querySelector('[data-field="vehicle"]');
-    const payAmountField = document.querySelector('[data-field="pay-amount"]');
-    const totalAmountField = document.querySelector('[data-field="total-amount"]');
+let currentTrip = null;
+let currentRoute = null;
+let currentTerminal = null;
 
-    const priceText = `₦${Number(currentRoute.price).toLocaleString()}`;
+async function loadBookingSummary() {
+    if (!tripId || seatNumbers.length === 0 || !terminalId) {
+        showToast("Missing booking details — please start over from Book a Trip.");
+        return;
+    }
 
-    if (routeField) routeField.textContent = `${currentTrip.from} → ${currentTrip.to}`;
-    if (departureField) departureField.textContent = currentTrip.time;
-    if (arrivalField) arrivalField.textContent = addMinutesToTime(currentTrip.time, currentRoute.duration);
-    if (vehicleField) vehicleField.textContent = currentTrip.vehicle;
-    if (payAmountField) payAmountField.textContent = priceText;
-    if (totalAmountField) totalAmountField.textContent = priceText;
+    try {
+        const [trip, allRoutes, terminal] = await Promise.all([
+            apiFetch(`/api/trips/${tripId}`),
+            apiFetch("/api/routes"),
+            apiFetch(`/api/terminals/${terminalId}`)
+        ]);
+
+        currentTrip = trip;
+        currentTerminal = terminal;
+        currentRoute = allRoutes.find(r =>
+            r.from.toLowerCase() === trip.from.toLowerCase() &&
+            r.to.toLowerCase() === trip.to.toLowerCase()
+        );
+
+        if (!currentRoute) {
+            showToast("Couldn't find pricing for this trip.");
+            return;
+        }
+
+        const arrival = addMinutesToTime(trip.time, currentRoute.duration);
+        const totalPrice = Number(currentRoute.price) * seatNumbers.length;
+        const priceText = `₦${totalPrice.toLocaleString()}`;
+
+        const routeField = document.querySelector('[data-field="route"]');
+        const departureField = document.querySelector('[data-field="departure"]');
+        const arrivalField = document.querySelector('[data-field="arrival"]');
+        const vehicleField = document.querySelector('[data-field="vehicle"]');
+        const payAmountField = document.querySelector('[data-field="pay-amount"]');
+        const totalAmountField = document.querySelector('[data-field="total-amount"]');
+        const seatField = document.querySelector('[data-field="seat"]');
+        const pickupField = document.querySelector('[data-field="pickup"]');
+
+        if (routeField) routeField.textContent = `${trip.from} → ${trip.to}`;
+        if (departureField) departureField.textContent = trip.time;
+        if (arrivalField) arrivalField.textContent = arrival;
+        if (vehicleField) vehicleField.textContent = trip.vehicle;
+        if (payAmountField) payAmountField.textContent = priceText;
+        if (totalAmountField) totalAmountField.textContent = priceText;
+        if (seatField) seatField.textContent = seatNumbers.join(', ');
+        if (pickupField) pickupField.textContent = terminal.name;
+    } catch (err) {
+        showToast(err.message);
+    }
 }
+
+loadBookingSummary();
 
 const passengerForm = document.getElementById("passenger-form");
 
@@ -71,13 +95,7 @@ if (passengerForm) {
     const emailField = document.getElementById("passenger-email");
     const phoneField = document.getElementById("passenger-phone");
 
-    // Pull the seat/pickup this page already displays (see index.js's
-    // passenger summary block) so the starter tracking event matches
-    // what the customer actually booked, not hardcoded values.
-    const seatField = document.querySelector('[data-field="seat"]');
-    const pickupField = document.querySelector('[data-field="pickup"]');
-
-    passengerForm.addEventListener("submit", (e) => {
+    passengerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -96,78 +114,43 @@ if (passengerForm) {
             return;
         }
 
-        const bookingCode = generateBookingCode();
+        const submitBtn = passengerForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
 
-        // Finalize the seat hold from select_a_seat.js into a
-        // permanent booking, right at the moment payment succeeds —
-        // not before. If the customer had abandoned checkout instead
-        // of reaching this point, the hold would have simply expired
-        // on its own and the seat would already be available again.
-        // Finalize the seat hold from select_a_seat.js into a
-        // permanent booking, right at the moment payment succeeds —
-        // not before. Scoped to this specific trip's own seat data,
-        // so it never touches any other trip's availability.
-        const seatNumber = seatField ? seatField.textContent.trim() : "";
-        const tripIdParam = new URLSearchParams(window.location.search).get("trip") || "1";
-        if (seatNumber) {
-            const holds = getActiveSeatHoldsForTrip(tripIdParam);
-            holds[seatNumber] = { status: "booked" };
-            saveSeatHoldsForTrip(tripIdParam, holds);
+        try {
+            // One real API call does everything: finalizes the seat as
+            // booked, saves the booking, and creates the starter
+            // tracking events — all as one transaction on the server.
+            // TEMP: no travel-date picker exists yet anywhere in the
+            // flow, so this defaults to today.
+            const result = await apiFetch("/api/bookings/passenger", {
+                method: "POST",
+                asCustomer: true,
+                body: JSON.stringify({
+                    tripId,
+                    terminalId,
+                    seatNumbers,
+                    sessionId: getTabSessionId(),
+                    passengerName: nameField.value.trim(),
+                    passengerEmail: emailField.value.trim(),
+                    passengerPhone: phoneField.value.trim(),
+                    travelDate: new Date().toISOString().split("T")[0]
+                })
+            });
+
+            generatedBookingCode.textContent = result.reference;
+            trackTripBtn.href = `track.html?ref=${encodeURIComponent(result.reference)}`;
+
+            paymentFormView.style.display = "none";
+            paymentConfirmationView.style.display = "block";
+
+            showToast("Payment received — here's your booking reference.", "success");
+        } catch (err) {
+            // Most likely case: someone else booked this exact seat
+            // between when it was held and now (e.g. the 10-minute
+            // hold expired while this form was open).
+            showToast(err.message);
+            if (submitBtn) submitBtn.disabled = false;
         }
-        const pickup = pickupField ? pickupField.textContent.trim() : "Jibowu Terminal";
-
-        // Booking details — lighter than the parcel version (no
-        // separate "recipient" for a bus trip), but enough for
-        // support to reach the passenger if a trip is delayed.
-        const bookings = getBookings();
-        bookings.push({
-            reference: bookingCode,
-            type: "passenger",
-            ownerEmail: getCurrentUser() ? getCurrentUser().email : null,
-            passengerName: nameField.value.trim(),
-            passengerEmail: emailField.value.trim(),
-            passengerPhone: phoneField.value.trim(),
-            route: currentTrip ? `${currentTrip.from} → ${currentTrip.to}` : "Lagos → Abuja",
-            pickup: pickup,
-            seat: seatField ? seatField.textContent.trim() : "",
-            price: currentRoute ? `₦${Number(currentRoute.price).toLocaleString()}` : "₦24,500",
-            createdAt: new Date().toISOString()
-        });
-        saveBookings(bookings);
-
-        // Seed the starter tracking events for this booking, so the
-        // admin panel sees it immediately and can add more progress
-        // events (departed, checkpoint, arrived) from there.
-        const allEvents = getTrackingEvents();
-
-        allEvents.push({
-            id: Date.now(),
-            reference: bookingCode,
-            order: 1,
-            title: "Booking confirmed",
-            time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-            status: "completed",
-            icon: "boarding"
-        });
-
-        allEvents.push({
-            id: Date.now() + 1,
-            reference: bookingCode,
-            order: 2,
-            title: `Awaiting boarding at ${pickup}`,
-            time: "06:00",
-            status: "active",
-            icon: "location"
-        });
-
-        saveTrackingEvents(allEvents);
-
-        generatedBookingCode.textContent = bookingCode;
-        trackTripBtn.href = `track.html?ref=${encodeURIComponent(bookingCode)}`;
-
-        paymentFormView.style.display = "none";
-        paymentConfirmationView.style.display = "block";
-
-        showToast("Payment received — here's your booking reference.", "success");
     });
 }

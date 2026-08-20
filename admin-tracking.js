@@ -23,7 +23,7 @@ async function loadBookings() {
         if (bookings.length === 0) {
             bookingsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="8">
+                    <td colspan="9">
                         <div class="admin-empty">No bookings yet — they'll show up here as customers pay on the courier and passenger pages.</div>
                     </td>
                 </tr>
@@ -40,6 +40,7 @@ async function loadBookings() {
             const phone = isParcel ? b.sender_phone : b.passenger_phone;
             const recipient = isParcel ? `${b.receiver_name}<br><span style="color:var(--color-text-muted); font-size:.8rem;">${b.receiver_phone}</span>` : "—";
             const route = isParcel ? `${b.from_city} → ${b.to_city}` : "—";
+            const seats = isParcel ? "—" : (b.seat_numbers || "—");
 
             return `
                 <tr>
@@ -49,6 +50,7 @@ async function loadBookings() {
                     <td>${phone}</td>
                     <td>${recipient}</td>
                     <td>${route}</td>
+                    <td>${seats}</td>
                     <td>${money(b.price_kobo)}</td>
                     <td>
                         <button class="admin-btn-secondary" data-manage="${b.reference}" style="white-space:nowrap;">
@@ -60,7 +62,7 @@ async function loadBookings() {
         }).join("");
     } catch (err) {
         showToast(err.message);
-        bookingsTableBody.innerHTML = `<tr><td colspan="8"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
+        bookingsTableBody.innerHTML = `<tr><td colspan="9"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
     }
 }
 
