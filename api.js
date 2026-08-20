@@ -5,9 +5,11 @@
 // with real calls to the backend. Load this AFTER index.js on any
 // admin page (index.js still provides showToast() etc.).
 //
-// Change this to your deployed backend's real address once it's
-// hosted somewhere other than your own computer (Render, etc.).
-const API_BASE_URL = "http://localhost:4000";
+// Your real, deployed backend — the frontend talks to this address
+// no matter where the frontend itself is hosted (GitHub Pages,
+// Live Server locally, wherever). If you ever redeploy the backend
+// somewhere else, this is the one line that needs to change.
+const API_BASE_URL = "https://fss-backend-api.onrender.com";
 
 const ADMIN_TOKEN_KEY = "fss_admin_token";
 
