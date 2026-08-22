@@ -35,84 +35,128 @@ async function loadTrips() {
     if (!tripCardsList) return;
 
     const params = new URLSearchParams(window.location.search);
-    const from = params.get("from") || "Lagos";
-    const to = params.get("to") || "Abuja";
+    const hasSearch = params.has("from") && params.has("to");
+    const from = params.get("from");
+    const to = params.get("to");
     const passengers = params.get("passengers") || "1";
 
     try {
-        const [allRoutes, trips] = await Promise.all([
-            apiFetch("/api/routes"),
-            apiFetch(`/api/trips?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&status=active`)
-        ]);
+        const allRoutes = await apiFetch("/api/routes");
 
-        const route = allRoutes.find(r =>
-            r.from.toLowerCase() === from.toLowerCase() &&
-            r.to.toLowerCase() === to.toLowerCase() &&
-            r.status === "active"
-        );
+        // Real search from the homepage — filter to that one route,
+        // same as before.
+        if (hasSearch) {
+            const trips = await apiFetch(`/api/trips?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&status=active`);
 
-        const sortedTrips = [...trips].sort((a, b) => a.time.localeCompare(b.time));
+            const route = allRoutes.find(r =>
+                r.from.toLowerCase() === from.toLowerCase() &&
+                r.to.toLowerCase() === to.toLowerCase() &&
+                r.status === "active"
+            );
 
-        if (!route || sortedTrips.length === 0) {
-            if (tripsCountEl) tripsCountEl.textContent = `No trips found for ${from} → ${to}`;
+            const sortedTrips = [...trips].sort((a, b) => a.time.localeCompare(b.time));
+
+            if (!route || sortedTrips.length === 0) {
+                if (tripsCountEl) tripsCountEl.textContent = `No trips found for ${from} → ${to}`;
+                tripCardsList.innerHTML = `
+                    <div class="admin-empty">
+                        No trips are currently scheduled on this route.
+                        <a href="route.html">Browse all routes</a>
+                    </div>
+                `;
+                return;
+            }
+
+            if (tripsCountEl) {
+                tripsCountEl.textContent = `${sortedTrips.length} trip${sortedTrips.length === 1 ? "" : "s"} found for ${from} → ${to}`;
+            }
+
+            renderTripCards(sortedTrips.map(trip => ({ trip, route })), passengers);
+            return;
+        }
+
+        // No search at all — someone just clicked "Book a Trip" from
+        // the menu. Show every active trip across every route, not
+        // a hardcoded single-route default.
+        const allTrips = await apiFetch("/api/trips?status=active");
+
+        const tripsWithRoutes = allTrips
+            .map(trip => {
+                const route = allRoutes.find(r =>
+                    r.from.toLowerCase() === trip.from.toLowerCase() &&
+                    r.to.toLowerCase() === trip.to.toLowerCase() &&
+                    r.status === "active"
+                );
+                return route ? { trip, route } : null;
+            })
+            .filter(Boolean)
+            .sort((a, b) =>
+                a.trip.from === b.trip.from
+                    ? (a.trip.to === b.trip.to ? a.trip.time.localeCompare(b.trip.time) : a.trip.to.localeCompare(b.trip.to))
+                    : a.trip.from.localeCompare(b.trip.from)
+            );
+
+        if (tripsWithRoutes.length === 0) {
+            if (tripsCountEl) tripsCountEl.textContent = "No trips available right now";
             tripCardsList.innerHTML = `
-                <div class="admin-empty">
-                    No trips are currently scheduled on this route.
-                    <a href="route.html">Browse all routes</a>
-                </div>
+                <div class="admin-empty">No trips are currently scheduled. Check back soon.</div>
             `;
             return;
         }
 
         if (tripsCountEl) {
-            tripsCountEl.textContent = `${sortedTrips.length} trip${sortedTrips.length === 1 ? "" : "s"} found for ${from} → ${to}`;
+            tripsCountEl.textContent = `${tripsWithRoutes.length} trip${tripsWithRoutes.length === 1 ? "" : "s"} available across all routes`;
         }
 
-        tripCardsList.innerHTML = sortedTrips.map(trip => `
-            <div class="trip-card">
-
-                <div class="trip-top">
-
-                    <div class="trip-time">
-                        <h3>${trip.time}</h3>
-                        <span>${trip.from}</span>
-                    </div>
-
-                    <div class="trip-duration">
-                        <span>${route.duration}</span>
-                        <div class="trip-line"></div>
-                        <span class="trip-type">Executive</span>
-                    </div>
-
-                    <div class="trip-time">
-                        <h3>${addMinutesToTime(trip.time, route.duration)}</h3>
-                        <span>${trip.to}</span>
-                    </div>
-
-                    <div class="trip-price">
-                        <small>From</small>
-                        <h3>₦${Number(route.price).toLocaleString()}</h3>
-                        <a href="select_a_seat.html?trip=${trip.id}&passengers=${passengers}" class="seat-btn">Select Seats →</a>
-                    </div>
-
-                </div>
-
-                <div class="trip-bottom">
-                    <span>${trip.vehicle} · ${trip.seats} seats</span>
-                    <span>${wifiIcon} WiFi</span>
-                    <span>${acIcon} Air Conditioning</span>
-                    <span>${usbIcon} USB Charging</span>
-                    <span>${refreshIcon} Refreshments</span>
-                </div>
-
-            </div>
-        `).join("");
+        renderTripCards(tripsWithRoutes, passengers);
     } catch (err) {
         if (tripsCountEl) tripsCountEl.textContent = "Couldn't load trips";
         tripCardsList.innerHTML = `
             <div class="admin-empty">Couldn't load trips right now. Please try again shortly.</div>
         `;
     }
+}
+
+function renderTripCards(tripsWithRoutes, passengers) {
+    tripCardsList.innerHTML = tripsWithRoutes.map(({ trip, route }) => `
+        <div class="trip-card">
+
+            <div class="trip-top">
+
+                <div class="trip-time">
+                    <h3>${trip.time}</h3>
+                    <span>${trip.from}</span>
+                </div>
+
+                <div class="trip-duration">
+                    <span>${route.duration}</span>
+                    <div class="trip-line"></div>
+                    <span class="trip-type">Executive</span>
+                </div>
+
+                <div class="trip-time">
+                    <h3>${addMinutesToTime(trip.time, route.duration)}</h3>
+                    <span>${trip.to}</span>
+                </div>
+
+                <div class="trip-price">
+                    <small>From</small>
+                    <h3>₦${Number(route.price).toLocaleString()}</h3>
+                    <a href="select_a_seat.html?trip=${trip.id}&passengers=${passengers}" class="seat-btn">Select Seats →</a>
+                </div>
+
+            </div>
+
+            <div class="trip-bottom">
+                <span>${trip.vehicle} · ${trip.seats} seats</span>
+                <span>${wifiIcon} WiFi</span>
+                <span>${acIcon} Air Conditioning</span>
+                <span>${usbIcon} USB Charging</span>
+                <span>${refreshIcon} Refreshments</span>
+            </div>
+
+        </div>
+    `).join("");
 }
 
 loadTrips();
