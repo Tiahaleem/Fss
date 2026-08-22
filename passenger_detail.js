@@ -1,12 +1,10 @@
 // =========================
-// PASSENGER PAYMENT — real backend
+// PASSENGER PAYMENT — real Paystack
 // =========================
-// TEMP: still simulates payment succeeding immediately (no
-// Paystack/Flutterwave yet — same honest gap as before), but
-// everything AFTER "payment succeeds" is now completely real: the
-// seat gets permanently booked, the booking is saved to Supabase,
-// and starter tracking events are created — all in one database
-// transaction handled server-side by POST /api/bookings/passenger.
+// "Pay" no longer creates a booking directly — it starts a real
+// Paystack transaction and sends the customer to Paystack's own
+// checkout page. The booking only actually gets created after
+// payment-callback.html verifies the payment really succeeded.
 
 function addMinutesToTime(time, durationText) {
     const [h, m] = time.split(":").map(Number);
@@ -86,11 +84,6 @@ loadBookingSummary();
 const passengerForm = document.getElementById("passenger-form");
 
 if (passengerForm) {
-    const paymentFormView = document.getElementById("payment-form-view");
-    const paymentConfirmationView = document.getElementById("payment-confirmation-view");
-    const generatedBookingCode = document.getElementById("generated-booking-code");
-    const trackTripBtn = document.getElementById("track-trip-btn");
-
     const nameField = document.getElementById("passenger-name");
     const emailField = document.getElementById("passenger-email");
     const phoneField = document.getElementById("passenger-phone");
@@ -118,12 +111,12 @@ if (passengerForm) {
         if (submitBtn) submitBtn.disabled = true;
 
         try {
-            // One real API call does everything: finalizes the seat as
-            // booked, saves the booking, and creates the starter
-            // tracking events — all as one transaction on the server.
+            // Starts a real Paystack transaction — no booking exists
+            // yet. Booking details ride along as metadata, which
+            // Paystack hands back once payment is verified.
             // TEMP: no travel-date picker exists yet anywhere in the
             // flow, so this defaults to today.
-            const result = await apiFetch("/api/bookings/passenger", {
+            const result = await apiFetch("/api/payments/initialize-passenger", {
                 method: "POST",
                 asCustomer: true,
                 body: JSON.stringify({
@@ -138,13 +131,8 @@ if (passengerForm) {
                 })
             });
 
-            generatedBookingCode.textContent = result.reference;
-            trackTripBtn.href = `track.html?ref=${encodeURIComponent(result.reference)}`;
-
-            paymentFormView.style.display = "none";
-            paymentConfirmationView.style.display = "block";
-
-            showToast("Payment received — here's your booking reference.", "success");
+            // Send the customer to Paystack's real checkout page
+            window.location.href = result.authorizationUrl;
         } catch (err) {
             // Most likely case: someone else booked this exact seat
             // between when it was held and now (e.g. the 10-minute

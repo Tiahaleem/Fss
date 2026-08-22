@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirming Payment | FSS Transport</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="passenger_detail.css">
+</head>
+<body>
+<nav class="navbar">
+
+    <div class="logo">
+        <img src="img/ffs_bg_removal.png" alt="FSS LOGO">
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="book_a_trip.html">Book a Trip</a></li>
+        <li><a href="route.html">Routes</a></li>
+        <li><a href="pickup.html">Pickup Centers</a></li>
+        <li><a href="courier.html">Courier</a></li>
+        <li><a href="track.html">Track</a></li>
+        <li><a href="about.html">About</a></li>
+    </ul>
+
+    <div class="nav-buttons">
+        <a href="login.html" class="signin">Sign In</a>
+        <a href="signup.html" class="btn-primary">Get Started</a>
+    </div>
+
+    <div class="hamburger">
+        ☰
+    </div>
+
+</nav>
+
+<section class="passenger-hero">
+    <div class="passenger-hero-content">
+        <h1>Confirming Your Payment</h1>
+        <p>Please don't close this page.</p>
+    </div>
+</section>
+
+<div class="passenger-container" style="max-width:520px; margin:0 auto; padding:40px 20px;">
+
+    <div id="verifying-view">
+
+        <div class="confirmation-icon" style="animation: spin 1s linear infinite;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+        </div>
+
+        <h2>Verifying your payment…</h2>
+        <p>This only takes a moment — we're confirming this directly with Paystack.</p>
+
+    </div>
+
+    <div id="success-view" style="display:none;">
+
+        <div class="confirmation-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+
+        <h2>Payment confirmed!</h2>
+        <p>Save this reference — you'll need it to track your booking.</p>
+
+        <div class="tracking-code-box">
+            <span id="confirmed-reference">FSS-000000</span>
+        </div>
+
+        <div class="confirmation-actions">
+            <a href="#" id="track-btn" class="pay-btn track-trip-link">
+                Track This Booking →
+            </a>
+            <a href="index.html" class="book-another-btn" style="display:block; text-decoration:none; text-align:center;">
+                Back to Home
+            </a>
+        </div>
+
+    </div>
+
+    <div id="failure-view" style="display:none;">
+
+        <div class="confirmation-icon" style="background:#fee2e2; color:#dc2626;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+        </div>
+
+        <h2>Payment wasn't completed</h2>
+        <p id="failure-message">This payment wasn't successful, so no booking was created — nothing was charged.</p>
+
+        <div class="confirmation-actions">
+            <a href="book_a_trip.html" class="pay-btn track-trip-link">
+                Try Again
+            </a>
+            <a href="contact.html" class="book-another-btn" style="display:block; text-decoration:none; text-align:center;">
+                Contact Support
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
+<script src="index.js"></script>
+<script src="api.js"></script>
+<script src="payment-callback.js"></script>
+</body>
+</html>

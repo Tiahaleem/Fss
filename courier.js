@@ -208,6 +208,9 @@ form.addEventListener("submit", async function(e){
     const senderPhone =
         document.getElementById("sender-phone");
 
+    const senderEmail =
+        document.getElementById("sender-email");
+
     const receiverName =
         document.getElementById("recipient-name");
 
@@ -217,11 +220,15 @@ form.addEventListener("submit", async function(e){
     const description =
         document.getElementById("description");
 
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if(
 
         senderName.value.trim() === "" ||
 
         senderPhone.value.trim() === "" ||
+
+        senderEmail.value.trim() === "" ||
 
         receiverName.value.trim() === "" ||
 
@@ -237,6 +244,11 @@ form.addEventListener("submit", async function(e){
 
     }
 
+    if (!emailPattern.test(senderEmail.value.trim())) {
+        showToast("Please enter a valid email address.");
+        return;
+    }
+
     if (!routes[`${from.value}-${to.value}`]) {
         showToast("Please choose a valid route.");
         return;
@@ -246,10 +258,10 @@ form.addEventListener("submit", async function(e){
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-        // One real API call: saves the booking, creates the parcel
-        // details, and seeds the starter tracking event — all as one
-        // transaction on the server, same pattern as passenger bookings.
-        const result = await apiFetch("/api/bookings/parcel", {
+        // Starts a real Paystack transaction — no booking exists yet.
+        // Details ride along as metadata, handed back once payment
+        // is verified on payment-callback.html.
+        const result = await apiFetch("/api/payments/initialize-parcel", {
             method: "POST",
             asCustomer: true,
             body: JSON.stringify({
@@ -257,6 +269,7 @@ form.addEventListener("submit", async function(e){
                 toCity: to.value,
                 senderName: senderName.value.trim(),
                 senderPhone: senderPhone.value.trim(),
+                senderEmail: senderEmail.value.trim(),
                 receiverName: receiverName.value.trim(),
                 receiverPhone: receiverPhone.value.trim(),
                 description: description.value.trim(),
@@ -266,13 +279,8 @@ form.addEventListener("submit", async function(e){
             })
         });
 
-        generatedTrackingCode.textContent = result.reference;
-        trackParcelBtn.href = `track.html?ref=${encodeURIComponent(result.reference)}`;
-
-        quoteFormView.style.display = "none";
-        quoteConfirmationView.style.display = "block";
-
-        showToast("Pickup booked — here's your tracking code.", "success");
+        // Send the customer to Paystack's real checkout page
+        window.location.href = result.authorizationUrl;
     } catch (err) {
         showToast(err.message);
         if (submitBtn) submitBtn.disabled = false;
