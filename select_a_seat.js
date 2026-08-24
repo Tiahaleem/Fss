@@ -40,6 +40,7 @@ if (seatMap && continueBtn) {
     const urlParams = new URLSearchParams(window.location.search);
     const tripId = urlParams.get('trip');
     const seatLimit = Math.max(1, Number(urlParams.get('passengers')) || 1);
+    const travelDate = urlParams.get('date') || new Date().toISOString().split('T')[0];
     const tabId = getTabSessionId();
 
     let countdownInterval = null;
@@ -47,6 +48,12 @@ if (seatMap && continueBtn) {
 
     if (seatLimitText) {
         seatLimitText.textContent = seatLimit === 1 ? "Select 1 seat" : `Select ${seatLimit} seats`;
+    }
+
+    const summaryDateEl = document.getElementById('summary-date');
+    if (summaryDateEl) {
+        const [y, m, d] = travelDate.split('-').map(Number);
+        summaryDateEl.textContent = new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
     function seatButtons() {
@@ -139,7 +146,7 @@ if (seatMap && continueBtn) {
 
     async function loadSeats() {
         try {
-            const seatStates = await apiFetch(`/api/trips/${tripId}/seats`);
+            const seatStates = await apiFetch(`/api/trips/${tripId}/seats?date=${encodeURIComponent(travelDate)}`);
             const holds = {};
             seatStates.forEach(s => { holds[s.seatNumber] = s; });
 
@@ -197,7 +204,7 @@ if (seatMap && continueBtn) {
             try {
                 await apiFetch(`/api/trips/${tripId}/seats/${seatNum}/hold`, {
                     method: "DELETE",
-                    body: JSON.stringify({ sessionId: tabId })
+                    body: JSON.stringify({ sessionId: tabId, travelDate })
                 });
                 await loadSeats();
             } catch (err) {
@@ -218,7 +225,7 @@ if (seatMap && continueBtn) {
         try {
             await apiFetch(`/api/trips/${tripId}/seats/${seatNum}/hold`, {
                 method: "POST",
-                body: JSON.stringify({ sessionId: tabId })
+                body: JSON.stringify({ sessionId: tabId, travelDate })
             });
             await loadSeats();
         } catch (err) {
@@ -243,7 +250,8 @@ if (seatMap && continueBtn) {
         const searchParams = new URLSearchParams({
             trip: tripId,
             seats: mySeats.join(','),
-            terminal: pickupSelect.value
+            terminal: pickupSelect.value,
+            date: travelDate
         });
 
         window.location.href = `passenger_detail.html?${searchParams.toString()}`;

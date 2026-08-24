@@ -15,6 +15,7 @@ async function loadSchedule() {
     const params = new URLSearchParams(window.location.search);
     const from = params.get("from") || "Lagos";
     const to = params.get("to") || "Abuja";
+    const date = params.get("date") || new Date().toISOString().split("T")[0];
 
     try {
         const [allRoutes, trips] = await Promise.all([
@@ -55,7 +56,7 @@ async function loadSchedule() {
                     <span>${route.duration}</span>
                     <span class="schedule-price">₦${Number(route.price).toLocaleString()}</span>
                 </div>
-                <a href="book_a_trip.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&passengers=1" class="schedule-book-btn">
+                <a href="book_a_trip.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&passengers=1&date=${date}" class="schedule-book-btn">
                     Book this trip →
                 </a>
             </div>

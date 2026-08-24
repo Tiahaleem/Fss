@@ -39,6 +39,7 @@ async function loadTrips() {
     const from = params.get("from");
     const to = params.get("to");
     const passengers = params.get("passengers") || "1";
+    const date = params.get("date") || new Date().toISOString().split("T")[0];
 
     try {
         const allRoutes = await apiFetch("/api/routes");
@@ -71,7 +72,7 @@ async function loadTrips() {
                 tripsCountEl.textContent = `${sortedTrips.length} trip${sortedTrips.length === 1 ? "" : "s"} found for ${from} → ${to}`;
             }
 
-            renderTripCards(sortedTrips.map(trip => ({ trip, route })), passengers);
+            renderTripCards(sortedTrips.map(trip => ({ trip, route })), passengers, date);
             return;
         }
 
@@ -108,7 +109,7 @@ async function loadTrips() {
             tripsCountEl.textContent = `${tripsWithRoutes.length} trip${tripsWithRoutes.length === 1 ? "" : "s"} available across all routes`;
         }
 
-        renderTripCards(tripsWithRoutes, passengers);
+        renderTripCards(tripsWithRoutes, passengers, date);
     } catch (err) {
         if (tripsCountEl) tripsCountEl.textContent = "Couldn't load trips";
         tripCardsList.innerHTML = `
@@ -117,7 +118,7 @@ async function loadTrips() {
     }
 }
 
-function renderTripCards(tripsWithRoutes, passengers) {
+function renderTripCards(tripsWithRoutes, passengers, date) {
     tripCardsList.innerHTML = tripsWithRoutes.map(({ trip, route }) => `
         <div class="trip-card">
 
@@ -142,7 +143,7 @@ function renderTripCards(tripsWithRoutes, passengers) {
                 <div class="trip-price">
                     <small>From</small>
                     <h3>₦${Number(route.price).toLocaleString()}</h3>
-                    <a href="select_a_seat.html?trip=${trip.id}&passengers=${passengers}" class="seat-btn">Select Seats →</a>
+                    <a href="select_a_seat.html?trip=${trip.id}&passengers=${passengers}&date=${date}" class="seat-btn">Select Seats →</a>
                 </div>
 
             </div>
