@@ -10,18 +10,59 @@
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Google button — shared by both pages. Real "Sign in with Google"
-// needs a Google Cloud OAuth Client ID and a backend to exchange
-// the token for a session; that doesn't exist yet, so this is a
-// clearly-labeled placeholder rather than something that pretends
-// to work.
-const googleBtn = document.querySelector(".google-btn");
+// =========================
+// GOOGLE SIGN-IN
+// =========================
+// Google's own script (loaded in the page's <head>) renders the
+// actual button into #google-signin-button. This just wires up what
+// happens once someone actually uses it: Google hands back a signed
+// credential, which goes straight to our backend to verify — this
+// page never looks inside it or trusts it directly.
+const GOOGLE_CLIENT_ID = "1033467784103-4s2bhc300lasq6c7gr9iehp9rnrl5jd7.apps.googleusercontent.com";
 
-if (googleBtn) {
-    googleBtn.addEventListener("click", () => {
-        showToast("Google Sign-In isn't connected yet — coming soon.");
+async function handleGoogleCredential(response) {
+    try {
+        const data = await apiFetch("/api/auth/google", {
+            method: "POST",
+            asCustomer: true,
+            body: JSON.stringify({ credential: response.credential })
+        });
+
+        setCustomerToken(data.token);
+        showToast(`Signed in as ${data.user.name} — redirecting…`, "success");
+
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 900);
+    } catch (err) {
+        showToast(err.message);
+    }
+}
+
+function initGoogleSignIn() {
+    const container = document.getElementById("google-signin-button");
+    if (!container) return;
+
+    if (typeof google === "undefined" || !google.accounts) {
+        // Google's script (loaded async) hasn't finished loading yet — try again shortly
+        setTimeout(initGoogleSignIn, 200);
+        return;
+    }
+
+    google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential
+    });
+
+    google.accounts.id.renderButton(container, {
+        theme: "outline",
+        size: "large",
+        width: 320,
+        text: "continue_with"
     });
 }
+
+initGoogleSignIn();
 
 // =========================
 // LOGIN FORM
