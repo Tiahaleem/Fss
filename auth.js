@@ -57,7 +57,9 @@ function initGoogleSignIn() {
     google.accounts.id.renderButton(container, {
         theme: "outline",
         size: "large",
-        width: 320,
+        shape: "rectangular",
+        logo_alignment: "left",
+        width: 348, // matches the auth card's inner content width (420px card - 36px padding × 2)
         text: "continue_with"
     });
 }
