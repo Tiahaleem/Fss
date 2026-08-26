@@ -87,30 +87,57 @@ async function loadMyBookings() {
     }).join("");
 }
 
-bookingsList.addEventListener("click", async (e) => {
-    const cancelBtn = e.target.closest("[data-cancel]");
-    if (!cancelBtn) return;
+const cancelModal = document.getElementById("cancel-modal-overlay");
+const cancelModalText = document.getElementById("cancel-modal-text");
+const cancelModalBackBtn = document.getElementById("cancel-modal-back-btn");
+const cancelModalConfirmBtn = document.getElementById("cancel-modal-confirm-btn");
 
-    const reference = cancelBtn.dataset.cancel;
+let pendingCancelReference = null;
+let pendingCancelBtn = null;
 
-    if (!confirm(`Cancel booking ${reference}? This can't be undone.`)) {
-        return;
-    }
+function openCancelModal(reference, triggerBtn) {
+    pendingCancelReference = reference;
+    pendingCancelBtn = triggerBtn;
+    cancelModalText.textContent = `Booking ${reference} will be cancelled and can't be restored.`;
+    cancelModal.classList.add("show");
+}
 
-    cancelBtn.disabled = true;
+function closeCancelModal() {
+    cancelModal.classList.remove("show");
+    pendingCancelReference = null;
+    pendingCancelBtn = null;
+}
+
+cancelModalBackBtn.addEventListener("click", closeCancelModal);
+cancelModal.addEventListener("click", (e) => {
+    if (e.target === cancelModal) closeCancelModal();
+});
+
+cancelModalConfirmBtn.addEventListener("click", async () => {
+    if (!pendingCancelReference) return;
+
+    cancelModalConfirmBtn.disabled = true;
 
     try {
-        await apiFetch(`/api/bookings/${reference}/cancel`, {
+        await apiFetch(`/api/bookings/${pendingCancelReference}/cancel`, {
             method: "POST",
             asCustomer: true
         });
 
         showToast("Booking cancelled.", "success");
+        closeCancelModal();
         loadMyBookings();
     } catch (err) {
         showToast(err.message);
-        cancelBtn.disabled = false;
+        cancelModalConfirmBtn.disabled = false;
     }
+});
+
+bookingsList.addEventListener("click", (e) => {
+    const cancelBtn = e.target.closest("[data-cancel]");
+    if (!cancelBtn) return;
+
+    openCancelModal(cancelBtn.dataset.cancel, cancelBtn);
 });
 
 loadMyBookings();

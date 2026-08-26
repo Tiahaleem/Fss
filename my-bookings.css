@@ -159,6 +159,92 @@
 }
 
 /* =========================
+   CANCEL CONFIRM MODAL
+========================= */
+
+.cancel-modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(15, 23, 42, .5);
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 2000;
+}
+
+.cancel-modal-overlay.show {
+    display: flex;
+}
+
+.cancel-modal {
+    width: 100%;
+    max-width: 400px;
+
+    background: #fff;
+    border-radius: var(--radius-xl);
+
+    padding: 28px;
+    text-align: center;
+}
+
+.cancel-modal h3 {
+    margin: 0 0 10px;
+    font-size: 1.15rem;
+    color: var(--color-navy-deep);
+}
+
+.cancel-modal p {
+    margin: 0 0 24px;
+    color: var(--color-text-muted);
+    font-size: .9rem;
+    line-height: 1.6;
+}
+
+.cancel-modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.cancel-modal-back-btn,
+.cancel-modal-confirm-btn {
+    flex: 1;
+
+    padding: 12px;
+
+    border: none;
+    border-radius: 50px;
+
+    font-weight: 600;
+    font-size: .9rem;
+    cursor: pointer;
+
+    transition: background var(--transition-base);
+}
+
+.cancel-modal-back-btn {
+    background: var(--color-field-bg);
+    color: var(--color-text-dark);
+}
+
+.cancel-modal-back-btn:hover {
+    background: var(--color-border-light);
+}
+
+.cancel-modal-confirm-btn {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.cancel-modal-confirm-btn:hover {
+    background: #fecaca;
+}
+
+/* =========================
    EMPTY STATE
 ========================= */
 

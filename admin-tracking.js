@@ -75,7 +75,64 @@ async function loadBookings() {
     }
 }
 
-bookingsTableBody.addEventListener("click", async (e) => {
+const bookingActionModal = document.getElementById("booking-action-modal-overlay");
+const bookingActionTitle = document.getElementById("booking-action-modal-title");
+const bookingActionText = document.getElementById("booking-action-modal-text");
+const bookingActionConfirmBtn = document.getElementById("booking-action-confirm-btn");
+const bookingActionCancelBtn = document.getElementById("booking-action-cancel-btn");
+const bookingActionModalClose = document.getElementById("booking-action-modal-close");
+
+let pendingBookingAction = null; // { type: "cancel" | "refund", reference, triggerBtn }
+
+function openBookingActionModal(type, reference, triggerBtn) {
+    pendingBookingAction = { type, reference, triggerBtn };
+
+    if (type === "cancel") {
+        bookingActionTitle.textContent = "Cancel this booking?";
+        bookingActionText.textContent = `This releases any held seats for ${reference} immediately. This can't be undone.`;
+        bookingActionConfirmBtn.textContent = "Cancel Booking";
+        bookingActionConfirmBtn.style.background = "#fee2e2";
+        bookingActionConfirmBtn.style.color = "#dc2626";
+    } else {
+        bookingActionTitle.textContent = "Refund this booking?";
+        bookingActionText.textContent = `This issues a REAL refund through Paystack for ${reference}, reversing the actual charge. This can't be undone.`;
+        bookingActionConfirmBtn.textContent = "Refund";
+        bookingActionConfirmBtn.style.background = "#fee2e2";
+        bookingActionConfirmBtn.style.color = "#dc2626";
+    }
+
+    bookingActionModal.classList.add("show");
+}
+
+function closeBookingActionModal() {
+    bookingActionModal.classList.remove("show");
+    pendingBookingAction = null;
+}
+
+bookingActionModalClose.addEventListener("click", closeBookingActionModal);
+bookingActionCancelBtn.addEventListener("click", closeBookingActionModal);
+bookingActionModal.addEventListener("click", (e) => {
+    if (e.target === bookingActionModal) closeBookingActionModal();
+});
+
+bookingActionConfirmBtn.addEventListener("click", async () => {
+    if (!pendingBookingAction) return;
+
+    const { type, reference, triggerBtn } = pendingBookingAction;
+    bookingActionConfirmBtn.disabled = true;
+
+    try {
+        await apiFetch(`/api/bookings/${reference}/${type}`, { method: "POST" });
+        showToast(type === "cancel" ? "Booking cancelled." : "Refund processed.", "success");
+        closeBookingActionModal();
+        loadBookings();
+    } catch (err) {
+        showToast(err.message);
+        bookingActionConfirmBtn.disabled = false;
+    }
+});
+
+bookingsTableBody.addEventListener("click", (e) => {
     const manageBtn = e.target.closest("[data-manage]");
     const cancelBtn = e.target.closest("[data-cancel]");
     const refundBtn = e.target.closest("[data-refund]");
@@ -93,34 +150,12 @@ bookingsTableBody.addEventListener("click", async (e) => {
     }
 
     if (cancelBtn) {
-        const reference = cancelBtn.dataset.cancel;
-        if (!confirm(`Cancel booking ${reference}? This releases any held seats immediately.`)) return;
-
-        cancelBtn.disabled = true;
-        try {
-            await apiFetch(`/api/bookings/${reference}/cancel`, { method: "POST" });
-            showToast("Booking cancelled.", "success");
-            loadBookings();
-        } catch (err) {
-            showToast(err.message);
-            cancelBtn.disabled = false;
-        }
+        openBookingActionModal("cancel", cancelBtn.dataset.cancel, cancelBtn);
         return;
     }
 
     if (refundBtn) {
-        const reference = refundBtn.dataset.refund;
-        if (!confirm(`Refund booking ${reference}? This issues a REAL refund through Paystack.`)) return;
-
-        refundBtn.disabled = true;
-        try {
-            await apiFetch(`/api/bookings/${reference}/refund`, { method: "POST" });
-            showToast("Refund processed.", "success");
-            loadBookings();
-        } catch (err) {
-            showToast(err.message);
-            refundBtn.disabled = false;
-        }
+        openBookingActionModal("refund", refundBtn.dataset.refund, refundBtn);
     }
 });
 
