@@ -27,7 +27,8 @@ const icons = {
     checkpoint: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line>',
     location: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle>',
     arrival: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
-    delivered: '<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path>'
+    delivered: '<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path>',
+    cancelled: '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>'
 };
 
 function iconSvg(type) {
@@ -62,13 +63,17 @@ async function renderTimeline(code) {
     document.getElementById("tracking-id").textContent = data.reference;
 
     // Overall status
+    const isCancelled = events.some(ev => ev.status === "cancelled");
     const hasActive = events.some(ev => ev.status === "active");
     const allCompleted = events.every(ev => ev.status === "completed");
 
     let overallLabel = "Scheduled";
     let overallClass = "pending";
 
-    if (allCompleted) {
+    if (isCancelled) {
+        overallLabel = "Cancelled";
+        overallClass = "cancelled";
+    } else if (allCompleted) {
         overallLabel = "Delivered";
         overallClass = "completed";
     } else if (hasActive) {
