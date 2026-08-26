@@ -54,6 +54,9 @@ async function loadMyBookings() {
             ? `To ${b.receiver_name} · Booked ${bookedDate}`
             : `Seat${b.seat_numbers && b.seat_numbers.includes(',') ? 's' : ''} ${b.seat_numbers} · ${b.pickup_terminal_name} · Booked ${bookedDate}`;
 
+        const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
+        const canCancel = b.status === "confirmed";
+
         return `
             <div class="booking-card">
 
@@ -66,6 +69,7 @@ async function loadMyBookings() {
                     <div class="booking-card-info">
                         <h3>${title}</h3>
                         <p><span class="booking-ref">${b.reference}</span> · ${subtitle}</p>
+                        <span class="booking-status-badge ${b.status}">${statusLabel}</span>
                     </div>
 
                 </div>
@@ -75,11 +79,38 @@ async function loadMyBookings() {
                     <a href="track.html?ref=${encodeURIComponent(b.reference)}" class="booking-track-btn">
                         Track →
                     </a>
+                    ${canCancel ? `<button type="button" class="booking-cancel-btn" data-cancel="${b.reference}">Cancel</button>` : ""}
                 </div>
 
             </div>
         `;
     }).join("");
 }
+
+bookingsList.addEventListener("click", async (e) => {
+    const cancelBtn = e.target.closest("[data-cancel]");
+    if (!cancelBtn) return;
+
+    const reference = cancelBtn.dataset.cancel;
+
+    if (!confirm(`Cancel booking ${reference}? This can't be undone.`)) {
+        return;
+    }
+
+    cancelBtn.disabled = true;
+
+    try {
+        await apiFetch(`/api/bookings/${reference}/cancel`, {
+            method: "POST",
+            asCustomer: true
+        });
+
+        showToast("Booking cancelled.", "success");
+        loadMyBookings();
+    } catch (err) {
+        showToast(err.message);
+        cancelBtn.disabled = false;
+    }
+});
 
 loadMyBookings();

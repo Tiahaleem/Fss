@@ -23,7 +23,7 @@ async function loadBookings() {
         if (bookings.length === 0) {
             bookingsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="9">
+                    <td colspan="10">
                         <div class="admin-empty">No bookings yet — they'll show up here as customers pay on the courier and passenger pages.</div>
                     </td>
                 </tr>
@@ -42,6 +42,18 @@ async function loadBookings() {
             const route = isParcel ? `${b.from_city} → ${b.to_city}` : "—";
             const seats = isParcel ? "—" : (b.seat_numbers || "—");
 
+            const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
+            const statusClass = b.status === "confirmed" ? "active" : "inactive";
+
+            let actions = `<button class="admin-btn-secondary" data-manage="${b.reference}" style="white-space:nowrap;">Manage Timeline</button>`;
+
+            if (b.status === "confirmed") {
+                actions += ` <button class="admin-btn-secondary" data-cancel="${b.reference}" style="white-space:nowrap;">Cancel</button>`;
+            }
+            if (b.status !== "refunded") {
+                actions += ` <button class="admin-btn-secondary" data-refund="${b.reference}" style="white-space:nowrap;">Refund</button>`;
+            }
+
             return `
                 <tr>
                     <td>${b.reference}</td>
@@ -51,33 +63,65 @@ async function loadBookings() {
                     <td>${recipient}</td>
                     <td>${route}</td>
                     <td>${seats}</td>
+                    <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
                     <td>${money(b.price_kobo)}</td>
-                    <td>
-                        <button class="admin-btn-secondary" data-manage="${b.reference}" style="white-space:nowrap;">
-                            Manage Timeline
-                        </button>
-                    </td>
+                    <td>${actions}</td>
                 </tr>
             `;
         }).join("");
     } catch (err) {
         showToast(err.message);
-        bookingsTableBody.innerHTML = `<tr><td colspan="9"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
+        bookingsTableBody.innerHTML = `<tr><td colspan="10"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
     }
 }
 
-bookingsTableBody.addEventListener("click", (e) => {
+bookingsTableBody.addEventListener("click", async (e) => {
     const manageBtn = e.target.closest("[data-manage]");
-    if (!manageBtn) return;
+    const cancelBtn = e.target.closest("[data-cancel]");
+    const refundBtn = e.target.closest("[data-refund]");
 
-    openEventModal(null);
-    eventReferenceField.value = manageBtn.dataset.manage;
+    if (manageBtn) {
+        openEventModal(null);
+        eventReferenceField.value = manageBtn.dataset.manage;
 
-    // Suggest the next order number for this reference automatically
-    const existingForRef = events.filter(ev => ev.reference === manageBtn.dataset.manage);
-    eventOrderField.value = existingForRef.length
-        ? Math.max(...existingForRef.map(ev => ev.order)) + 1
-        : 1;
+        // Suggest the next order number for this reference automatically
+        const existingForRef = events.filter(ev => ev.reference === manageBtn.dataset.manage);
+        eventOrderField.value = existingForRef.length
+            ? Math.max(...existingForRef.map(ev => ev.order)) + 1
+            : 1;
+        return;
+    }
+
+    if (cancelBtn) {
+        const reference = cancelBtn.dataset.cancel;
+        if (!confirm(`Cancel booking ${reference}? This releases any held seats immediately.`)) return;
+
+        cancelBtn.disabled = true;
+        try {
+            await apiFetch(`/api/bookings/${reference}/cancel`, { method: "POST" });
+            showToast("Booking cancelled.", "success");
+            loadBookings();
+        } catch (err) {
+            showToast(err.message);
+            cancelBtn.disabled = false;
+        }
+        return;
+    }
+
+    if (refundBtn) {
+        const reference = refundBtn.dataset.refund;
+        if (!confirm(`Refund booking ${reference}? This issues a REAL refund through Paystack.`)) return;
+
+        refundBtn.disabled = true;
+        try {
+            await apiFetch(`/api/bookings/${reference}/refund`, { method: "POST" });
+            showToast("Refund processed.", "success");
+            loadBookings();
+        } catch (err) {
+            showToast(err.message);
+            refundBtn.disabled = false;
+        }
+    }
 });
 
 const tableBody = document.getElementById("events-table-body");

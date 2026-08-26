@@ -118,6 +118,46 @@
     background: var(--color-border-light);
 }
 
+.booking-status-badge {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+.booking-status-badge.confirmed {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.booking-status-badge.cancelled,
+.booking-status-badge.refunded {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.booking-cancel-btn {
+    background: none;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+
+    padding: 9px 16px;
+
+    border-radius: 50px;
+
+    font-weight: 600;
+    font-size: .85rem;
+    white-space: nowrap;
+    cursor: pointer;
+
+    transition: background var(--transition-base);
+}
+
+.booking-cancel-btn:hover {
+    background: #fee2e2;
+}
+
 /* =========================
    EMPTY STATE
 ========================= */
