@@ -57,6 +57,16 @@ async function loadMyBookings() {
         const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
         const canCancel = b.status === "confirmed";
 
+        let reviewMarkup = "";
+        if (!isParcel) {
+            if (b.my_rating) {
+                const stars = "★".repeat(b.my_rating) + "☆".repeat(5 - b.my_rating);
+                reviewMarkup = `<span class="booking-review-given"><span class="star-filled">${stars}</span></span>`;
+            } else if (b.canReview) {
+                reviewMarkup = `<button type="button" class="booking-review-btn" data-review="${b.booking_id}" data-reference="${b.reference}">Leave a Review</button>`;
+            }
+        }
+
         return `
             <div class="booking-card">
 
@@ -80,6 +90,7 @@ async function loadMyBookings() {
                         Track →
                     </a>
                     ${canCancel ? `<button type="button" class="booking-cancel-btn" data-cancel="${b.reference}">Cancel</button>` : ""}
+                    ${reviewMarkup}
                 </div>
 
             </div>
@@ -135,9 +146,90 @@ cancelModalConfirmBtn.addEventListener("click", async () => {
 
 bookingsList.addEventListener("click", (e) => {
     const cancelBtn = e.target.closest("[data-cancel]");
-    if (!cancelBtn) return;
+    if (cancelBtn) {
+        openCancelModal(cancelBtn.dataset.cancel, cancelBtn);
+        return;
+    }
 
-    openCancelModal(cancelBtn.dataset.cancel, cancelBtn);
+    const reviewBtn = e.target.closest("[data-review]");
+    if (reviewBtn) {
+        openReviewModal(reviewBtn.dataset.review);
+    }
+});
+
+// =========================
+// LEAVE A REVIEW
+// =========================
+
+const reviewModal = document.getElementById("review-modal-overlay");
+const reviewStarPicker = document.getElementById("review-star-picker");
+const reviewCommentInput = document.getElementById("review-comment");
+const reviewModalBackBtn = document.getElementById("review-modal-back-btn");
+const reviewModalSubmitBtn = document.getElementById("review-modal-submit-btn");
+
+let pendingReviewBookingId = null;
+let selectedRating = 0;
+
+function openReviewModal(bookingId) {
+    pendingReviewBookingId = bookingId;
+    selectedRating = 0;
+    reviewCommentInput.value = "";
+    updateStarDisplay();
+    reviewModal.classList.add("show");
+}
+
+function closeReviewModal() {
+    reviewModal.classList.remove("show");
+    pendingReviewBookingId = null;
+}
+
+function updateStarDisplay() {
+    document.querySelectorAll(".review-star").forEach(star => {
+        star.classList.toggle("filled", Number(star.dataset.star) <= selectedRating);
+    });
+}
+
+reviewStarPicker.addEventListener("click", (e) => {
+    const star = e.target.closest(".review-star");
+    if (!star) return;
+
+    selectedRating = Number(star.dataset.star);
+    updateStarDisplay();
+});
+
+reviewModalBackBtn.addEventListener("click", closeReviewModal);
+reviewModal.addEventListener("click", (e) => {
+    if (e.target === reviewModal) closeReviewModal();
+});
+
+reviewModalSubmitBtn.addEventListener("click", async () => {
+    if (!pendingReviewBookingId) return;
+
+    if (selectedRating === 0) {
+        showToast("Please pick a star rating first.");
+        return;
+    }
+
+    reviewModalSubmitBtn.disabled = true;
+
+    try {
+        await apiFetch("/api/reviews", {
+            method: "POST",
+            asCustomer: true,
+            body: JSON.stringify({
+                bookingId: pendingReviewBookingId,
+                rating: selectedRating,
+                comment: reviewCommentInput.value.trim()
+            })
+        });
+
+        showToast("Thanks for your review!", "success");
+        closeReviewModal();
+        loadMyBookings();
+    } catch (err) {
+        showToast(err.message);
+        reviewModalSubmitBtn.disabled = false;
+    }
 });
 
 loadMyBookings();

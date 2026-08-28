@@ -144,3 +144,50 @@ async function apiFetch(path, options = {}) {
         });
     }
 })();
+
+// =========================
+// HOMEPAGE TESTIMONIALS
+// =========================
+// Only runs on pages that actually have the testimonials grid
+// (currently just the homepage). Real reviews, real average rating —
+// nothing here is invented.
+
+(async function loadTestimonials() {
+    const grid = document.getElementById("testimonials-grid");
+    const summaryEl = document.getElementById("testimonials-summary");
+    if (!grid) return;
+
+    try {
+        const [reviews, summary] = await Promise.all([
+            apiFetch("/api/reviews?limit=6"),
+            apiFetch("/api/reviews/summary")
+        ]);
+
+        if (summaryEl) {
+            summaryEl.textContent = summary.reviewCount > 0
+                ? `${summary.averageRating} ★ average from ${summary.reviewCount} real customer${summary.reviewCount === 1 ? "" : "s"}`
+                : "Be the first to leave a review after your trip.";
+        }
+
+        if (reviews.length === 0) {
+            grid.closest(".testimonials-section").style.display = "none";
+            return;
+        }
+
+        grid.innerHTML = reviews.map(r => `
+            <div class="testimonial-card">
+                <div class="testimonial-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
+                <p class="testimonial-comment">${r.comment ? r.comment : "Great experience overall."}</p>
+                <div class="testimonial-author">
+                    <span class="testimonial-name">${r.name}</span>
+                    <span class="testimonial-route">${r.route}</span>
+                </div>
+            </div>
+        `).join("");
+    } catch (err) {
+        // No reviews yet, or the API isn't reachable — just hide the
+        // section entirely rather than showing an error on the homepage.
+        const section = grid.closest(".testimonials-section");
+        if (section) section.style.display = "none";
+    }
+})();

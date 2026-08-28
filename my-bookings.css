@@ -245,6 +245,96 @@
 }
 
 /* =========================
+   REVIEW MODAL
+========================= */
+
+.review-star-picker {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+
+    margin: 20px 0 16px;
+}
+
+.review-star {
+    background: none;
+    border: none;
+
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--color-border-light);
+    cursor: pointer;
+
+    transition: color var(--transition-base), transform var(--transition-base);
+}
+
+.review-star:hover {
+    transform: scale(1.1);
+}
+
+.review-star.filled {
+    color: #f59e0b;
+}
+
+.review-comment-input {
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+
+    font-family: inherit;
+    font-size: .9rem;
+    resize: vertical;
+
+    margin-bottom: 20px;
+}
+
+.review-comment-input:focus {
+    outline: none;
+    border-color: var(--color-cyan);
+}
+
+/* =========================
+   REVIEW BADGE (already-reviewed state)
+========================= */
+
+.booking-review-given {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    font-size: .85rem;
+    color: var(--color-text-muted);
+}
+
+.booking-review-given .star-filled {
+    color: #f59e0b;
+}
+
+.booking-review-btn {
+    background: none;
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-dark);
+
+    padding: 9px 16px;
+
+    border-radius: 50px;
+
+    font-weight: 600;
+    font-size: .85rem;
+    white-space: nowrap;
+    cursor: pointer;
+
+    transition: background var(--transition-base);
+}
+
+.booking-review-btn:hover {
+    background: var(--color-field-bg);
+}
+
+/* =========================
    EMPTY STATE
 ========================= */
 
