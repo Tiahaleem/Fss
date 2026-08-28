@@ -113,6 +113,79 @@
 
             <div class="admin-card-header">
                 <div>
+                    <h2>Analytics</h2>
+                    <p>Real numbers from actual bookings — revenue only counts confirmed bookings.</p>
+                </div>
+
+                <select id="analytics-range" class="admin-range-select">
+                    <option value="7">Last 7 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                </select>
+            </div>
+
+            <div class="admin-analytics-summary">
+
+                <div class="admin-analytics-stat">
+                    <span>Revenue</span>
+                    <h3 id="an-revenue">₦0</h3>
+                </div>
+
+                <div class="admin-analytics-stat">
+                    <span>Confirmed Bookings</span>
+                    <h3 id="an-confirmed">0</h3>
+                </div>
+
+                <div class="admin-analytics-stat">
+                    <span>Cancelled</span>
+                    <h3 id="an-cancelled">0</h3>
+                </div>
+
+                <div class="admin-analytics-stat">
+                    <span>Refunded</span>
+                    <h3 id="an-refunded">₦0</h3>
+                </div>
+
+            </div>
+
+            <div class="admin-chart-wrap">
+                <div class="admin-chart" id="revenue-chart">
+                    <p class="admin-empty">Loading chart…</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="admin-card">
+
+            <div class="admin-card-header">
+                <div>
+                    <h2>Top Routes</h2>
+                    <p>Your best-performing routes by confirmed bookings, in this date range.</p>
+                </div>
+            </div>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Route</th>
+                            <th>Bookings</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-routes-body">
+                        <!-- Rendered by admin-dashboard.js -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="admin-card">
+
+            <div class="admin-card-header">
+                <div>
                     <h2>Recent Bookings</h2>
                     <p>The last few parcel and passenger bookings, newest first.</p>
                 </div>
