@@ -1,0 +1,103 @@
+/* =========================
+   BOOKING TYPE TABS
+========================= */
+
+.booking-type-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.booking-type-tab {
+    padding: 10px 20px;
+
+    background: #fff;
+    border: 1px solid var(--color-border-light);
+    border-radius: 50px;
+
+    font-weight: 600;
+    font-size: .9rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+
+    transition: all var(--transition-base);
+}
+
+.booking-type-tab.active {
+    background: var(--color-navy-deep);
+    border-color: var(--color-navy-deep);
+    color: #fff;
+}
+
+/* =========================
+   SEAT PICKER
+========================= */
+
+.admin-seat-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    padding: 16px;
+
+    background: var(--color-field-bg);
+    border-radius: var(--radius-md);
+}
+
+.admin-seat-btn {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #fff;
+    border: 1px solid var(--color-border-light);
+    border-radius: 8px;
+
+    font-weight: 600;
+    font-size: .85rem;
+    cursor: pointer;
+
+    transition: all var(--transition-base);
+}
+
+.admin-seat-btn:hover:not(:disabled) {
+    border-color: var(--color-cyan);
+}
+
+.admin-seat-btn.selected {
+    background: var(--color-cyan);
+    border-color: var(--color-cyan);
+    color: #fff;
+}
+
+.admin-seat-btn:disabled {
+    background: var(--color-border-light);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+}
+
+/* =========================
+   BOOKING TOTAL
+========================= */
+
+.admin-booking-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 14px 18px;
+    margin: 8px 0;
+
+    background: var(--color-field-bg);
+    border-radius: var(--radius-md);
+
+    font-size: .9rem;
+}
+
+.admin-booking-total strong {
+    font-size: 1.15rem;
+    color: var(--color-navy-deep);
+}
