@@ -62,6 +62,16 @@ async function renderTimeline(code) {
 
     document.getElementById("tracking-id").textContent = data.reference;
 
+    const printLink = document.getElementById("print-ticket-link");
+    if (printLink) {
+        if (data.type === "passenger") {
+            printLink.href = `ticket.html?ref=${encodeURIComponent(data.reference)}`;
+            printLink.style.display = "inline-flex";
+        } else {
+            printLink.style.display = "none";
+        }
+    }
+
     // Overall status
     const isCancelled = events.some(ev => ev.status === "cancelled");
     const hasActive = events.some(ev => ev.status === "active");

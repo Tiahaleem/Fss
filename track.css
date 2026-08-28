@@ -267,6 +267,29 @@
     margin-bottom: 24px;
 }
 
+.tracking-print-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 24px;
+    padding: 10px 18px;
+
+    background: var(--color-field-bg);
+    border-radius: 50px;
+
+    color: var(--color-text-dark);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: .85rem;
+
+    transition: background var(--transition-base);
+}
+
+.tracking-print-link:hover {
+    background: var(--color-border-light);
+}
+
 .tracking-label {
     font-size: .72rem;
     letter-spacing: 2px;
