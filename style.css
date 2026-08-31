@@ -2084,6 +2084,7 @@ input:focus-visible {
 .testimonials-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
     gap: 24px;
 
     max-width: 1100px;
@@ -2091,11 +2092,14 @@ input:focus-visible {
 }
 
 .testimonial-card {
+    display: flex;
+    flex-direction: column;
+
     background: #fff;
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
 
-    padding: 26px;
+    padding: 22px;
 }
 
 .testimonial-stars {
@@ -2114,9 +2118,14 @@ input:focus-visible {
 .testimonial-author {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
+    gap: 10px;
 
-    font-size: .85rem;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border-light);
+
+    font-size: .82rem;
 }
 
 .testimonial-name {
