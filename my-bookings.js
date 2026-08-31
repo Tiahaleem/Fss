@@ -167,8 +167,6 @@ bookingsList.addEventListener("click", (e) => {
     }
 });
 
-reviewModalClose.addEventListener("click", closeReviewModal);
-
 // =========================
 // LEAVE A REVIEW
 // =========================
@@ -183,6 +181,8 @@ const reviewStarPicker = document.getElementById("review-star-picker");
 const reviewCommentInput = document.getElementById("review-comment");
 const reviewModalBackBtn = document.getElementById("review-modal-back-btn");
 const reviewModalSubmitBtn = document.getElementById("review-modal-submit-btn");
+
+reviewModalClose.addEventListener("click", closeReviewModal);
 
 let pendingReviewBookingId = null;
 let selectedRating = 0;
