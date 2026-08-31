@@ -29,15 +29,21 @@ async function loadAllReviews() {
         }
 
         reviewsGrid.innerHTML = reviews.map(r => {
-            const date = new Date(r.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+            const initial = r.name.trim().charAt(0).toUpperCase();
+            const avatar = r.photo
+                ? `<img src="${r.photo}" alt="${r.name}">`
+                : initial;
 
             return `
                 <div class="review-card">
                     <div class="review-card-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
-                    <p class="review-card-comment">${r.comment ? r.comment : "Great experience overall."}</p>
+                    <p class="review-card-comment">"${r.comment ? r.comment : "Great experience overall."}"</p>
                     <div class="review-card-footer">
-                        <span class="review-card-name">${r.name}</span>
-                        <span class="review-card-meta">${r.route}<br>${date}</span>
+                        <div class="review-avatar">${avatar}</div>
+                        <div class="review-card-identity">
+                            <span class="review-card-name">${r.name}</span>
+                            <span class="review-card-route">${r.route}</span>
+                        </div>
                     </div>
                 </div>
             `;

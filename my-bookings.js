@@ -181,6 +181,50 @@ const reviewStarPicker = document.getElementById("review-star-picker");
 const reviewCommentInput = document.getElementById("review-comment");
 const reviewModalBackBtn = document.getElementById("review-modal-back-btn");
 const reviewModalSubmitBtn = document.getElementById("review-modal-submit-btn");
+const reviewPhotoInput = document.getElementById("review-photo-input");
+const reviewPhotoUploadLabel = document.getElementById("review-photo-upload-label");
+const reviewPhotoPreview = document.getElementById("review-photo-preview");
+const reviewPhotoLabelText = document.getElementById("review-photo-label-text");
+
+let selectedPhotoBase64 = null;
+
+const cameraIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
+
+reviewPhotoUploadLabel.addEventListener("click", (e) => {
+    // The <input> itself is hidden and already inside the <label>,
+    // so a native click would double-fire — this opens it manually instead.
+    if (e.target !== reviewPhotoInput) {
+        e.preventDefault();
+        reviewPhotoInput.click();
+    }
+});
+
+reviewPhotoInput.addEventListener("change", () => {
+    const file = reviewPhotoInput.files[0];
+    if (!file) return;
+
+    // 2MB raw file — comfortably under the backend's base64 size guard
+    if (file.size > 2 * 1024 * 1024) {
+        showToast("That photo is too large — please pick one under 2MB.");
+        reviewPhotoInput.value = "";
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        selectedPhotoBase64 = reader.result;
+        reviewPhotoPreview.innerHTML = `<img src="${selectedPhotoBase64}" alt="Your photo">`;
+        reviewPhotoLabelText.textContent = "Photo added — tap to change";
+    };
+    reader.readAsDataURL(file);
+});
+
+function resetPhotoUpload() {
+    selectedPhotoBase64 = null;
+    reviewPhotoInput.value = "";
+    reviewPhotoPreview.innerHTML = cameraIconSvg;
+    reviewPhotoLabelText.textContent = "Add a photo (optional)";
+}
 
 reviewModalClose.addEventListener("click", closeReviewModal);
 
@@ -215,6 +259,7 @@ function openReviewModal(bookingId, route) {
     reviewCommentInput.value = "";
     reviewQuickPicks.style.display = "none";
     reviewQuickPicks.innerHTML = "";
+    resetPhotoUpload();
 
     updateStarDisplay();
     reviewModal.classList.add("show");
@@ -282,7 +327,8 @@ reviewModalSubmitBtn.addEventListener("click", async () => {
             body: JSON.stringify({
                 bookingId: pendingReviewBookingId,
                 rating: selectedRating,
-                comment: reviewCommentInput.value.trim()
+                comment: reviewCommentInput.value.trim(),
+                photo: selectedPhotoBase64
             })
         });
 

@@ -174,16 +174,24 @@ async function apiFetch(path, options = {}) {
             return;
         }
 
-        grid.innerHTML = reviews.map(r => `
-            <div class="testimonial-card">
-                <div class="testimonial-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
-                <p class="testimonial-comment">${r.comment ? r.comment : "Great experience overall."}</p>
-                <div class="testimonial-author">
-                    <span class="testimonial-name">${r.name}</span>
-                    <span class="testimonial-route">${r.route}</span>
+        grid.innerHTML = reviews.map(r => {
+            const initial = r.name.trim().charAt(0).toUpperCase();
+            const avatar = r.photo ? `<img src="${r.photo}" alt="${r.name}">` : initial;
+
+            return `
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
+                    <p class="testimonial-comment">"${r.comment ? r.comment : "Great experience overall."}"</p>
+                    <div class="testimonial-footer">
+                        <div class="testimonial-avatar">${avatar}</div>
+                        <div class="testimonial-identity">
+                            <span class="testimonial-name">${r.name}</span>
+                            <span class="testimonial-route">${r.route}</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        `).join("");
+            `;
+        }).join("");
     } catch (err) {
         // No reviews yet, or the API isn't reachable — just hide the
         // section entirely rather than showing an error on the homepage.
