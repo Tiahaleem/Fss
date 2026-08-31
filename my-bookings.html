@@ -80,10 +80,17 @@
 
 <!-- LEAVE A REVIEW MODAL -->
 <div class="cancel-modal-overlay" id="review-modal-overlay">
-    <div class="cancel-modal">
+    <div class="review-card-modal">
 
-        <h3>How was your trip?</h3>
-        <p>Your review helps other travellers, and helps us improve.</p>
+        <div class="review-modal-header">
+            <h3>Leave a Review</h3>
+            <button type="button" class="review-modal-close" id="review-modal-close">&times;</button>
+        </div>
+
+        <div class="review-modal-trip">
+            <span id="review-modal-name">—</span>
+            <span class="review-modal-route" id="review-modal-route">—</span>
+        </div>
 
         <div class="review-star-picker" id="review-star-picker">
             <button type="button" class="review-star" data-star="1">★</button>
@@ -93,12 +100,19 @@
             <button type="button" class="review-star" data-star="5">★</button>
         </div>
 
-        <textarea id="review-comment" class="review-comment-input" placeholder="Tell us about your trip (optional)" rows="3"></textarea>
+        <p class="review-star-hint" id="review-star-hint">Tap a star to rate your trip</p>
+
+        <div class="review-quick-picks" id="review-quick-picks" style="display:none;">
+            <!-- Filled in by my-bookings.js based on the star rating chosen -->
+        </div>
+
+        <textarea id="review-comment" class="review-comment-input" placeholder="Write your own message (optional)" rows="2"></textarea>
 
         <div class="cancel-modal-actions">
             <button type="button" class="cancel-modal-back-btn" id="review-modal-back-btn">Cancel</button>
             <button type="button" class="cancel-modal-confirm-btn" id="review-modal-submit-btn" style="background:#dcfce7; color:#16a34a;">Submit Review</button>
         </div>
+
 
     </div>
 </div>

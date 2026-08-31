@@ -251,16 +251,16 @@
 .review-star-picker {
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
 
-    margin: 20px 0 16px;
+    margin: 4px 0 6px;
 }
 
 .review-star {
     background: none;
     border: none;
 
-    font-size: 2rem;
+    font-size: 1.7rem;
     line-height: 1;
     color: var(--color-border-light);
     cursor: pointer;
@@ -274,6 +274,106 @@
 
 .review-star.filled {
     color: #f59e0b;
+}
+
+.review-star-hint {
+    text-align: center;
+    font-size: .82rem;
+    color: var(--color-text-muted);
+    margin: 0 0 16px;
+}
+
+/* =========================
+   REVIEW CARD MODAL (compact, not a long box)
+========================= */
+
+.review-card-modal {
+    width: 100%;
+    max-width: 380px;
+
+    background: #fff;
+    border-radius: var(--radius-xl);
+
+    padding: 22px 24px;
+}
+
+.review-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 14px;
+}
+
+.review-modal-header h3 {
+    font-size: 1.1rem;
+    color: var(--color-navy-deep);
+    margin: 0;
+}
+
+.review-modal-close {
+    background: none;
+    border: none;
+
+    font-size: 1.3rem;
+    line-height: 1;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.review-modal-trip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 14px;
+    margin-bottom: 18px;
+
+    background: var(--color-field-bg);
+    border-radius: var(--radius-md);
+
+    font-size: .85rem;
+}
+
+.review-modal-trip span:first-child {
+    font-weight: 700;
+    color: var(--color-navy-deep);
+}
+
+.review-modal-route {
+    color: var(--color-text-muted);
+}
+
+.review-quick-picks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-bottom: 14px;
+}
+
+.review-quick-pick-chip {
+    padding: 7px 14px;
+
+    background: var(--color-field-bg);
+    border: 1px solid transparent;
+    border-radius: 50px;
+
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    cursor: pointer;
+
+    transition: all var(--transition-base);
+}
+
+.review-quick-pick-chip:hover {
+    border-color: var(--color-cyan);
+}
+
+.review-quick-pick-chip.selected {
+    background: var(--color-cyan);
+    color: #fff;
 }
 
 .review-comment-input {

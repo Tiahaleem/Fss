@@ -7,6 +7,16 @@
 // bookings, which was never possible with the old localStorage version.
 
 const bookingsList = document.getElementById("bookings-list");
+let currentCustomerName = "You";
+
+async function loadCurrentCustomerName() {
+    try {
+        const user = await apiFetch("/api/auth/me", { asCustomer: true });
+        currentCustomerName = user.name || "You";
+    } catch (err) {
+        // Not critical — falls back to "You" if this fails for any reason
+    }
+}
 
 async function loadMyBookings() {
     if (!bookingsList) return;
@@ -63,7 +73,7 @@ async function loadMyBookings() {
                 const stars = "★".repeat(b.my_rating) + "☆".repeat(5 - b.my_rating);
                 reviewMarkup = `<span class="booking-review-given"><span class="star-filled">${stars}</span></span>`;
             } else if (b.canReview) {
-                reviewMarkup = `<button type="button" class="booking-review-btn" data-review="${b.booking_id}" data-reference="${b.reference}">Leave a Review</button>`;
+                reviewMarkup = `<button type="button" class="booking-review-btn" data-review="${b.booking_id}" data-route="${title}">Leave a Review</button>`;
             }
         }
 
@@ -153,15 +163,22 @@ bookingsList.addEventListener("click", (e) => {
 
     const reviewBtn = e.target.closest("[data-review]");
     if (reviewBtn) {
-        openReviewModal(reviewBtn.dataset.review);
+        openReviewModal(reviewBtn.dataset.review, reviewBtn.dataset.route);
     }
 });
+
+reviewModalClose.addEventListener("click", closeReviewModal);
 
 // =========================
 // LEAVE A REVIEW
 // =========================
 
 const reviewModal = document.getElementById("review-modal-overlay");
+const reviewModalClose = document.getElementById("review-modal-close");
+const reviewModalName = document.getElementById("review-modal-name");
+const reviewModalRoute = document.getElementById("review-modal-route");
+const reviewStarHint = document.getElementById("review-star-hint");
+const reviewQuickPicks = document.getElementById("review-quick-picks");
 const reviewStarPicker = document.getElementById("review-star-picker");
 const reviewCommentInput = document.getElementById("review-comment");
 const reviewModalBackBtn = document.getElementById("review-modal-back-btn");
@@ -170,10 +187,35 @@ const reviewModalSubmitBtn = document.getElementById("review-modal-submit-btn");
 let pendingReviewBookingId = null;
 let selectedRating = 0;
 
-function openReviewModal(bookingId) {
+// Quick-pick feedback per star rating — lets someone leave a genuine
+// review in one tap without needing to type anything, if they'd rather not.
+const quickPicksByRating = {
+    1: ["Bad experience", "Not satisfied", "Would not recommend"],
+    2: ["Below expectations", "It was okay", "Needs improvement"],
+    3: ["It was alright", "Decent trip", "Average experience"],
+    4: ["Very good", "Good experience", "Comfortable trip"],
+    5: ["Excellent!", "Satisfying", "Highly recommend"]
+};
+
+const starHints = {
+    0: "Tap a star to rate your trip",
+    1: "Poor",
+    2: "Fair",
+    3: "Good",
+    4: "Very Good",
+    5: "Excellent"
+};
+
+function openReviewModal(bookingId, route) {
     pendingReviewBookingId = bookingId;
     selectedRating = 0;
+
+    reviewModalName.textContent = currentCustomerName;
+    reviewModalRoute.textContent = route;
     reviewCommentInput.value = "";
+    reviewQuickPicks.style.display = "none";
+    reviewQuickPicks.innerHTML = "";
+
     updateStarDisplay();
     reviewModal.classList.add("show");
 }
@@ -187,7 +229,28 @@ function updateStarDisplay() {
     document.querySelectorAll(".review-star").forEach(star => {
         star.classList.toggle("filled", Number(star.dataset.star) <= selectedRating);
     });
+
+    reviewStarHint.textContent = starHints[selectedRating];
+
+    if (selectedRating === 0) {
+        reviewQuickPicks.style.display = "none";
+        return;
+    }
+
+    reviewQuickPicks.style.display = "flex";
+    reviewQuickPicks.innerHTML = quickPicksByRating[selectedRating]
+        .map(text => `<button type="button" class="review-quick-pick-chip" data-pick="${text}">${text}</button>`)
+        .join("");
 }
+
+reviewQuickPicks.addEventListener("click", (e) => {
+    const chip = e.target.closest(".review-quick-pick-chip");
+    if (!chip) return;
+
+    document.querySelectorAll(".review-quick-pick-chip").forEach(c => c.classList.remove("selected"));
+    chip.classList.add("selected");
+    reviewCommentInput.value = chip.dataset.pick;
+});
 
 reviewStarPicker.addEventListener("click", (e) => {
     const star = e.target.closest(".review-star");
@@ -232,4 +295,5 @@ reviewModalSubmitBtn.addEventListener("click", async () => {
     }
 });
 
+loadCurrentCustomerName();
 loadMyBookings();
