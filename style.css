@@ -2127,3 +2127,17 @@ input:focus-visible {
 .testimonial-route {
     color: var(--color-text-muted);
 }
+
+.testimonials-see-all {
+    display: inline-block;
+    margin-top: 14px;
+
+    color: var(--color-cyan);
+    font-weight: 600;
+    font-size: .9rem;
+    text-decoration: none;
+}
+
+.testimonials-see-all:hover {
+    text-decoration: underline;
+}
