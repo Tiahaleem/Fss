@@ -110,7 +110,7 @@ async function renderTimeline(code) {
                 ${iconSvg(ev.icon)}
             </div>
             <div class="timeline-content">
-                <h4>${ev.title}</h4>
+                <h4>${escapeHtml(ev.title)}</h4>
                 <span>${ev.event_time}</span>
             </div>
         </div>

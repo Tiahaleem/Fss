@@ -30,12 +30,12 @@ async function loadRoutes() {
             <div class="route-card">
 
                 <div class="route-top">
-                    <span>${distanceIcon} ${route.distance} KM • ${route.duration.toUpperCase()}</span>
+                    <span>${distanceIcon} ${escapeHtml(route.distance)} KM • ${escapeHtml(route.duration.toUpperCase())}</span>
                 </div>
 
                 <div class="route-cities">
-                    <h3>${route.from}</h3>
-                    <h3>${route.to}</h3>
+                    <h3>${escapeHtml(route.from)}</h3>
+                    <h3>${escapeHtml(route.to)}</h3>
                 </div>
 
                 <div class="route-bottom">

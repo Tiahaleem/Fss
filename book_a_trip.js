@@ -125,19 +125,19 @@ function renderTripCards(tripsWithRoutes, passengers, date) {
             <div class="trip-top">
 
                 <div class="trip-time">
-                    <h3>${trip.time}</h3>
-                    <span>${trip.from}</span>
+                    <h3>${escapeHtml(trip.time)}</h3>
+                    <span>${escapeHtml(trip.from)}</span>
                 </div>
 
                 <div class="trip-duration">
-                    <span>${route.duration}</span>
+                    <span>${escapeHtml(route.duration)}</span>
                     <div class="trip-line"></div>
                     <span class="trip-type">Executive</span>
                 </div>
 
                 <div class="trip-time">
-                    <h3>${addMinutesToTime(trip.time, route.duration)}</h3>
-                    <span>${trip.to}</span>
+                    <h3>${escapeHtml(addMinutesToTime(trip.time, route.duration))}</h3>
+                    <span>${escapeHtml(trip.to)}</span>
                 </div>
 
                 <div class="trip-price">

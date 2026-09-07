@@ -1,6 +1,22 @@
 // =========================
 // API CLIENT (shared)
 // =========================
+
+// Escapes any text before it's inserted into the page's HTML — a
+// review comment or name is just data, never code. Without this,
+// someone could submit a review containing something like <img
+// onerror="steal a visitor's session"> and have it actually RUN for
+// every real visitor who sees it on the homepage or Reviews page.
+function escapeHtml(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // Replaces the localStorage get___()/save___() pattern from index.js
 // with real calls to the backend. Load this AFTER index.js on any
 // admin page (index.js still provides showToast() etc.).
@@ -175,18 +191,21 @@ async function apiFetch(path, options = {}) {
         }
 
         grid.innerHTML = reviews.map(r => {
-            const initial = r.name.trim().charAt(0).toUpperCase();
-            const avatar = r.photo ? `<img src="${r.photo}" alt="${r.name}">` : initial;
+            const name = escapeHtml(r.name);
+            const comment = escapeHtml(r.comment ? r.comment : "Great experience overall.");
+            const route = escapeHtml(r.route);
+            const initial = escapeHtml(r.name.trim().charAt(0).toUpperCase());
+            const avatar = r.photo ? `<img src="${escapeHtml(r.photo)}" alt="${name}">` : initial;
 
             return `
                 <div class="testimonial-card">
                     <div class="testimonial-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
-                    <p class="testimonial-comment">"${r.comment ? r.comment : "Great experience overall."}"</p>
+                    <p class="testimonial-comment">"${comment}"</p>
                     <div class="testimonial-footer">
                         <div class="testimonial-avatar">${avatar}</div>
                         <div class="testimonial-identity">
-                            <span class="testimonial-name">${r.name}</span>
-                            <span class="testimonial-route">${r.route}</span>
+                            <span class="testimonial-name">${name}</span>
+                            <span class="testimonial-route">${route}</span>
                         </div>
                     </div>
                 </div>

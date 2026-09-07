@@ -59,10 +59,10 @@ async function loadMyBookings() {
         const price = `₦${(Number(b.price_kobo) / 100).toLocaleString()}`;
         const bookedDate = new Date(b.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
-        const title = isParcel ? `${b.from_city} → ${b.to_city}` : `${b.trip_from} → ${b.trip_to}`;
+        const title = isParcel ? `${escapeHtml(b.from_city)} → ${escapeHtml(b.to_city)}` : `${escapeHtml(b.trip_from)} → ${escapeHtml(b.trip_to)}`;
         const subtitle = isParcel
-            ? `To ${b.receiver_name} · Booked ${bookedDate}`
-            : `Seat${b.seat_numbers && b.seat_numbers.includes(',') ? 's' : ''} ${b.seat_numbers} · ${b.pickup_terminal_name} · Booked ${bookedDate}`;
+            ? `To ${escapeHtml(b.receiver_name)} · Booked ${bookedDate}`
+            : `Seat${b.seat_numbers && b.seat_numbers.includes(',') ? 's' : ''} ${escapeHtml(b.seat_numbers)} · ${escapeHtml(b.pickup_terminal_name)} · Booked ${bookedDate}`;
 
         const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
         const canCancel = b.status === "confirmed";
@@ -88,7 +88,7 @@ async function loadMyBookings() {
 
                     <div class="booking-card-info">
                         <h3>${title}</h3>
-                        <p><span class="booking-ref">${b.reference}</span> · ${subtitle}</p>
+                        <p><span class="booking-ref">${escapeHtml(b.reference)}</span> · ${subtitle}</p>
                         <span class="booking-status-badge ${b.status}">${statusLabel}</span>
                     </div>
 

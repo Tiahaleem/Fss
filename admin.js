@@ -2,6 +2,23 @@
 // ADMIN SHELL
 // (shared across every admin-*.html page except admin-login.html)
 // =========================
+
+// Escapes any text before it's inserted into the page's HTML — a
+// customer's "name" or "description" is just data, never code, but
+// without this, someone could type something like <img
+// onerror="steal admin's session token"> as their booking name and
+// have it actually RUN the moment an admin views the bookings table.
+// This turns it back into harmless, visible text instead.
+function escapeHtml(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // The session check is now a real network request — "is this token
 // still genuinely valid, according to the server?" — instead of an
 // instant, trust-it-blindly localStorage read. That's slightly

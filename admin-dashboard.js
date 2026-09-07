@@ -49,12 +49,12 @@ async function loadOverviewStats() {
 
         recentBookingsBody.innerHTML = recent.map(b => {
             const isParcel = b.type === "parcel";
-            const customer = isParcel ? b.sender_name : b.passenger_name;
-            const route = isParcel ? `${b.from_city} → ${b.to_city}` : "—";
+            const customer = escapeHtml(isParcel ? b.sender_name : b.passenger_name);
+            const route = isParcel ? `${escapeHtml(b.from_city)} → ${escapeHtml(b.to_city)}` : "—";
 
             return `
                 <tr>
-                    <td>${b.reference}</td>
+                    <td>${escapeHtml(b.reference)}</td>
                     <td><span class="status-badge ${isParcel ? "inactive" : "active"}">${isParcel ? "Parcel" : "Passenger"}</span></td>
                     <td>${customer}</td>
                     <td>${route}</td>

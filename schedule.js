@@ -49,11 +49,11 @@ async function loadSchedule() {
         scheduleList.innerHTML = sortedTrips.map(trip => `
             <div class="schedule-row">
                 <div class="schedule-time">
-                    <h3>${trip.time}</h3>
+                    <h3>${escapeHtml(trip.time)}</h3>
                     <span>Departure</span>
                 </div>
                 <div class="schedule-meta">
-                    <span>${route.duration}</span>
+                    <span>${escapeHtml(route.duration)}</span>
                     <span class="schedule-price">₦${Number(route.price).toLocaleString()}</span>
                 </div>
                 <a href="book_a_trip.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&passengers=1&date=${date}" class="schedule-book-btn">

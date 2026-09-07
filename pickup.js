@@ -32,7 +32,7 @@ async function loadTerminals() {
             return `
                 <div class="city-block">
 
-                    <h2>${city}</h2>
+                    <h2>${escapeHtml(city)}</h2>
 
                     <div class="pickup-grid">
                         ${cityTerminals.map(t => `
@@ -40,13 +40,13 @@ async function loadTerminals() {
 
                                 <div class="pickup-icon">${pinIcon}</div>
 
-                                <h3>${t.name}</h3>
-                                <p>${t.address}</p>
+                                <h3>${escapeHtml(t.name)}</h3>
+                                <p>${escapeHtml(t.address)}</p>
 
                                 <div class="pickup-divider"></div>
 
-                                <div class="pickup-info">${phoneIcon} ${t.phone}</div>
-                                <div class="pickup-info">${clockIcon} ${t.hours}</div>
+                                <div class="pickup-info">${phoneIcon} ${escapeHtml(t.phone)}</div>
+                                <div class="pickup-info">${clockIcon} ${escapeHtml(t.hours)}</div>
 
                             </div>
                         `).join("")}

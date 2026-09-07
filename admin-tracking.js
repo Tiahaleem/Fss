@@ -36,27 +36,28 @@ async function loadBookings() {
         bookingsTableBody.innerHTML = sorted.map(b => {
             const isParcel = b.type === "parcel";
 
-            const customer = isParcel ? b.sender_name : b.passenger_name;
-            const phone = isParcel ? b.sender_phone : b.passenger_phone;
-            const recipient = isParcel ? `${b.receiver_name}<br><span style="color:var(--color-text-muted); font-size:.8rem;">${b.receiver_phone}</span>` : "—";
-            const route = isParcel ? `${b.from_city} → ${b.to_city}` : "—";
-            const seats = isParcel ? "—" : (b.seat_numbers || "—");
+            const customer = escapeHtml(isParcel ? b.sender_name : b.passenger_name);
+            const phone = escapeHtml(isParcel ? b.sender_phone : b.passenger_phone);
+            const recipient = isParcel ? `${escapeHtml(b.receiver_name)}<br><span style="color:var(--color-text-muted); font-size:.8rem;">${escapeHtml(b.receiver_phone)}</span>` : "—";
+            const route = isParcel ? `${escapeHtml(b.from_city)} → ${escapeHtml(b.to_city)}` : "—";
+            const seats = isParcel ? "—" : escapeHtml(b.seat_numbers || "—");
+            const reference = escapeHtml(b.reference);
 
             const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
             const statusClass = b.status === "confirmed" ? "active" : "inactive";
 
-            let actions = `<button class="admin-btn-secondary" data-manage="${b.reference}" style="white-space:nowrap;">Manage Timeline</button>`;
+            let actions = `<button class="admin-btn-secondary" data-manage="${reference}" style="white-space:nowrap;">Manage Timeline</button>`;
 
             if (b.status === "confirmed") {
-                actions += ` <button class="admin-btn-secondary" data-cancel="${b.reference}" style="white-space:nowrap;">Cancel</button>`;
+                actions += ` <button class="admin-btn-secondary" data-cancel="${reference}" style="white-space:nowrap;">Cancel</button>`;
             }
             if (b.status !== "refunded") {
-                actions += ` <button class="admin-btn-secondary" data-refund="${b.reference}" style="white-space:nowrap;">Refund</button>`;
+                actions += ` <button class="admin-btn-secondary" data-refund="${reference}" style="white-space:nowrap;">Refund</button>`;
             }
 
             return `
                 <tr>
-                    <td>${b.reference}</td>
+                    <td>${reference}</td>
                     <td><span class="status-badge ${isParcel ? "inactive" : "active"}">${isParcel ? "Parcel" : "Passenger"}</span></td>
                     <td>${customer}</td>
                     <td>${phone}</td>
