@@ -9,6 +9,7 @@
 
 let trips = [];
 let availableRoutes = [];
+let availableVehicles = [];
 let deleteTargetId = null;
 
 const tableBody = document.getElementById("trips-table-body");
@@ -37,13 +38,40 @@ async function loadRoutesForDropdown() {
         }
 
         tripRouteField.innerHTML = availableRoutes
-            .map(r => `<option value="${r.id}">${r.from} → ${r.to}</option>`)
+            .map(r => `<option value="${r.id}">${escapeHtml(r.from)} → ${escapeHtml(r.to)}</option>`)
             .join("");
     } catch (err) {
         tripRouteField.innerHTML = `<option value="">Couldn't load routes</option>`;
         showToast(err.message);
     }
 }
+
+async function loadVehiclesForDropdown() {
+    try {
+        availableVehicles = await apiFetch("/api/vehicles?status=active");
+
+        if (availableVehicles.length === 0) {
+            tripVehicleField.innerHTML = `<option value="">No vehicles yet — add one in Vehicles first</option>`;
+            return;
+        }
+
+        tripVehicleField.innerHTML = availableVehicles
+            .map(v => `<option value="${v.id}">${escapeHtml(v.name)}${v.plateNumber ? ` (${escapeHtml(v.plateNumber)})` : ""} — ${v.seats} seats</option>`)
+            .join("");
+
+        updateSeatsDisplay();
+    } catch (err) {
+        tripVehicleField.innerHTML = `<option value="">Couldn't load vehicles</option>`;
+        showToast(err.message);
+    }
+}
+
+function updateSeatsDisplay() {
+    const selected = availableVehicles.find(v => v.id === tripVehicleField.value);
+    tripSeatsField.value = selected ? `${selected.seats} (from ${selected.name})` : "";
+}
+
+tripVehicleField.addEventListener("change", updateSeatsDisplay);
 
 async function loadTrips() {
     try {
@@ -76,9 +104,9 @@ function renderTrips() {
 
     tableBody.innerHTML = sorted.map(trip => `
         <tr>
-            <td>${trip.from} → ${trip.to}</td>
-            <td>${trip.time}</td>
-            <td>${trip.vehicle}</td>
+            <td>${escapeHtml(trip.from)} → ${escapeHtml(trip.to)}</td>
+            <td>${escapeHtml(trip.time)}</td>
+            <td>${trip.vehicleName ? escapeHtml(trip.vehicleName) + (trip.vehiclePlate ? ` (${escapeHtml(trip.vehiclePlate)})` : "") : "—"}</td>
             <td>${trip.seats}</td>
             <td><span class="status-badge ${trip.status}">${trip.status === "active" ? "Active" : "Inactive"}</span></td>
             <td>
@@ -101,17 +129,15 @@ function openTripModal(trip) {
         tripIdField.value = trip.id;
         tripRouteField.value = trip.routeId;
         tripTimeField.value = trip.time;
-        tripVehicleField.value = trip.vehicle;
-        tripSeatsField.value = trip.seats;
+        tripVehicleField.value = trip.vehicleId || "";
         tripStatusField.value = trip.status;
     } else {
         tripModalTitle.textContent = "Add Trip";
         tripForm.reset();
         tripIdField.value = "";
-        tripVehicleField.value = "Honda Odyssey";
-        tripSeatsField.value = 7;
     }
 
+    updateSeatsDisplay();
     tripModal.classList.add("show");
 }
 
@@ -133,8 +159,7 @@ tripForm.addEventListener("submit", async (e) => {
     if (
         !tripRouteField.value ||
         tripTimeField.value.trim() === "" ||
-        tripVehicleField.value.trim() === "" ||
-        tripSeatsField.value.trim() === ""
+        !tripVehicleField.value
     ) {
         showToast("Please fill in every field.");
         return;
@@ -145,8 +170,7 @@ tripForm.addEventListener("submit", async (e) => {
     const tripData = {
         routeId: tripRouteField.value,
         time: tripTimeField.value,
-        vehicle: tripVehicleField.value.trim(),
-        seats: Number(tripSeatsField.value),
+        vehicleId: tripVehicleField.value,
         status: tripStatusField.value
     };
 
@@ -217,4 +241,5 @@ document.getElementById("delete-confirm-btn").addEventListener("click", async ()
 });
 
 loadRoutesForDropdown();
+loadVehiclesForDropdown();
 loadTrips();
