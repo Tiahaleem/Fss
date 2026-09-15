@@ -258,10 +258,16 @@ form.addEventListener("submit", async function(e){
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-        // Starts a real Paystack transaction — no booking exists yet.
-        // Details ride along as metadata, handed back once payment
-        // is verified on payment-callback.html.
-        const result = await apiFetch("/api/payments/initialize-parcel", {
+        // Starts a real transaction with whichever provider the
+        // customer picked — no booking exists yet. Details ride
+        // along as metadata/meta, handed back once payment is
+        // verified on payment-callback.html.
+        const selectedMethod = document.querySelector('input[name="payment-method"]:checked').value;
+        const initEndpoint = selectedMethod === "flutterwave"
+            ? "/api/payments/flutterwave/initialize-parcel"
+            : "/api/payments/initialize-parcel";
+
+        const result = await apiFetch(initEndpoint, {
             method: "POST",
             asCustomer: true,
             body: JSON.stringify({
@@ -279,7 +285,7 @@ form.addEventListener("submit", async function(e){
             })
         });
 
-        // Send the customer to Paystack's real checkout page
+        // Send the customer to the provider's real checkout page
         window.location.href = result.authorizationUrl;
     } catch (err) {
         showToast(err.message);

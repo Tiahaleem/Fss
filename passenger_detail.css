@@ -182,6 +182,41 @@
     background: var(--color-navy-hover);
 }
 
+.payment-method-picker {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.payment-method-option {
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 12px;
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+
+    font-weight: 600;
+    font-size: .9rem;
+    cursor: pointer;
+
+    transition: all var(--transition-base);
+}
+
+.payment-method-option:has(input:checked) {
+    border-color: var(--color-cyan);
+    background: var(--color-field-bg);
+}
+
+.payment-method-option input {
+    accent-color: var(--color-cyan);
+}
+
 /* =========================
    PAYMENT CONFIRMATION PANEL
 ========================= */

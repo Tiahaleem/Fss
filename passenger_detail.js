@@ -112,12 +112,18 @@ if (passengerForm) {
         if (submitBtn) submitBtn.disabled = true;
 
         try {
-            // Starts a real Paystack transaction — no booking exists
-            // yet. Booking details ride along as metadata, which
-            // Paystack hands back once payment is verified.
+            // Starts a real transaction with whichever provider the
+            // customer picked — no booking exists yet. Booking
+            // details ride along as metadata/meta, which the
+            // provider hands back once payment is verified.
             // TEMP: no travel-date picker exists yet anywhere in the
             // flow, so this defaults to today.
-            const result = await apiFetch("/api/payments/initialize-passenger", {
+            const selectedMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            const initEndpoint = selectedMethod === "flutterwave"
+                ? "/api/payments/flutterwave/initialize-passenger"
+                : "/api/payments/initialize-passenger";
+
+            const result = await apiFetch(initEndpoint, {
                 method: "POST",
                 asCustomer: true,
                 body: JSON.stringify({
@@ -132,7 +138,7 @@ if (passengerForm) {
                 })
             });
 
-            // Send the customer to Paystack's real checkout page
+            // Send the customer to the provider's real checkout page
             window.location.href = result.authorizationUrl;
         } catch (err) {
             // Most likely case: someone else booked this exact seat

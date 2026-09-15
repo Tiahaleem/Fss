@@ -119,6 +119,17 @@
                      pushes a starter tracking event — see passenger_detail.js.
                      Later: hand off to the real Paystack/Flutterwave SDK
                      first, and only run this once payment actually succeeds. -->
+                <div class="payment-method-picker">
+                    <label class="payment-method-option">
+                        <input type="radio" name="payment-method" value="paystack" checked>
+                        <span>Paystack</span>
+                    </label>
+                    <label class="payment-method-option">
+                        <input type="radio" name="payment-method" value="flutterwave">
+                        <span>Flutterwave</span>
+                    </label>
+                </div>
+
                 <div class="form-actions">
 
                     <a href="select_a_seat.html"
