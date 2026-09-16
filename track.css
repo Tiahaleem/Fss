@@ -297,6 +297,23 @@
     font-weight: 700;
 }
 
+.tracking-who {
+    margin-bottom: 4px;
+}
+
+.tracking-who h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-navy-deep);
+    margin: 0 0 2px;
+}
+
+.tracking-who p {
+    color: var(--color-text-muted);
+    font-size: .9rem;
+    margin: 0;
+}
+
 .tracking-header h2 {
     margin-top: 8px;
     font-size: 1.8rem;

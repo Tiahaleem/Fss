@@ -62,6 +62,9 @@ async function renderTimeline(code) {
 
     document.getElementById("tracking-id").textContent = data.reference;
 
+    document.getElementById("tracking-name").textContent = data.name || "Your Booking";
+    document.getElementById("tracking-route").textContent = data.route || (data.type === "passenger" ? "Passenger trip" : "Parcel delivery");
+
     const printLink = document.getElementById("print-ticket-link");
     if (printLink) {
         if (data.type === "passenger") {

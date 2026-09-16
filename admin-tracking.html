@@ -96,6 +96,8 @@
                     <h2>Bookings</h2>
                     <p>Full details behind each reference — who booked it, and who to contact about it.</p>
                 </div>
+
+                <input type="text" id="booking-search-input" class="admin-search-input" placeholder="Search by reference, name, or phone…">
             </div>
 
             <div class="admin-table-wrap">
@@ -188,7 +190,24 @@
             </div>
 
             <div class="admin-form-group">
-                <label>Event Title</label>
+                <label>Event</label>
+                <select id="event-preset">
+                    <option value="">Choose an event…</option>
+                    <option value="Booking Confirmed">Booking Confirmed</option>
+                    <option value="Awaiting Boarding">Awaiting Boarding</option>
+                    <option value="Boarding Completed">Boarding Completed</option>
+                    <option value="Departed">Departed</option>
+                    <option value="In Transit">In Transit</option>
+                    <option value="Checkpoint Reached">Checkpoint Reached</option>
+                    <option value="Arrived at Destination">Arrived at Destination</option>
+                    <option value="Parcel Picked Up">Parcel Picked Up</option>
+                    <option value="Parcel Delivered">Parcel Delivered</option>
+                    <option value="custom">Other (type my own)…</option>
+                </select>
+            </div>
+
+            <div class="admin-form-group" id="event-title-custom-group" style="display:none;">
+                <label>Custom Title</label>
                 <input type="text" id="event-title" placeholder="Boarding completed">
             </div>
 

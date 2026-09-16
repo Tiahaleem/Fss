@@ -8,9 +8,11 @@
 // any reference you like.
 
 let events = [];
+let allBookings = [];
 let deleteTargetId = null;
 
 const bookingsTableBody = document.getElementById("bookings-table-body");
+const bookingSearchInput = document.getElementById("booking-search-input");
 
 function money(kobo) {
     return "₦" + (Number(kobo) / 100).toLocaleString();
@@ -18,8 +20,15 @@ function money(kobo) {
 
 async function loadBookings() {
     try {
-        const bookings = await apiFetch("/api/bookings");
+        allBookings = await apiFetch("/api/bookings");
+        renderBookings(allBookings);
+    } catch (err) {
+        showToast(err.message);
+        bookingsTableBody.innerHTML = `<tr><td colspan="10"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
+    }
+}
 
+function renderBookings(bookings) {
         if (bookings.length === 0) {
             bookingsTableBody.innerHTML = `
                 <tr>
@@ -70,10 +79,6 @@ async function loadBookings() {
                 </tr>
             `;
         }).join("");
-    } catch (err) {
-        showToast(err.message);
-        bookingsTableBody.innerHTML = `<tr><td colspan="10"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
-    }
 }
 
 const bookingActionModal = document.getElementById("booking-action-modal-overlay");
@@ -170,9 +175,43 @@ const eventIdField = document.getElementById("event-id");
 const eventReferenceField = document.getElementById("event-reference");
 const eventOrderField = document.getElementById("event-order");
 const eventTitleField = document.getElementById("event-title");
+const eventPresetField = document.getElementById("event-preset");
+const eventTitleCustomGroup = document.getElementById("event-title-custom-group");
 const eventTimeField = document.getElementById("event-time");
 const eventStatusField = document.getElementById("event-status");
 const eventIconField = document.getElementById("event-icon");
+
+// Picking a preset fills in the title, status, and icon together —
+// no need to remember which icon/status combo goes with which stage.
+// "Other" reveals a free-text field for anything unusual.
+const EVENT_PRESETS = {
+    "Booking Confirmed": { status: "completed", icon: "checkpoint" },
+    "Awaiting Boarding": { status: "active", icon: "boarding" },
+    "Boarding Completed": { status: "completed", icon: "boarding" },
+    "Departed": { status: "active", icon: "departed" },
+    "In Transit": { status: "active", icon: "location" },
+    "Checkpoint Reached": { status: "completed", icon: "checkpoint" },
+    "Arrived at Destination": { status: "completed", icon: "arrival" },
+    "Parcel Picked Up": { status: "completed", icon: "checkpoint" },
+    "Parcel Delivered": { status: "completed", icon: "delivered" }
+};
+
+eventPresetField.addEventListener("change", () => {
+    if (eventPresetField.value === "custom") {
+        eventTitleCustomGroup.style.display = "block";
+        eventTitleField.value = "";
+        return;
+    }
+
+    eventTitleCustomGroup.style.display = "none";
+    eventTitleField.value = eventPresetField.value;
+
+    const preset = EVENT_PRESETS[eventPresetField.value];
+    if (preset) {
+        eventStatusField.value = preset.status;
+        eventIconField.value = preset.icon;
+    }
+});
 
 const deleteModal = document.getElementById("delete-modal-overlay");
 const deleteConfirmText = document.getElementById("delete-confirm-text");
@@ -241,12 +280,24 @@ function openEventModal(event) {
         eventTimeField.value = event.time;
         eventStatusField.value = event.status;
         eventIconField.value = event.icon || "location";
+
+        // If the existing title matches a known preset, show that in
+        // the dropdown; otherwise treat it as a custom one-off title.
+        if (EVENT_PRESETS[event.title]) {
+            eventPresetField.value = event.title;
+            eventTitleCustomGroup.style.display = "none";
+        } else {
+            eventPresetField.value = "custom";
+            eventTitleCustomGroup.style.display = "block";
+        }
     } else {
         eventModalTitle.textContent = "Add Event";
         eventForm.reset();
         eventIdField.value = "";
         eventReferenceField.disabled = false;
         eventIconField.value = "location";
+        eventPresetField.value = "";
+        eventTitleCustomGroup.style.display = "none";
     }
 
     eventModal.classList.add("show");
@@ -270,6 +321,7 @@ eventForm.addEventListener("submit", async (e) => {
     if (
         eventReferenceField.value.trim() === "" ||
         eventOrderField.value.trim() === "" ||
+        eventPresetField.value === "" ||
         eventTitleField.value.trim() === "" ||
         eventTimeField.value.trim() === ""
     ) {
@@ -354,6 +406,29 @@ document.getElementById("delete-confirm-btn").addEventListener("click", async ()
     } catch (err) {
         showToast(err.message);
     }
+});
+
+bookingSearchInput.addEventListener("input", () => {
+    const query = bookingSearchInput.value.trim().toLowerCase();
+
+    if (query === "") {
+        renderBookings(allBookings);
+        return;
+    }
+
+    const filtered = allBookings.filter(b => {
+        const isParcel = b.type === "parcel";
+        const name = (isParcel ? b.sender_name : b.passenger_name) || "";
+        const phone = (isParcel ? b.sender_phone : b.passenger_phone) || "";
+
+        return (
+            b.reference.toLowerCase().includes(query) ||
+            name.toLowerCase().includes(query) ||
+            phone.toLowerCase().includes(query)
+        );
+    });
+
+    renderBookings(filtered);
 });
 
 loadBookings();

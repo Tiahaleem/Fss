@@ -761,3 +761,104 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================
+   SMALL PHONES (under 480px)
+========================= */
+/* The breakpoints above handle tablets and larger phones well, but a
+   genuinely narrow phone (375–414px, the most common real size)
+   needs a bit more tightening — the topbar in particular can overflow
+   with a long page title plus the user's name both fighting for space. */
+
+@media (max-width: 480px) {
+
+    .admin-topbar {
+        padding: 12px 14px;
+        gap: 8px;
+    }
+
+    .admin-topbar h1 {
+        font-size: 1.05rem;
+    }
+
+    /* Keep the avatar, hide the name — there just isn't room for both
+       next to a page title on a small phone screen. */
+    .admin-user span {
+        display: none;
+    }
+
+    .admin-content {
+        padding: 14px;
+    }
+
+    .admin-card {
+        padding: 18px;
+    }
+
+    .admin-card-header h2 {
+        font-size: 1.05rem;
+    }
+
+    .admin-modal {
+        padding: 20px;
+    }
+
+    .admin-modal-header h3 {
+        font-size: 1rem;
+    }
+
+    .admin-form-group label {
+        font-size: .85rem;
+    }
+
+    /* Action buttons (Edit/Delete, Cancel/Refund, etc.) wrap onto
+       their own line instead of squeezing into the table column. */
+    .admin-table-actions {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* The chart's day labels rotate slightly so more of them fit
+       without every single one overlapping its neighbor. */
+    .admin-chart-bar-label {
+        font-size: .6rem;
+    }
+
+    .admin-analytics-stat h3 {
+        font-size: 1.05rem;
+    }
+
+    .booking-type-tabs {
+        flex-direction: column;
+    }
+
+    .booking-type-tab {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.admin-search-input {
+    padding: 10px 16px;
+    min-width: 260px;
+
+    background: var(--color-field-bg);
+    border: 1px solid var(--color-border-light);
+    border-radius: 50px;
+
+    font-size: .85rem;
+    color: var(--color-text-dark);
+}
+
+.admin-search-input:focus {
+    outline: none;
+    border-color: var(--color-cyan);
+    background: #fff;
+}
+
+@media (max-width: 480px) {
+    .admin-search-input {
+        width: 100%;
+        min-width: 0;
+    }
+}
