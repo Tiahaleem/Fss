@@ -41,6 +41,15 @@ async function loadTrips() {
     const passengers = params.get("passengers") || "1";
     const date = params.get("date") || new Date().toISOString().split("T")[0];
 
+    // A trip that departs at 6am is still perfectly bookable for
+    // tomorrow, even at 11pm tonight — this only excludes the exact
+    // date+time combination that's genuinely already gone by.
+    function hasDeparted(trip) {
+        const [hours, minutes] = trip.time.split(":").map(Number);
+        const [year, month, day] = date.split("-").map(Number);
+        return new Date(year, month - 1, day, hours, minutes) <= new Date();
+    }
+
     try {
         const allRoutes = await apiFetch("/api/routes");
 
@@ -55,13 +64,13 @@ async function loadTrips() {
                 r.status === "active"
             );
 
-            const sortedTrips = [...trips].sort((a, b) => a.time.localeCompare(b.time));
+            const sortedTrips = [...trips].filter(t => !hasDeparted(t)).sort((a, b) => a.time.localeCompare(b.time));
 
             if (!route || sortedTrips.length === 0) {
                 if (tripsCountEl) tripsCountEl.textContent = `No trips found for ${from} → ${to}`;
                 tripCardsList.innerHTML = `
                     <div class="admin-empty">
-                        No trips are currently scheduled on this route.
+                        No trips are currently scheduled on this route${date === new Date().toISOString().split("T")[0] ? " for the rest of today" : ""}.
                         <a href="route.html">Browse all routes</a>
                     </div>
                 `;
@@ -91,6 +100,7 @@ async function loadTrips() {
                 return route ? { trip, route } : null;
             })
             .filter(Boolean)
+            .filter(({ trip }) => !hasDeparted(trip))
             .sort((a, b) =>
                 a.trip.from === b.trip.from
                     ? (a.trip.to === b.trip.to ? a.trip.time.localeCompare(b.trip.time) : a.trip.to.localeCompare(b.trip.to))
