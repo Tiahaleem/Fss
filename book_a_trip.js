@@ -100,7 +100,6 @@ async function loadTrips() {
                 return route ? { trip, route } : null;
             })
             .filter(Boolean)
-            .filter(({ trip }) => !hasDeparted(trip))
             .sort((a, b) =>
                 a.trip.from === b.trip.from
                     ? (a.trip.to === b.trip.to ? a.trip.time.localeCompare(b.trip.time) : a.trip.to.localeCompare(b.trip.to))
