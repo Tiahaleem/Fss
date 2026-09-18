@@ -158,7 +158,7 @@ function renderTripCards(tripsWithRoutes, passengers, date) {
             </div>
 
             <div class="trip-bottom">
-                <span>${trip.vehicle} · ${trip.seats} seats</span>
+                <span>${escapeHtml(trip.vehicleName || "Vehicle")} · ${trip.seats} seats</span>
                 <span>${wifiIcon} WiFi</span>
                 <span>${acIcon} Air Conditioning</span>
                 <span>${usbIcon} USB Charging</span>
