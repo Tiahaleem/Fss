@@ -120,6 +120,7 @@ async function loadTrips() {
 
         renderTripCards(tripsWithRoutes, passengers, date);
     } catch (err) {
+        console.error("loadTrips failed:", err);
         if (tripsCountEl) tripsCountEl.textContent = "Couldn't load trips";
         tripCardsList.innerHTML = `
             <div class="admin-empty">Couldn't load trips right now. Please try again shortly.</div>
