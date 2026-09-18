@@ -39,7 +39,7 @@ async function loadTrips() {
     const from = params.get("from");
     const to = params.get("to");
     const passengers = params.get("passengers") || "1";
-    const date = params.get("date") || new Date().toISOString().split("T")[0];
+    const date = params.get("date") || getLocalDateString();
 
     // A trip that departs at 6am is still perfectly bookable for
     // tomorrow, even at 11pm tonight — this only excludes the exact
@@ -70,7 +70,7 @@ async function loadTrips() {
                 if (tripsCountEl) tripsCountEl.textContent = `No trips found for ${from} → ${to}`;
                 tripCardsList.innerHTML = `
                     <div class="admin-empty">
-                        No trips are currently scheduled on this route${date === new Date().toISOString().split("T")[0] ? " for the rest of today" : ""}.
+                        No trips are currently scheduled on this route${date === getLocalDateString() ? " for the rest of today" : ""}.
                         <a href="route.html">Browse all routes</a>
                     </div>
                 `;

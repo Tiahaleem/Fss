@@ -23,7 +23,7 @@ const params = new URLSearchParams(window.location.search);
 const tripId = params.get("trip");
 const seatNumbers = (params.get("seats") || "").split(",").filter(Boolean);
 const terminalId = params.get("terminal");
-const travelDate = params.get("date") || new Date().toISOString().split("T")[0];
+const travelDate = params.get("date") || getLocalDateString();
 
 let currentTrip = null;
 let currentRoute = null;

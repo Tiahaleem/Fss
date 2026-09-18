@@ -35,7 +35,7 @@ let allRoutes = [];
 let selectedSeats = [];
 let currentTripPrice = 0;
 
-dateInput.value = new Date().toISOString().split("T")[0];
+dateInput.value = getLocalDateString();
 
 async function loadTripsForDropdown() {
     try {
@@ -179,7 +179,7 @@ passengerForm.addEventListener("submit", async (e) => {
 
         showToast(`Booking created — ${result.reference}`, "success");
         passengerForm.reset();
-        dateInput.value = new Date().toISOString().split("T")[0];
+        dateInput.value = getLocalDateString();
         loadSeatsForSelection();
     } catch (err) {
         showToast(err.message);

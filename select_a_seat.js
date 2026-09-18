@@ -39,16 +39,31 @@ if (seatMap && continueBtn) {
 
     const urlParams = new URLSearchParams(window.location.search);
     const tripId = urlParams.get('trip');
-    const seatLimit = Math.max(1, Number(urlParams.get('passengers')) || 1);
-    const travelDate = urlParams.get('date') || new Date().toISOString().split('T')[0];
+    let seatLimit = Math.max(1, Number(urlParams.get('passengers')) || 1);
+    let maxSeatLimit = 6; // safe default until the real vehicle capacity loads
+    const travelDate = urlParams.get('date') || getLocalDateString();
     const tabId = getTabSessionId();
+
+    const seatCountValue = document.getElementById('seat-count-value');
+    const seatCountMinus = document.getElementById('seat-count-minus');
+    const seatCountPlus = document.getElementById('seat-count-plus');
+
+    function updateSeatCountDisplay() {
+        if (seatCountValue) seatCountValue.textContent = seatLimit;
+        if (seatCountMinus) seatCountMinus.disabled = seatLimit <= 1;
+        if (seatCountPlus) seatCountPlus.disabled = seatLimit >= maxSeatLimit;
+        if (seatLimitText) {
+            seatLimitText.textContent = seatLimit === 1 ? "Select 1 seat" : `Select ${seatLimit} seats`;
+        }
+        if (continueBtn) {
+            continueBtn.disabled = mySelectedSeats().length !== seatLimit;
+        }
+    }
 
     let countdownInterval = null;
     let currentRoute = null;
 
-    if (seatLimitText) {
-        seatLimitText.textContent = seatLimit === 1 ? "Select 1 seat" : `Select ${seatLimit} seats`;
-    }
+    updateSeatCountDisplay();
 
     const summaryDateEl = document.getElementById('summary-date');
     if (summaryDateEl) {
@@ -81,11 +96,18 @@ if (seatMap && continueBtn) {
                 r.to.toLowerCase() === trip.to.toLowerCase()
             );
 
+            // The real vehicle's seat count minus 1 (seat 1 is
+            // always the driver) — the true ceiling on how many
+            // seats a single booking could ever need.
+            maxSeatLimit = Math.max(1, (trip.seats || 7) - 1);
+            if (seatLimit > maxSeatLimit) seatLimit = maxSeatLimit;
+            updateSeatCountDisplay();
+
             if (currentRoute) {
                 const arrival = addMinutesToTime(trip.time, currentRoute.duration);
 
                 if (heroHeading) heroHeading.textContent = `${trip.from} → ${trip.to}`;
-                if (heroSubtitle) heroSubtitle.textContent = `${trip.time} → ${arrival} (${currentRoute.duration}) · ${trip.vehicle}`;
+                if (heroSubtitle) heroSubtitle.textContent = `${trip.time} → ${arrival} (${currentRoute.duration}) · ${trip.vehicleName || "Vehicle"}`;
                 if (summaryRoute) summaryRoute.textContent = `${trip.from} → ${trip.to}`;
                 if (summaryDeparture) summaryDeparture.textContent = trip.time;
                 if (summaryArrival) summaryArrival.textContent = arrival;
@@ -191,6 +213,35 @@ if (seatMap && continueBtn) {
             showToast(err.message);
         }
     }
+
+    seatCountMinus?.addEventListener('click', async () => {
+        if (seatLimit <= 1) return;
+        seatLimit--;
+
+        // If they'd already selected more seats than the new lower
+        // limit allows, release the extra ones automatically —
+        // starting from whichever seat they picked last.
+        const excess = mySelectedSeats().slice(seatLimit);
+        for (const seatNum of excess) {
+            try {
+                await apiFetch(`/api/trips/${tripId}/seats/${seatNum}/hold`, {
+                    method: "DELETE",
+                    body: JSON.stringify({ sessionId: tabId, travelDate })
+                });
+            } catch (err) {
+                // Not critical — worst case it just stays held until it expires naturally
+            }
+        }
+
+        updateSeatCountDisplay();
+        if (excess.length > 0) await loadSeats();
+    });
+
+    seatCountPlus?.addEventListener('click', () => {
+        if (seatLimit >= maxSeatLimit) return;
+        seatLimit++;
+        updateSeatCountDisplay();
+    });
 
     seatMap.addEventListener('click', async (e) => {
         const seat = e.target.closest('.seat');

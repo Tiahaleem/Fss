@@ -15,7 +15,7 @@ async function loadSchedule() {
     const params = new URLSearchParams(window.location.search);
     const from = params.get("from") || "Lagos";
     const to = params.get("to") || "Abuja";
-    const date = params.get("date") || new Date().toISOString().split("T")[0];
+    const date = params.get("date") || getLocalDateString();
 
     try {
         const [allRoutes, trips] = await Promise.all([

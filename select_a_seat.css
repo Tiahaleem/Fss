@@ -154,6 +154,65 @@
     margin-bottom: 6px;
 }
 
+.seat-count-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 12px 16px;
+    margin-bottom: 8px;
+
+    background: var(--color-field-bg);
+    border-radius: var(--radius-md);
+
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.seat-count-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.seat-count-controls button {
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #fff;
+    border: 1px solid var(--color-border-light);
+    border-radius: 50%;
+
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-navy-deep);
+    cursor: pointer;
+
+    transition: all var(--transition-base);
+}
+
+.seat-count-controls button:hover:not(:disabled) {
+    border-color: var(--color-cyan);
+    color: var(--color-cyan);
+}
+
+.seat-count-controls button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+#seat-count-value {
+    min-width: 16px;
+    text-align: center;
+    font-size: 1rem;
+    color: var(--color-navy-deep);
+}
+
 .seat-map-card p {
     color: var(--color-text-muted);
     font-size: .95rem;

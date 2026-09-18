@@ -1,260 +1,234 @@
 // =========================
-// AUTH (login.html + signup.html) — real backend
+// API CLIENT (shared)
 // =========================
-// Same two-step signup flow as before (details → email verification)
-// — but now creates a real account with a real bcrypt-hashed
-// password. The "demo code" box still shows the actual code, since
-// there's still no email service wired up to send it for real —
-// that's the backend's own _devCode field, not something invented
-// here anymore.
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Gives today's date as the customer's own real local date
+// ("2026-09-18"), NOT the UTC date. toISOString() always returns UTC
+// — for anyone in Nigeria (UTC+1), that's silently the WRONG date for
+// roughly the first hour after midnight local time, since UTC is
+// still on "yesterday" then. This uses the browser's own local date
+// fields instead, so it always matches what the customer's clock
+// actually says.
+function getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
 
-// =========================
-// GOOGLE SIGN-IN
-// =========================
-// Google's own script (loaded in the page's <head>) renders the
-// actual button into #google-signin-button. This just wires up what
-// happens once someone actually uses it: Google hands back a signed
-// credential, which goes straight to our backend to verify — this
-// page never looks inside it or trusts it directly.
-const GOOGLE_CLIENT_ID = "1033467784103-4s2bhc300lasq6c7gr9iehp9rnrl5jd7.apps.googleusercontent.com";
+// Escapes any text before it's inserted into the page's HTML — a
+// review comment or name is just data, never code. Without this,
+// someone could submit a review containing something like <img
+// onerror="steal a visitor's session"> and have it actually RUN for
+// every real visitor who sees it on the homepage or Reviews page.
+function escapeHtml(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
-async function handleGoogleCredential(response) {
+// Replaces the localStorage get___()/save___() pattern from index.js
+// with real calls to the backend. Load this AFTER index.js on any
+// admin page (index.js still provides showToast() etc.).
+//
+// Your real, deployed backend — the frontend talks to this address
+// no matter where the frontend itself is hosted (GitHub Pages,
+// Live Server locally, wherever). If you ever redeploy the backend
+// somewhere else, this is the one line that needs to change.
+const API_BASE_URL = "https://fss-backend-api.onrender.com";
+
+const ADMIN_TOKEN_KEY = "fss_admin_token";
+
+function getAdminToken() {
+    return localStorage.getItem(ADMIN_TOKEN_KEY);
+}
+
+function setAdminToken(token) {
+    localStorage.setItem(ADMIN_TOKEN_KEY, token);
+}
+
+function clearAdminToken() {
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+// Separate from the admin token on purpose — someone testing this
+// site could be logged into the admin panel AND have a customer
+// account signed in at the same time, in the same browser. They
+// shouldn't interfere with each other.
+const CUSTOMER_TOKEN_KEY = "fss_customer_token";
+
+function getCustomerToken() {
+    return localStorage.getItem(CUSTOMER_TOKEN_KEY);
+}
+
+function setCustomerToken(token) {
+    localStorage.setItem(CUSTOMER_TOKEN_KEY, token);
+}
+
+function clearCustomerToken() {
+    localStorage.removeItem(CUSTOMER_TOKEN_KEY);
+}
+
+// Wraps fetch() with the API base URL, JSON headers, a login token
+// (if any), and consistent error handling. Every call site does:
+// const data = await apiFetch("/api/routes");
+//
+// Pass { asCustomer: true } for endpoints a signed-in CUSTOMER calls
+// (like /api/bookings/mine) — everything else (the existing admin
+// pages) keeps using the admin token by default, unchanged.
+async function apiFetch(path, options = {}) {
+    const asCustomer = options.asCustomer === true;
+    const token = asCustomer ? getCustomerToken() : getAdminToken();
+
+    const headers = {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers
+    };
+
+    let response;
+
     try {
-        const data = await apiFetch("/api/auth/google", {
-            method: "POST",
-            asCustomer: true,
-            body: JSON.stringify({ credential: response.credential })
-        });
-
-        setCustomerToken(data.token);
-        showToast(`Signed in as ${data.user.name} — redirecting…`, "success");
-
-        setTimeout(() => {
-            window.location.href = "index.html";
-        }, 900);
+        response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
     } catch (err) {
-        showToast(err.message);
-    }
-}
-
-function initGoogleSignIn() {
-    const container = document.getElementById("google-signin-button");
-    if (!container) return;
-
-    if (typeof google === "undefined" || !google.accounts) {
-        // Google's script (loaded async) hasn't finished loading yet — try again shortly
-        setTimeout(initGoogleSignIn, 200);
-        return;
+        // The server itself is unreachable (not running, wrong URL, etc.)
+        throw new Error("Couldn't reach the server. Is it running?");
     }
 
-    google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredential
-    });
-
-    google.accounts.id.renderButton(container, {
-        theme: "outline",
-        size: "large",
-        shape: "rectangular",
-        logo_alignment: "left",
-        width: 348, // matches the auth card's inner content width (420px card - 36px padding × 2)
-        text: "continue_with"
-    });
-}
-
-initGoogleSignIn();
-
-// =========================
-// LOGIN FORM
-// =========================
-const loginForm = document.getElementById("login-form");
-
-if (loginForm) {
-    loginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const email = document.getElementById("login-email");
-        const password = document.getElementById("login-password");
-
-        if (email.value.trim() === "" || password.value.trim() === "") {
-            showToast("Please enter your email and password.");
-            return;
+    // Session expired or was never valid
+    if (response.status === 401 && path !== "/api/auth/login") {
+        if (asCustomer) {
+            clearCustomerToken();
+            // No forced redirect here — most customer pages are public
+            // and shouldn't kick someone out just because their
+            // optional login expired. Callers decide what to do.
+        } else {
+            clearAdminToken();
+            window.location.href = "admin-login.html";
         }
+        throw new Error("Session expired.");
+    }
 
-        if (!emailPattern.test(email.value.trim())) {
-            showToast("Please enter a valid email address.");
-            return;
-        }
+    // No content (e.g. a successful DELETE)
+    if (response.status === 204) {
+        return null;
+    }
 
-        try {
-            const data = await apiFetch("/api/auth/login", {
-                method: "POST",
-                asCustomer: true,
-                body: JSON.stringify({
-                    email: email.value.trim(),
-                    password: password.value
-                })
-            });
+    let data;
+    try {
+        data = await response.json();
+    } catch (err) {
+        throw new Error(`Server returned an unexpected response (status ${response.status}) for ${path}.`);
+    }
 
-            setCustomerToken(data.token);
+    if (!response.ok) {
+        throw new Error(data.error || "Something went wrong.");
+    }
 
-            showToast("Signed in — redirecting…", "success");
-
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 900);
-        } catch (err) {
-            showToast(err.message);
-        }
-    });
+    return data;
 }
 
 // =========================
-// SIGNUP FORM (step 1: details → step 2: email verification)
+// NAV AUTH STATE
 // =========================
-const signupForm = document.getElementById("signup-form");
-const signupFormView = document.getElementById("signup-form-view");
-const verifyView = document.getElementById("verify-view");
-const verifyEmailTarget = document.getElementById("verify-email-target");
-const demoCodeDisplay = document.getElementById("demo-code-display");
-const verifyForm = document.getElementById("verify-form");
-const verifyCodeInput = document.getElementById("verify-code-input");
-const resendCodeBtn = document.getElementById("resend-code-btn");
-const changeEmailLink = document.getElementById("change-email-link");
+// Swaps "Sign In" / "Get Started" for the customer's name + Log Out,
+// on every page that has a .nav-buttons element and a customer
+// session token. Checks the REAL session with the backend (not just
+// "is there a token sitting in storage") — a stale/expired token
+// quietly falls back to showing the normal Sign In / Get Started.
 
-let pendingEmail = null;
+(async function applyNavAuthState() {
+    const navButtons = document.querySelector(".nav-buttons");
+    if (!navButtons) return;
 
-function showVerifyStep(email, code) {
-    pendingEmail = email;
-    verifyEmailTarget.textContent = email;
-    demoCodeDisplay.textContent = code;
-    verifyCodeInput.value = "";
+    const token = getCustomerToken();
+    if (!token) return;
 
-    signupFormView.style.display = "none";
-    verifyView.style.display = "block";
-    verifyCodeInput.focus();
-}
+    let user;
+    try {
+        user = await apiFetch("/api/auth/me", { asCustomer: true });
+    } catch (err) {
+        return; // no token, expired token, or server unreachable — leave the default Sign In / Get Started
+    }
 
-if (signupForm) {
-    signupForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    const initial = user.name ? user.name.trim().charAt(0).toUpperCase() : "U";
 
-        const name = document.getElementById("signup-name");
-        const email = document.getElementById("signup-email");
-        const password = document.getElementById("signup-password");
-        const confirm = document.getElementById("signup-confirm");
-        const terms = document.getElementById("signup-terms");
+    navButtons.innerHTML = `
+        <a href="settings.html" class="signin" style="display:flex; align-items:center; gap:8px;">
+            <span style="width:26px; height:26px; border-radius:50%; background:var(--color-cyan); color:white; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">${initial}</span>
+            ${user.name ? user.name.split(" ")[0] : "Account"}
+        </a>
+        <a href="#" class="btn-primary" id="nav-logout-btn">Log Out</a>
+    `;
 
-        if (
-            name.value.trim() === "" ||
-            email.value.trim() === "" ||
-            password.value.trim() === "" ||
-            confirm.value.trim() === ""
-        ) {
-            showToast("Please fill in every field.");
+    const logoutBtn = document.getElementById("nav-logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            clearCustomerToken();
+            window.location.href = "index.html";
+        });
+    }
+})();
+
+// =========================
+// HOMEPAGE TESTIMONIALS
+// =========================
+// Only runs on pages that actually have the testimonials grid
+// (currently just the homepage). Real reviews, real average rating —
+// nothing here is invented.
+
+(async function loadTestimonials() {
+    const grid = document.getElementById("testimonials-grid");
+    const summaryEl = document.getElementById("testimonials-summary");
+    if (!grid) return;
+
+    try {
+        const [reviews, summary] = await Promise.all([
+            apiFetch("/api/reviews?limit=6"),
+            apiFetch("/api/reviews/summary")
+        ]);
+
+        if (summaryEl) {
+            summaryEl.textContent = summary.reviewCount > 0
+                ? `${summary.averageRating} ★ average from ${summary.reviewCount} real customer${summary.reviewCount === 1 ? "" : "s"}`
+                : "Be the first to leave a review after your trip.";
+        }
+
+        if (reviews.length === 0) {
+            grid.closest(".testimonials-section").style.display = "none";
             return;
         }
 
-        if (!emailPattern.test(email.value.trim())) {
-            showToast("Please enter a valid email address.");
-            return;
-        }
+        grid.innerHTML = reviews.map(r => {
+            const name = escapeHtml(r.name);
+            const comment = escapeHtml(r.comment ? r.comment : "Great experience overall.");
+            const route = escapeHtml(r.route);
+            const initial = escapeHtml(r.name.trim().charAt(0).toUpperCase());
+            const avatar = r.photo ? `<img src="${escapeHtml(r.photo)}" alt="${name}">` : initial;
 
-        if (password.value.length < 8) {
-            showToast("Password must be at least 8 characters.");
-            return;
-        }
-
-        if (password.value !== confirm.value) {
-            showToast("Passwords don't match.");
-            return;
-        }
-
-        if (!terms.checked) {
-            showToast("Please accept the Terms & Privacy Policy to continue.");
-            return;
-        }
-
-        try {
-            // Nothing is "logged in" yet — the account exists on the
-            // server now (unverified), but no session starts until
-            // the code below is confirmed.
-            const result = await apiFetch("/api/auth/signup", {
-                method: "POST",
-                body: JSON.stringify({
-                    name: name.value.trim(),
-                    email: email.value.trim(),
-                    password: password.value
-                })
-            });
-
-            showVerifyStep(email.value.trim(), result._devCode);
-        } catch (err) {
-            showToast(err.message);
-        }
-    });
-}
-
-if (verifyForm) {
-    verifyForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        if (!pendingEmail) {
-            showToast("Something went wrong — please start over.");
-            return;
-        }
-
-        try {
-            const data = await apiFetch("/api/auth/verify", {
-                method: "POST",
-                body: JSON.stringify({
-                    email: pendingEmail,
-                    code: verifyCodeInput.value.trim()
-                })
-            });
-
-            setCustomerToken(data.token);
-            pendingEmail = null;
-
-            showToast("Email verified — redirecting…", "success");
-
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 900);
-        } catch (err) {
-            showToast(err.message);
-        }
-    });
-}
-
-if (resendCodeBtn) {
-    resendCodeBtn.addEventListener("click", async () => {
-        if (!pendingEmail) return;
-
-        try {
-            const result = await apiFetch("/api/auth/resend-code", {
-                method: "POST",
-                body: JSON.stringify({ email: pendingEmail })
-            });
-
-            demoCodeDisplay.textContent = result._devCode;
-            verifyCodeInput.value = "";
-            verifyCodeInput.focus();
-
-            showToast("New code generated.", "success");
-        } catch (err) {
-            showToast(err.message);
-        }
-    });
-}
-
-if (changeEmailLink) {
-    changeEmailLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        pendingEmail = null;
-        verifyView.style.display = "none";
-        signupFormView.style.display = "block";
-    });
-}
+            return `
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
+                    <p class="testimonial-comment">"${comment}"</p>
+                    <div class="testimonial-footer">
+                        <div class="testimonial-avatar">${avatar}</div>
+                        <div class="testimonial-identity">
+                            <span class="testimonial-name">${name}</span>
+                            <span class="testimonial-route">${route}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    } catch (err) {
+        // No reviews yet, or the API isn't reachable — just hide the
+        // section entirely rather than showing an error on the homepage.
+        const section = grid.closest(".testimonials-section");
+        if (section) section.style.display = "none";
+    }
+})();
