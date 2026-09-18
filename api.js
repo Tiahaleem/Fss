@@ -2,6 +2,20 @@
 // API CLIENT (shared)
 // =========================
 
+// Gives today's date as the customer's own real local date
+// ("2026-09-18"), NOT the UTC date. toISOString() always returns UTC
+// — for anyone in Nigeria (UTC+1), that's silently the WRONG date for
+// roughly the first hour after midnight local time, since UTC is
+// still on "yesterday" then. This uses the browser's own local date
+// fields instead, so it always matches what the customer's clock
+// actually says.
+function getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
 // Escapes any text before it's inserted into the page's HTML — a
 // review comment or name is just data, never code. Without this,
 // someone could submit a review containing something like <img
