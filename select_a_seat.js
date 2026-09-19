@@ -107,6 +107,9 @@ if (seatMap && continueBtn) {
                 const arrival = addMinutesToTime(trip.time, currentRoute.duration);
 
                 if (heroHeading) heroHeading.textContent = `${trip.from} → ${trip.to}`;
+
+                const summaryRouteEl = document.getElementById("summary-route");
+                if (summaryRouteEl) summaryRouteEl.textContent = `${trip.from} → ${trip.to}`;
                 if (heroSubtitle) heroSubtitle.textContent = `${trip.time} → ${arrival} (${currentRoute.duration}) · ${trip.vehicleName || "Vehicle"}`;
                 if (summaryRoute) summaryRoute.textContent = `${trip.from} → ${trip.to}`;
                 if (summaryDeparture) summaryDeparture.textContent = trip.time;

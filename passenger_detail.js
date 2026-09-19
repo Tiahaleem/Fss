@@ -59,6 +59,7 @@ async function loadBookingSummary() {
         const priceText = `₦${totalPrice.toLocaleString()}`;
 
         const routeField = document.querySelector('[data-field="route"]');
+        const dateField = document.querySelector('[data-field="date"]');
         const departureField = document.querySelector('[data-field="departure"]');
         const arrivalField = document.querySelector('[data-field="arrival"]');
         const vehicleField = document.querySelector('[data-field="vehicle"]');
@@ -67,12 +68,19 @@ async function loadBookingSummary() {
         const seatField = document.querySelector('[data-field="seat"]');
         const pickupField = document.querySelector('[data-field="pickup"]');
 
+        const [y, m, d] = travelDate.split("-").map(Number);
+        const formattedDate = new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+
         if (routeField) routeField.textContent = `${trip.from} → ${trip.to}`;
+        if (dateField) dateField.textContent = formattedDate;
         if (departureField) departureField.textContent = trip.time;
         if (arrivalField) arrivalField.textContent = arrival;
-        if (vehicleField) vehicleField.textContent = trip.vehicle;
+        if (vehicleField) vehicleField.textContent = trip.vehicleName || "Vehicle";
         if (payAmountField) payAmountField.textContent = priceText;
         if (totalAmountField) totalAmountField.textContent = priceText;
+
+        const heroSubtitle = document.querySelector(".passenger-hero p");
+        if (heroSubtitle) heroSubtitle.textContent = `${trip.from} → ${trip.to} · ${formattedDate}`;
         if (seatField) seatField.textContent = seatNumbers.join(', ');
         if (pickupField) pickupField.textContent = terminal.name;
     } catch (err) {
