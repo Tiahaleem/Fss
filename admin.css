@@ -862,3 +862,13 @@
         min-width: 0;
     }
 }
+
+.admin-help-text {
+    font-size: .8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+}
+
+.admin-help-text a {
+    color: var(--color-cyan);
+}

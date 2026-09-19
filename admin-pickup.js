@@ -19,6 +19,8 @@ const terminalNameField = document.getElementById("terminal-name");
 const terminalAddressField = document.getElementById("terminal-address");
 const terminalPhoneField = document.getElementById("terminal-phone");
 const terminalHoursField = document.getElementById("terminal-hours");
+const terminalLatitudeField = document.getElementById("terminal-latitude");
+const terminalLongitudeField = document.getElementById("terminal-longitude");
 const terminalStatusField = document.getElementById("terminal-status");
 
 const deleteModal = document.getElementById("delete-modal-overlay");
@@ -81,6 +83,8 @@ function openTerminalModal(terminal) {
         terminalAddressField.value = terminal.address;
         terminalPhoneField.value = terminal.phone;
         terminalHoursField.value = terminal.hours;
+        terminalLatitudeField.value = terminal.latitude ?? "";
+        terminalLongitudeField.value = terminal.longitude ?? "";
         terminalStatusField.value = terminal.status;
     } else {
         terminalModalTitle.textContent = "Add Terminal";
@@ -125,6 +129,8 @@ terminalForm.addEventListener("submit", async (e) => {
         address: terminalAddressField.value.trim(),
         phone: terminalPhoneField.value.trim(),
         hours: terminalHoursField.value.trim(),
+        latitude: terminalLatitudeField.value.trim() ? Number(terminalLatitudeField.value.trim()) : null,
+        longitude: terminalLongitudeField.value.trim() ? Number(terminalLongitudeField.value.trim()) : null,
         status: terminalStatusField.value
     };
 

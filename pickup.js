@@ -11,6 +11,49 @@ const pinIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em
 const phoneIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none" /><path fill="#61d1d5" d="M19.95 21q-3.125 0-6.175-1.362t-5.55-3.863t-3.862-5.55T3 4.05q0-.45.3-.75t.75-.3H8.1q.35 0 .625.238t.325.562l.65 3.5q.05.4-.025.675T9.4 8.45L6.975 10.9q.5.925 1.187 1.787t1.513 1.663q.775.775 1.625 1.438T13.1 17l2.35-2.35q.225-.225.588-.337t.712-.063l3.45.7q.35.1.575.363T21 15.9v4.05q0 .45-.3.75t-.75.3M6.025 9l1.65-1.65L7.25 5H5.025q.125 1.025.35 2.025T6.025 9m8.95 8.95q.975.425 1.988.675T19 18.95v-2.2l-2.35-.475zm0 0" /></svg>';
 const clockIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none" /><path fill="#61d1d5" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2m0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m0 2a1 1 0 0 1 .993.883L13 7v4.586l2.707 2.707a1 1 0 0 1-1.32 1.497l-.094-.083l-3-3a1 1 0 0 1-.284-.576L11 12V7a1 1 0 0 1 1-1" /></svg>';
 
+// Only terminals that actually have coordinates set can show a real
+// pin — older terminals added before this feature existed just
+// won't appear on the map until an admin fills theirs in.
+function renderMap(terminals) {
+    const mapContainer = document.getElementById("pickup-map");
+    if (!mapContainer || typeof L === "undefined") return;
+
+    const withCoordinates = terminals.filter(t => t.latitude && t.longitude);
+
+    if (withCoordinates.length === 0) {
+        mapContainer.closest(".pickup-map-section").style.display = "none";
+        return;
+    }
+
+    // Centered on Nigeria by default; will re-fit to the real pins below anyway.
+    const map = L.map("pickup-map").setView([9.082, 8.6753], 6);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+    }).addTo(map);
+
+    const markers = withCoordinates.map(t => {
+        const marker = L.marker([t.latitude, t.longitude]).addTo(map);
+        marker.bindPopup(`
+            <div class="pickup-map-popup">
+                <strong>${escapeHtml(t.name)}</strong>
+                <span>${escapeHtml(t.address)}</span>
+            </div>
+        `);
+        return marker;
+    });
+
+    // Zoom/pan to fit every pin on screen at once, rather than a
+    // fixed zoom level that might crop some out.
+    if (markers.length > 1) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.2));
+    } else {
+        map.setView([withCoordinates[0].latitude, withCoordinates[0].longitude], 13);
+    }
+}
+
 async function loadTerminals() {
     if (!pickupCentersSection) return;
 
@@ -23,6 +66,8 @@ async function loadTerminals() {
             `;
             return;
         }
+
+        renderMap(terminals);
 
         const cities = [...new Set(terminals.map(t => t.city))];
 
