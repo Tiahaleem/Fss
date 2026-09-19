@@ -50,6 +50,20 @@ async function loadTrips() {
         return new Date(year, month - 1, day, hours, minutes) <= new Date();
     }
 
+    // Lets someone change the date right here, without going all
+    // the way back to the homepage and re-searching from scratch.
+    const dateInput = document.getElementById("trip-date-input");
+    if (dateInput) {
+        dateInput.value = date;
+        dateInput.min = getLocalDateString(); // can't search a date that's already passed
+
+        dateInput.addEventListener("change", () => {
+            const newParams = new URLSearchParams(window.location.search);
+            newParams.set("date", dateInput.value);
+            window.location.href = `book_a_trip.html?${newParams.toString()}`;
+        });
+    }
+
     try {
         const allRoutes = await apiFetch("/api/routes");
 
@@ -100,6 +114,7 @@ async function loadTrips() {
                 return route ? { trip, route } : null;
             })
             .filter(Boolean)
+            .filter(({ trip }) => !hasDeparted(trip))
             .sort((a, b) =>
                 a.trip.from === b.trip.from
                     ? (a.trip.to === b.trip.to ? a.trip.time.localeCompare(b.trip.time) : a.trip.to.localeCompare(b.trip.to))
@@ -107,9 +122,9 @@ async function loadTrips() {
             );
 
         if (tripsWithRoutes.length === 0) {
-            if (tripsCountEl) tripsCountEl.textContent = "No trips available right now";
+            if (tripsCountEl) tripsCountEl.textContent = "No trips available for this date";
             tripCardsList.innerHTML = `
-                <div class="admin-empty">No trips are currently scheduled. Check back soon.</div>
+                <div class="admin-empty">No trips are scheduled, or all of today's have already departed. Try a different date above.</div>
             `;
             return;
         }
