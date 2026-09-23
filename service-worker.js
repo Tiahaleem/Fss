@@ -56,9 +56,22 @@ self.addEventListener("fetch", (event) => {
     // offline right now.
     if (event.request.mode === "navigate") {
         event.respondWith(
-            fetch(event.request).catch(() =>
-                caches.match(event.request).then((cached) => cached || caches.match("./index.html"))
-            )
+            fetch(event.request).catch(async () => {
+                const cached = await caches.match(event.request);
+                if (cached) return cached;
+
+                const indexCached = await caches.match("./index.html");
+                if (indexCached) return indexCached;
+
+                // Absolute last resort — guarantees a real Response
+                // no matter what, since returning undefined here is
+                // exactly what throws "Failed to convert value to
+                // 'Response'" and breaks the page load entirely.
+                return new Response(
+                    "You're offline and this page hasn't been saved for offline use yet.",
+                    { status: 503, headers: { "Content-Type": "text/plain" } }
+                );
+            })
         );
         return;
     }
