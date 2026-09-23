@@ -2,6 +2,21 @@
 // API CLIENT (shared)
 // =========================
 
+// Makes the site installable and lets it work at least partially
+// offline. Registered here since api.js already loads on virtually
+// every customer-facing page — no need to touch every single
+// script tag separately. Silently does nothing on browsers that
+// don't support service workers (no error, just no offline benefit).
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {
+            // Not critical if this fails — the site still works
+            // completely normally, just without offline caching.
+        });
+    });
+}
+
+
 // Gives today's date as the customer's own real local date
 // ("2026-09-18"), NOT the UTC date. toISOString() always returns UTC
 // — for anyone in Nigeria (UTC+1), that's silently the WRONG date for
