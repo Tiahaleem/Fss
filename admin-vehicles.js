@@ -18,6 +18,9 @@ const vehicleIdField = document.getElementById("vehicle-id");
 const vehicleNameField = document.getElementById("vehicle-name");
 const vehiclePlateField = document.getElementById("vehicle-plate");
 const vehicleSeatsField = document.getElementById("vehicle-seats");
+const vehicleLayoutField = document.getElementById("vehicle-layout");
+const vehicleClassField = document.getElementById("vehicle-class");
+const vehicleHasACField = document.getElementById("vehicle-has-ac");
 const vehicleStatusField = document.getElementById("vehicle-status");
 
 const deleteModal = document.getElementById("delete-modal-overlay");
@@ -29,7 +32,7 @@ async function loadVehicles() {
         renderVehicles();
     } catch (err) {
         showToast(err.message);
-        tableBody.innerHTML = `<tr><td colspan="5"><div class="admin-empty">Couldn't load vehicles.</div></td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7"><div class="admin-empty">Couldn't load vehicles.</div></td></tr>`;
     }
 }
 
@@ -37,7 +40,7 @@ function renderVehicles() {
     if (vehicles.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="5">
+                <td colspan="7">
                     <div class="admin-empty">No vehicles yet. Click "Add Vehicle" to add your first one.</div>
                 </td>
             </tr>
@@ -51,7 +54,9 @@ function renderVehicles() {
         <tr>
             <td>${escapeHtml(v.name)}</td>
             <td>${escapeHtml(v.plateNumber || "—")}</td>
-            <td>${v.seats}</td>
+            <td>${v.seats}${v.layout ? ` (${escapeHtml(v.layout)})` : ""}</td>
+            <td>${escapeHtml(v.vehicleClass || "—")}</td>
+            <td>${v.hasAC ? "Yes" : "No"}</td>
             <td><span class="status-badge ${v.status}">${v.status === "active" ? "Active" : "Inactive"}</span></td>
             <td>
                 <div class="admin-table-actions">
@@ -74,6 +79,9 @@ function openVehicleModal(vehicle) {
         vehicleNameField.value = vehicle.name;
         vehiclePlateField.value = vehicle.plateNumber || "";
         vehicleSeatsField.value = vehicle.seats;
+        vehicleLayoutField.value = vehicle.layout || "";
+        vehicleClassField.value = vehicle.vehicleClass || "";
+        vehicleHasACField.checked = vehicle.hasAC !== false;
         vehicleStatusField.value = vehicle.status;
     } else {
         vehicleModalTitle.textContent = "Add Vehicle";
@@ -110,6 +118,9 @@ vehicleForm.addEventListener("submit", async (e) => {
         name: vehicleNameField.value.trim(),
         plateNumber: vehiclePlateField.value.trim(),
         seats: Number(vehicleSeatsField.value),
+        layout: vehicleLayoutField.value.trim(),
+        vehicleClass: vehicleClassField.value.trim(),
+        hasAC: vehicleHasACField.checked,
         status: vehicleStatusField.value
     };
 

@@ -111,6 +111,42 @@ if (seatMap && continueBtn) {
                 const summaryRouteEl = document.getElementById("summary-route");
                 if (summaryRouteEl) summaryRouteEl.textContent = `${trip.from} → ${trip.to}`;
                 if (heroSubtitle) heroSubtitle.textContent = `${trip.time} → ${arrival} (${currentRoute.duration}) · ${trip.vehicleName || "Vehicle"}`;
+
+                const vehicleNameEl = document.getElementById("vehicle-name");
+                const vehiclePlateEl = document.getElementById("vehicle-plate");
+                const vehicleSeatsEl = document.getElementById("vehicle-seats");
+
+                if (vehicleNameEl) vehicleNameEl.textContent = trip.vehicleName || "Vehicle";
+                if (vehiclePlateEl) vehiclePlateEl.textContent = trip.vehiclePlate || "";
+                if (vehicleSeatsEl) vehicleSeatsEl.textContent = trip.seats;
+
+                // Layout and vehicle class are genuinely optional per
+                // vehicle — only show that box at all when this
+                // specific vehicle actually has one set, rather than
+                // displaying an empty "–" for vehicles nobody's
+                // bothered to fill that in for yet.
+                const layoutBox = document.getElementById("vehicle-layout-box");
+                const layoutEl = document.getElementById("vehicle-layout");
+                if (trip.vehicleLayout) {
+                    layoutEl.textContent = trip.vehicleLayout;
+                    layoutBox.style.display = "";
+                } else if (layoutBox) {
+                    layoutBox.style.display = "none";
+                }
+
+                const classBox = document.getElementById("vehicle-class-box");
+                const classEl = document.getElementById("vehicle-class");
+                if (trip.vehicleClass) {
+                    classEl.textContent = trip.vehicleClass;
+                    classBox.style.display = "";
+                } else if (classBox) {
+                    classBox.style.display = "none";
+                }
+
+                // A/C always has a real true/false value, so it
+                // always shows.
+                const acEl = document.getElementById("vehicle-ac");
+                if (acEl) acEl.textContent = trip.vehicleHasAC ? "Yes" : "No";
                 if (summaryRoute) summaryRoute.textContent = `${trip.from} → ${trip.to}`;
                 if (summaryDeparture) summaryDeparture.textContent = trip.time;
                 if (summaryArrival) summaryArrival.textContent = arrival;
