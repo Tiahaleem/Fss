@@ -173,7 +173,7 @@ async function apiFetch(path, options = {}) {
     const initial = user.name ? user.name.trim().charAt(0).toUpperCase() : "U";
 
     navButtons.innerHTML = `
-        <a href="settings.html" class="signin" style="display:flex; align-items:center; gap:8px;">
+        <a href="dashboard.html" class="signin" style="display:flex; align-items:center; gap:8px;">
             <span style="width:26px; height:26px; border-radius:50%; background:var(--color-cyan); color:white; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">${initial}</span>
             ${user.name ? user.name.split(" ")[0] : "Account"}
         </a>
