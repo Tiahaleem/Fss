@@ -79,6 +79,61 @@ if (seatMap && continueBtn) {
         return seatButtons().filter(b => b.classList.contains('selected')).map(b => b.textContent.trim());
     }
 
+    const DRIVER_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+\t<path d="M0 0h16v16H0z" fill="none" />
+\t<path fill="currentColor" fill-rule="evenodd" d="M5.5 11H4.419l-.342 1.026l-.158.474H2V9.52c.496.129 1.213.23 2.25.23a.75.75 0 1 0 0-1.5c-1.073 0-1.682-.12-1.998-.217a2 2 0 0 1-.204-.075a1.8 1.8 0 0 1 .485-.87q.11-.11.214-.228C4.272 7.293 6.15 7.5 8 7.5s3.728-.207 5.253-.64q.103.119.214.228c.241.242.408.544.485.87q-.066.032-.204.075c-.316.097-.925.217-1.998.217a.75.75 0 0 0 0 1.5c1.037 0 1.754-.101 2.25-.23v2.98h-1.919l-.158-.474L11.581 11zm6.924-5.472C11.144 5.838 9.584 6 8 6s-3.144-.162-4.424-.472q.046-.112.088-.226l.448-1.257c.18-.505.57-.806.96-.863a20.8 20.8 0 0 1 5.855 0c.392.057.78.358.96.863l.45 1.257q.04.114.087.226m-1.652 7.788L10.5 12.5h-5l-.272.816a1 1 0 0 1-.949.684H1.5a1 1 0 0 1-1-1V8.375c0-.88.35-1.725.972-2.347a3.3 3.3 0 0 0 .43-.528H1.25a.75.75 0 1 1 0-1.5h1.286l.164-.46c.343-.96 1.148-1.696 2.157-1.842a22.3 22.3 0 0 1 6.286 0c1.009.146 1.814.882 2.157 1.843l.164.459h1.286a.75.75 0 0 1 0 1.5h-.651q.187.286.429.528a3.32 3.32 0 0 1 .972 2.347V13a1 1 0 0 1-1 1h-2.78a1 1 0 0 1-.948-.684" clip-rule="evenodd" />
+</svg>`;
+
+    // Works out how many seats go in each row. Uses the vehicle's
+    // real layout string (e.g. "2-3") when it's set and actually
+    // adds up to the real seat count — otherwise falls back to a
+    // sensible default (rows of 2, with the last row absorbing the
+    // remainder) rather than assuming every vehicle has 7 seats.
+    function getSeatRowSizes(totalSeats, layoutString) {
+        if (layoutString) {
+            const parsed = layoutString.split("-").map(Number).filter(n => Number.isInteger(n) && n > 0);
+            const sum = parsed.reduce((a, b) => a + b, 0);
+            if (sum === totalSeats) return parsed;
+        }
+
+        const rows = [];
+        let remaining = totalSeats;
+        while (remaining > 3) {
+            rows.push(2);
+            remaining -= 2;
+        }
+        if (remaining > 0) rows.push(remaining);
+        return rows;
+    }
+
+    // Builds the actual seat grid HTML from scratch, matching
+    // whatever this specific vehicle's real seat count and layout
+    // are — seat 1 is always the driver, exactly like before, just
+    // no longer hardcoded to a fixed 7-seat shape.
+    function renderSeatMapGrid(totalSeats, layoutString) {
+        const rowSizes = getSeatRowSizes(totalSeats, layoutString);
+        let seatNum = 1;
+        let html = "";
+
+        rowSizes.forEach((rowSize, rowIndex) => {
+            const isLastRow = rowIndex === rowSizes.length - 1;
+            html += `<div class="seat-row${isLastRow && rowSize >= 3 ? " rear-row" : ""}">`;
+
+            for (let i = 0; i < rowSize; i++) {
+                if (seatNum === 1) {
+                    html += `<button class="seat driver" disabled aria-label="Seat 1, Driver, not selectable">${DRIVER_ICON_SVG} 1</button>`;
+                } else {
+                    html += `<button class="seat">${seatNum}</button>`;
+                }
+                seatNum++;
+            }
+
+            html += `</div>`;
+        });
+
+        seatMap.innerHTML = html;
+    }
+
     async function loadTripDetails() {
         if (!tripId) {
             showToast("No trip specified.");
@@ -102,6 +157,8 @@ if (seatMap && continueBtn) {
             maxSeatLimit = Math.max(1, (trip.seats || 7) - 1);
             if (seatLimit > maxSeatLimit) seatLimit = maxSeatLimit;
             updateSeatCountDisplay();
+
+            renderSeatMapGrid(trip.seats || 7, trip.vehicleLayout);
 
             if (currentRoute) {
                 const arrival = addMinutesToTime(trip.time, currentRoute.duration);
@@ -348,6 +405,8 @@ if (seatMap && continueBtn) {
     });
 
     continueBtn.disabled = true;
-    loadTripDetails();
-    loadSeats();
+    (async () => {
+        await loadTripDetails(); // builds the real seat grid first
+        await loadSeats();       // only safe to run once those buttons actually exist
+    })();
 }

@@ -48,7 +48,9 @@ function renderBookings(bookings) {
             const customer = escapeHtml(isParcel ? b.sender_name : b.passenger_name);
             const phone = escapeHtml(isParcel ? b.sender_phone : b.passenger_phone);
             const recipient = isParcel ? `${escapeHtml(b.receiver_name)}<br><span style="color:var(--color-text-muted); font-size:.8rem;">${escapeHtml(b.receiver_phone)}</span>` : "—";
-            const route = isParcel ? `${escapeHtml(b.from_city)} → ${escapeHtml(b.to_city)}` : "—";
+            const route = b.from_city && b.to_city
+                ? `${escapeHtml(b.from_city)} → ${escapeHtml(b.to_city)}${!isParcel && b.departure_time ? `<br><span style="color:var(--color-text-muted); font-size:.8rem;">${escapeHtml(b.departure_time.slice(0, 5))}</span>` : ""}`
+                : "—";
             const seats = isParcel ? "—" : escapeHtml(b.seat_numbers || "—");
             const reference = escapeHtml(b.reference);
 
