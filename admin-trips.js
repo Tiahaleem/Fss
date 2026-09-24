@@ -10,6 +10,7 @@
 let trips = [];
 let availableRoutes = [];
 let availableVehicles = [];
+let availableDrivers = [];
 let deleteTargetId = null;
 
 const tableBody = document.getElementById("trips-table-body");
@@ -22,6 +23,7 @@ const tripIdField = document.getElementById("trip-id");
 const tripRouteField = document.getElementById("trip-route");
 const tripTimeField = document.getElementById("trip-time");
 const tripVehicleField = document.getElementById("trip-vehicle");
+const tripDriverField = document.getElementById("trip-driver");
 const tripSeatsField = document.getElementById("trip-seats");
 const tripStatusField = document.getElementById("trip-status");
 
@@ -55,7 +57,7 @@ async function loadVehiclesForDropdown() {
             return;
         }
 
-        tripVehicleField.innerHTML = availableVehicles
+        tripVehicleField.innerHTML = `<option value="">Choose a vehicle…</option>` + availableVehicles
             .map(v => `<option value="${v.id}">${escapeHtml(v.name)}${v.plateNumber ? ` (${escapeHtml(v.plateNumber)})` : ""} — ${v.seats} seats</option>`)
             .join("");
 
@@ -73,13 +75,26 @@ function updateSeatsDisplay() {
 
 tripVehicleField.addEventListener("change", updateSeatsDisplay);
 
+async function loadDriversForDropdown() {
+    try {
+        availableDrivers = await apiFetch("/api/drivers?status=active");
+
+        tripDriverField.innerHTML = `<option value="">No driver assigned yet</option>` + availableDrivers
+            .map(d => `<option value="${d.id}">${escapeHtml(d.name)} — ${escapeHtml(d.phone)}</option>`)
+            .join("");
+    } catch (err) {
+        tripDriverField.innerHTML = `<option value="">Couldn't load drivers</option>`;
+        showToast(err.message);
+    }
+}
+
 async function loadTrips() {
     try {
         trips = await apiFetch("/api/trips");
         renderTrips();
     } catch (err) {
         showToast(err.message);
-        tableBody.innerHTML = `<tr><td colspan="6"><div class="admin-empty">Couldn't load trips.</div></td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7"><div class="admin-empty">Couldn't load trips.</div></td></tr>`;
     }
 }
 
@@ -87,7 +102,7 @@ function renderTrips() {
     if (trips.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="6">
+                <td colspan="7">
                     <div class="admin-empty">No trips yet. Click "Add Trip" to create one.</div>
                 </td>
             </tr>
@@ -107,6 +122,7 @@ function renderTrips() {
             <td>${escapeHtml(trip.from)} → ${escapeHtml(trip.to)}</td>
             <td>${escapeHtml(trip.time)}</td>
             <td>${trip.vehicleName ? escapeHtml(trip.vehicleName) + (trip.vehiclePlate ? ` (${escapeHtml(trip.vehiclePlate)})` : "") : "—"}</td>
+            <td>${trip.driverName ? escapeHtml(trip.driverName) : "—"}</td>
             <td>${trip.seats}</td>
             <td><span class="status-badge ${trip.status}">${trip.status === "active" ? "Active" : "Inactive"}</span></td>
             <td>
@@ -130,11 +146,14 @@ function openTripModal(trip) {
         tripRouteField.value = trip.routeId;
         tripTimeField.value = trip.time;
         tripVehicleField.value = trip.vehicleId || "";
+        tripDriverField.value = trip.driverId || "";
         tripStatusField.value = trip.status;
     } else {
         tripModalTitle.textContent = "Add Trip";
         tripForm.reset();
         tripIdField.value = "";
+        tripVehicleField.value = ""; // force a conscious choice — never silently default to whichever vehicle is first in the list
+        tripDriverField.value = "";
     }
 
     updateSeatsDisplay();
@@ -171,6 +190,7 @@ tripForm.addEventListener("submit", async (e) => {
         routeId: tripRouteField.value,
         time: tripTimeField.value,
         vehicleId: tripVehicleField.value,
+        driverId: tripDriverField.value || null,
         status: tripStatusField.value
     };
 
@@ -242,4 +262,5 @@ document.getElementById("delete-confirm-btn").addEventListener("click", async ()
 
 loadRoutesForDropdown();
 loadVehiclesForDropdown();
+loadDriversForDropdown();
 loadTrips();

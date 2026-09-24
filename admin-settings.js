@@ -1,10 +1,11 @@
 // =========================
 // ADMIN SETTINGS — real backend
 // =========================
-// Note: `currentAdmin` is already populated by admin.js's real
-// GET /api/auth/me session check, loaded before this file runs.
-// Passwords are hashed server-side now — the plaintext caveat that
-// used to apply here no longer does.
+// admin.js fetches currentAdmin ASYNCHRONOUSLY — script load order
+// alone doesn't guarantee it's ready by the time this file runs, so
+// this waits for admin.js's own "admin-session-ready" signal instead
+// of assuming it. Without this, the form silently never gets
+// populated with your real name/email at all.
 
 const adminSettingsForm = document.getElementById("admin-settings-form");
 const adminNameField = document.getElementById("admin-settings-name");
@@ -13,7 +14,9 @@ const adminCurrentPasswordField = document.getElementById("admin-settings-curren
 const adminNewPasswordField = document.getElementById("admin-settings-new-password");
 const adminConfirmPasswordField = document.getElementById("admin-settings-confirm-password");
 
-if (adminSettingsForm && currentAdmin) {
+function initAdminSettingsForm() {
+    if (!(adminSettingsForm && currentAdmin)) return;
+
     adminNameField.value = currentAdmin.name || "";
     adminEmailField.value = currentAdmin.email || "";
 
@@ -69,4 +72,12 @@ if (adminSettingsForm && currentAdmin) {
             showToast(err.message);
         }
     });
+}
+
+// currentAdmin might already be populated by the time this script
+// runs, or it might not be yet — either way, this covers it.
+if (currentAdmin) {
+    initAdminSettingsForm();
+} else {
+    document.addEventListener("admin-session-ready", initAdminSettingsForm);
 }
