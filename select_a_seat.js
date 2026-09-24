@@ -304,6 +304,25 @@ if (seatMap && continueBtn) {
                 clearInterval(countdownInterval);
             }
 
+            // Genuinely available = not occupied, not the driver seat.
+            // If that's fewer than what the customer actually wants,
+            // there's no point pretending Continue will work — offer
+            // the waitlist instead.
+            const availableCount = seatButtons().filter(btn => !btn.classList.contains('occupied')).length;
+            const waitlistSection = document.getElementById('waitlist-section');
+            const waitlistIntro = document.getElementById('waitlist-intro');
+
+            if (waitlistSection) {
+                if (availableCount < seatLimit) {
+                    waitlistIntro.textContent = seatLimit === 1
+                        ? "This trip is fully booked right now."
+                        : `Only ${availableCount} seat${availableCount === 1 ? "" : "s"} left — not enough for your group of ${seatLimit}.`;
+                    waitlistSection.style.display = "";
+                } else {
+                    waitlistSection.style.display = "none";
+                }
+            }
+
             updateSummary();
         } catch (err) {
             showToast(err.message);
@@ -337,6 +356,49 @@ if (seatMap && continueBtn) {
         if (seatLimit >= maxSeatLimit) return;
         seatLimit++;
         updateSeatCountDisplay();
+    });
+
+    document.getElementById('waitlist-join-btn')?.addEventListener('click', async () => {
+        const nameEl = document.getElementById('waitlist-name');
+        const emailEl = document.getElementById('waitlist-email');
+        const phoneEl = document.getElementById('waitlist-phone');
+        const messageEl = document.getElementById('waitlist-message');
+        const btn = document.getElementById('waitlist-join-btn');
+
+        if (!nameEl.value.trim() || !emailEl.value.trim() || !phoneEl.value.trim()) {
+            messageEl.textContent = "Please fill in your name, email, and phone.";
+            messageEl.className = "error";
+            return;
+        }
+
+        btn.disabled = true;
+        messageEl.textContent = "Joining…";
+        messageEl.className = "";
+
+        try {
+            await apiFetch('/api/waitlist', {
+                method: 'POST',
+                body: JSON.stringify({
+                    tripId,
+                    travelDate,
+                    name: nameEl.value.trim(),
+                    email: emailEl.value.trim(),
+                    phone: phoneEl.value.trim(),
+                    seatsWanted: seatLimit
+                })
+            });
+
+            messageEl.textContent = "You're on the list! We'll email you if a seat opens up.";
+            messageEl.className = "success";
+            nameEl.disabled = true;
+            emailEl.disabled = true;
+            phoneEl.disabled = true;
+            btn.textContent = "Joined";
+        } catch (err) {
+            messageEl.textContent = err.message;
+            messageEl.className = "error";
+            btn.disabled = false;
+        }
     });
 
     seatMap.addEventListener('click', async (e) => {

@@ -29,7 +29,16 @@ async function loadTicket() {
         document.getElementById("ticket-datetime").textContent = `${travelDate} · ${ticket.departureTime}`;
         document.getElementById("ticket-passenger").textContent = ticket.passengerName;
         document.getElementById("ticket-seats").textContent = ticket.seatNumbers;
-        document.getElementById("ticket-vehicle").textContent = ticket.vehicle;
+        document.getElementById("ticket-vehicle").textContent = ticket.vehicleName
+            ? `${ticket.vehicleName}${ticket.vehiclePlate ? ` (${ticket.vehiclePlate})` : ""}`
+            : "—";
+
+        const driverField = document.getElementById("ticket-driver-field");
+        if (ticket.driverName) {
+            document.getElementById("ticket-driver").textContent = `${ticket.driverName} — ${ticket.driverPhone}`;
+            driverField.style.display = "";
+        }
+
         document.getElementById("ticket-duration").textContent = ticket.duration;
         document.getElementById("ticket-terminal").textContent = ticket.terminalName;
         document.getElementById("ticket-terminal-address").textContent = ticket.terminalAddress;

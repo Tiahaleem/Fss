@@ -74,6 +74,12 @@ const buttonTotal = document.getElementById("button-total");
 
 const form = document.getElementById("quote-form");
 
+let appliedPromoCode = null;
+
+const promoInput = document.getElementById("promo-code-input");
+const promoApplyBtn = document.getElementById("promo-apply-btn");
+const promoMessage = document.getElementById("promo-message");
+
 
 /* =====================================
    FORMAT MONEY
@@ -168,6 +174,25 @@ function updateQuote(){
 
     lastQuoteTotal = total;
 
+    // The quote just changed, so any previously-applied discount was
+    // calculated against a now-outdated amount — reset it and let
+    // the customer re-apply if they still want it.
+    if (appliedPromoCode) {
+        appliedPromoCode = null;
+        if (promoInput) {
+            promoInput.disabled = false;
+            promoInput.value = "";
+        }
+        if (promoApplyBtn) {
+            promoApplyBtn.disabled = false;
+            promoApplyBtn.textContent = "Apply";
+        }
+        if (promoMessage) {
+            promoMessage.textContent = "";
+            promoMessage.className = "";
+        }
+    }
+
 }
 
 
@@ -193,6 +218,47 @@ const quoteConfirmationView = document.getElementById("quote-confirmation-view")
 const generatedTrackingCode = document.getElementById("generated-tracking-code");
 const trackParcelBtn = document.getElementById("track-parcel-btn");
 const bookAnotherBtn = document.getElementById("book-another-btn");
+
+/* =====================================
+   PROMO CODE
+===================================== */
+
+promoApplyBtn?.addEventListener("click", async () => {
+    const code = promoInput.value.trim();
+    if (!code) {
+        promoMessage.textContent = "Enter a code first.";
+        promoMessage.className = "error";
+        return;
+    }
+
+    if (lastQuoteTotal <= 0) {
+        promoMessage.textContent = "Get a quote first before applying a code.";
+        promoMessage.className = "error";
+        return;
+    }
+
+    promoApplyBtn.disabled = true;
+    promoMessage.textContent = "Checking…";
+    promoMessage.className = "";
+
+    try {
+        const amountKobo = Math.round(lastQuoteTotal * 100);
+        const result = await apiFetch(`/api/promo-codes/validate?code=${encodeURIComponent(code)}&amountKobo=${amountKobo}`);
+
+        appliedPromoCode = code;
+        buttonTotal.textContent = money(result.finalAmountKobo / 100);
+
+        promoMessage.textContent = `Promo applied — you save ${money(result.discountKobo / 100)}!`;
+        promoMessage.className = "success";
+        promoInput.disabled = true;
+        promoApplyBtn.textContent = "Applied";
+    } catch (err) {
+        appliedPromoCode = null;
+        promoMessage.textContent = err.message;
+        promoMessage.className = "error";
+        promoApplyBtn.disabled = false;
+    }
+});
 
 /* =====================================
    FORM VALIDATION
@@ -275,7 +341,8 @@ form.addEventListener("submit", async function(e){
                 description: description.value.trim(),
                 weightKg: Number(weight.value),
                 declaredValueKobo: Math.round(Number(declaredValue.value) * 100),
-                priceKobo: Math.round(lastQuoteTotal * 100)
+                priceKobo: Math.round(lastQuoteTotal * 100),
+                promoCode: appliedPromoCode
             })
         });
 

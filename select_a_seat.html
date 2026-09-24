@@ -163,6 +163,19 @@
                 <!-- Rendered dynamically by select_a_seat.js, based on this trip's real vehicle seat count and layout -->
             </div>
 
+            <div id="waitlist-section" style="display:none;">
+                <p id="waitlist-intro">Not enough seats together right now for your group.</p>
+                <div class="waitlist-form-row">
+                    <input type="text" id="waitlist-name" placeholder="Your name">
+                    <input type="email" id="waitlist-email" placeholder="Your email">
+                </div>
+                <div class="waitlist-form-row">
+                    <input type="tel" id="waitlist-phone" placeholder="Your phone">
+                    <button type="button" id="waitlist-join-btn">Notify Me</button>
+                </div>
+                <p id="waitlist-message"></p>
+            </div>
+
             <button class="continue-btn">
                 Continue →
             </button>

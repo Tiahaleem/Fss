@@ -624,3 +624,47 @@ COURIER FEATURES
 .payment-method-option input {
     accent-color: var(--color-cyan);
 }
+
+.promo-code-row {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 8px;
+}
+
+.promo-code-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: .85rem;
+}
+
+.promo-code-row button {
+    padding: 10px 18px;
+    background: var(--color-navy-deep);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: .85rem;
+    cursor: pointer;
+}
+
+.promo-code-row button:hover {
+    background: var(--color-navy-hover);
+}
+
+#promo-message {
+    font-size: .8rem;
+    margin: 0 0 12px;
+    min-height: 1em;
+}
+
+#promo-message.error {
+    color: #dc2626;
+}
+
+#promo-message.success {
+    color: var(--color-cyan);
+}

@@ -28,6 +28,9 @@ const travelDate = params.get("date") || getLocalDateString();
 let currentTrip = null;
 let currentRoute = null;
 let currentTerminal = null;
+let basePriceKobo = 0;
+let appliedPromoCode = null;
+let finalPriceKobo = 0;
 
 async function loadBookingSummary() {
     if (!tripId || seatNumbers.length === 0 || !terminalId) {
@@ -57,6 +60,9 @@ async function loadBookingSummary() {
         const arrival = addMinutesToTime(trip.time, currentRoute.duration);
         const totalPrice = Number(currentRoute.price) * seatNumbers.length;
         const priceText = `₦${totalPrice.toLocaleString()}`;
+
+        basePriceKobo = Math.round(totalPrice * 100);
+        finalPriceKobo = basePriceKobo;
 
         const routeField = document.querySelector('[data-field="route"]');
         const dateField = document.querySelector('[data-field="date"]');
@@ -97,6 +103,55 @@ if (passengerForm) {
     const emailField = document.getElementById("passenger-email");
     const phoneField = document.getElementById("passenger-phone");
 
+    const promoInput = document.getElementById("promo-code-input");
+    const promoApplyBtn = document.getElementById("promo-apply-btn");
+    const promoMessage = document.getElementById("promo-message");
+    const discountRow = document.getElementById("discount-row");
+    const discountAmountEl = document.getElementById("discount-amount");
+    const payAmountField = document.querySelector('[data-field="pay-amount"]');
+    const totalAmountField = document.querySelector('[data-field="total-amount"]');
+
+    promoApplyBtn?.addEventListener("click", async () => {
+        const code = promoInput.value.trim();
+        if (!code) {
+            promoMessage.textContent = "Enter a code first.";
+            promoMessage.className = "error";
+            return;
+        }
+
+        promoApplyBtn.disabled = true;
+        promoMessage.textContent = "Checking…";
+        promoMessage.className = "";
+
+        try {
+            const result = await apiFetch(`/api/promo-codes/validate?code=${encodeURIComponent(code)}&amountKobo=${basePriceKobo}`);
+
+            appliedPromoCode = code;
+            finalPriceKobo = result.finalAmountKobo;
+
+            const discountNaira = result.discountKobo / 100;
+            const finalNaira = result.finalAmountKobo / 100;
+
+            discountAmountEl.textContent = `−₦${discountNaira.toLocaleString()}`;
+            discountRow.style.display = "";
+
+            const finalText = `₦${finalNaira.toLocaleString()}`;
+            if (payAmountField) payAmountField.textContent = finalText;
+            if (totalAmountField) totalAmountField.textContent = finalText;
+
+            promoMessage.textContent = "Promo code applied!";
+            promoMessage.className = "success";
+            promoInput.disabled = true;
+            promoApplyBtn.textContent = "Applied";
+        } catch (err) {
+            appliedPromoCode = null;
+            finalPriceKobo = basePriceKobo;
+            promoMessage.textContent = err.message;
+            promoMessage.className = "error";
+            promoApplyBtn.disabled = false;
+        }
+    });
+
     passengerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -136,7 +191,8 @@ if (passengerForm) {
                     passengerName: nameField.value.trim(),
                     passengerEmail: emailField.value.trim(),
                     passengerPhone: phoneField.value.trim(),
-                    travelDate
+                    travelDate,
+                    promoCode: appliedPromoCode
                 })
             });
 

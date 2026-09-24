@@ -616,3 +616,71 @@
         font-size: 1.1rem;
     }
 }
+
+/* =========================
+   WAITLIST
+========================= */
+
+#waitlist-section {
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--color-field-bg);
+    border-radius: var(--radius-md);
+}
+
+#waitlist-intro {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    margin-bottom: 12px;
+}
+
+.waitlist-form-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.waitlist-form-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: .85rem;
+}
+
+.waitlist-form-row button {
+    padding: 10px 18px;
+    background: var(--color-cyan);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: .85rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.waitlist-form-row button:hover {
+    opacity: .9;
+}
+
+#waitlist-message {
+    font-size: .8rem;
+    margin: 4px 0 0;
+}
+
+#waitlist-message.error {
+    color: #dc2626;
+}
+
+#waitlist-message.success {
+    color: var(--color-cyan);
+}
+
+@media (max-width: 480px) {
+    .waitlist-form-row {
+        flex-direction: column;
+    }
+}
