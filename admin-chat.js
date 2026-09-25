@@ -124,6 +124,15 @@ closeBtn.addEventListener("click", async () => {
 
 loadConversations();
 
+// If we arrived here via the "Reply Now" link in an alert email,
+// jump straight to that conversation instead of showing the empty
+// "select one" state.
+const urlParams = new URLSearchParams(window.location.search);
+const linkedConversationId = urlParams.get("conversation");
+if (linkedConversationId) {
+    openConversation(linkedConversationId);
+}
+
 // Keep the inbox feeling reasonably live without needing a full
 // real-time connection — matches the same polling interval the
 // customer-facing widget uses.
