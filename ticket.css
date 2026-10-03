@@ -1,0 +1,195 @@
+.ticket-page {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 60px 20px 40px;
+}
+
+.ticket-status-msg {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-text-muted);
+}
+
+.ticket-status-msg h3 {
+    color: var(--color-navy-deep);
+    margin-bottom: 8px;
+}
+
+.ticket-status-msg a {
+    display: inline-block;
+    margin-top: 16px;
+    color: var(--color-cyan);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* =========================
+   TICKET CARD
+========================= */
+
+.ticket-card {
+    background: #fff;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.ticket-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 24px 28px;
+    background: var(--color-navy-deep);
+}
+
+.ticket-logo {
+    height: 28px;
+}
+
+.ticket-status-badge {
+    padding: 5px 14px;
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.15);
+    color: #fff;
+
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.ticket-status-badge.cancelled,
+.ticket-status-badge.refunded {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.ticket-route {
+    padding: 28px 28px 0;
+    text-align: center;
+}
+
+.ticket-route h1 {
+    font-size: 1.6rem;
+    color: var(--color-navy-deep);
+    margin: 0 0 6px;
+}
+
+.ticket-route p {
+    color: var(--color-text-muted);
+    font-size: .95rem;
+    margin: 0;
+}
+
+.ticket-divider {
+    height: 1px;
+    background: var(--color-border-light);
+    margin: 24px 28px;
+}
+
+.ticket-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    padding: 0 28px 24px;
+}
+
+.ticket-field span {
+    display: block;
+    font-size: .75rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 4px;
+}
+
+.ticket-field strong {
+    font-size: 1rem;
+    color: var(--color-navy-deep);
+}
+
+.ticket-field-wide {
+    grid-column: 1 / -1;
+}
+
+.ticket-field-wide p {
+    margin: 4px 0 0;
+    font-size: .85rem;
+    color: var(--color-text-muted);
+}
+
+.ticket-reference {
+    letter-spacing: .05em;
+}
+
+.ticket-footer {
+    padding: 18px 28px;
+    background: var(--color-field-bg);
+}
+
+.ticket-footer p {
+    margin: 0;
+    font-size: .8rem;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.ticket-actions {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.ticket-print-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 13px 26px;
+
+    background: var(--color-navy-deep);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+
+    font-weight: 600;
+    font-size: .9rem;
+    cursor: pointer;
+
+    transition: background var(--transition-base);
+}
+
+.ticket-print-btn:hover {
+    background: var(--color-navy);
+}
+
+/* =========================
+   PRINT STYLES
+========================= */
+/* Anything with .no-print disappears entirely when actually printed
+   or saved as PDF — just the ticket itself remains, nothing else. */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .ticket-page {
+        padding: 0;
+        max-width: 100%;
+    }
+
+    .ticket-card {
+        border: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .ticket-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,209 @@
+// =========================
+// PASSENGER PAYMENT — real Paystack
+// =========================
+// "Pay" no longer creates a booking directly — it starts a real
+// Paystack transaction and sends the customer to Paystack's own
+// checkout page. The booking only actually gets created after
+// payment-callback.html verifies the payment really succeeded.
+
+function addMinutesToTime(time, durationText) {
+    const [h, m] = time.split(":").map(Number);
+    const durationMatch = durationText.match(/(\d+)h\s*(\d+)?m?/);
+    const durHours = durationMatch ? Number(durationMatch[1]) : 0;
+    const durMinutes = durationMatch && durationMatch[2] ? Number(durationMatch[2]) : 0;
+
+    const totalMinutes = (h * 60 + m + durHours * 60 + durMinutes) % (24 * 60);
+    const arriveH = Math.floor(totalMinutes / 60);
+    const arriveM = totalMinutes % 60;
+
+    return `${String(arriveH).padStart(2, "0")}:${String(arriveM).padStart(2, "0")}`;
+}
+
+const params = new URLSearchParams(window.location.search);
+const tripId = params.get("trip");
+const seatNumbers = (params.get("seats") || "").split(",").filter(Boolean);
+const terminalId = params.get("terminal");
+const travelDate = params.get("date") || getLocalDateString();
+
+let currentTrip = null;
+let currentRoute = null;
+let currentTerminal = null;
+let basePriceKobo = 0;
+let appliedPromoCode = null;
+let finalPriceKobo = 0;
+
+async function loadBookingSummary() {
+    if (!tripId || seatNumbers.length === 0 || !terminalId) {
+        showToast("Missing booking details — please start over from Book a Trip.");
+        return;
+    }
+
+    try {
+        const [trip, allRoutes, terminal] = await Promise.all([
+            apiFetch(`/api/trips/${tripId}`),
+            apiFetch("/api/routes"),
+            apiFetch(`/api/terminals/${terminalId}`)
+        ]);
+
+        currentTrip = trip;
+        currentTerminal = terminal;
+        currentRoute = allRoutes.find(r =>
+            r.from.toLowerCase() === trip.from.toLowerCase() &&
+            r.to.toLowerCase() === trip.to.toLowerCase()
+        );
+
+        if (!currentRoute) {
+            showToast("Couldn't find pricing for this trip.");
+            return;
+        }
+
+        const arrival = addMinutesToTime(trip.time, currentRoute.duration);
+        const totalPrice = Number(currentRoute.price) * seatNumbers.length;
+        const priceText = `₦${totalPrice.toLocaleString()}`;
+
+        basePriceKobo = Math.round(totalPrice * 100);
+        finalPriceKobo = basePriceKobo;
+
+        const routeField = document.querySelector('[data-field="route"]');
+        const dateField = document.querySelector('[data-field="date"]');
+        const departureField = document.querySelector('[data-field="departure"]');
+        const arrivalField = document.querySelector('[data-field="arrival"]');
+        const vehicleField = document.querySelector('[data-field="vehicle"]');
+        const payAmountField = document.querySelector('[data-field="pay-amount"]');
+        const totalAmountField = document.querySelector('[data-field="total-amount"]');
+        const seatField = document.querySelector('[data-field="seat"]');
+        const pickupField = document.querySelector('[data-field="pickup"]');
+
+        const [y, m, d] = travelDate.split("-").map(Number);
+        const formattedDate = new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+
+        if (routeField) routeField.textContent = `${trip.from} → ${trip.to}`;
+        if (dateField) dateField.textContent = formattedDate;
+        if (departureField) departureField.textContent = trip.time;
+        if (arrivalField) arrivalField.textContent = arrival;
+        if (vehicleField) vehicleField.textContent = trip.vehicleName || "Vehicle";
+        if (payAmountField) payAmountField.textContent = priceText;
+        if (totalAmountField) totalAmountField.textContent = priceText;
+
+        const heroSubtitle = document.querySelector(".passenger-hero p");
+        if (heroSubtitle) heroSubtitle.textContent = `${trip.from} → ${trip.to} · ${formattedDate}`;
+        if (seatField) seatField.textContent = seatNumbers.join(', ');
+        if (pickupField) pickupField.textContent = terminal.name;
+    } catch (err) {
+        showToast(err.message);
+    }
+}
+
+loadBookingSummary();
+
+const passengerForm = document.getElementById("passenger-form");
+
+if (passengerForm) {
+    const nameField = document.getElementById("passenger-name");
+    const emailField = document.getElementById("passenger-email");
+    const phoneField = document.getElementById("passenger-phone");
+
+    const promoInput = document.getElementById("promo-code-input");
+    const promoApplyBtn = document.getElementById("promo-apply-btn");
+    const promoMessage = document.getElementById("promo-message");
+    const discountRow = document.getElementById("discount-row");
+    const discountAmountEl = document.getElementById("discount-amount");
+    const payAmountField = document.querySelector('[data-field="pay-amount"]');
+    const totalAmountField = document.querySelector('[data-field="total-amount"]');
+
+    promoApplyBtn?.addEventListener("click", async () => {
+        const code = promoInput.value.trim();
+        if (!code) {
+            promoMessage.textContent = "Enter a code first.";
+            promoMessage.className = "error";
+            return;
+        }
+
+        promoApplyBtn.disabled = true;
+        promoMessage.textContent = "Checking…";
+        promoMessage.className = "";
+
+        try {
+            const result = await apiFetch(`/api/promo-codes/validate?code=${encodeURIComponent(code)}&amountKobo=${basePriceKobo}`);
+
+            appliedPromoCode = code;
+            finalPriceKobo = result.finalAmountKobo;
+
+            const discountNaira = result.discountKobo / 100;
+            const finalNaira = result.finalAmountKobo / 100;
+
+            discountAmountEl.textContent = `−₦${discountNaira.toLocaleString()}`;
+            discountRow.style.display = "";
+
+            const finalText = `₦${finalNaira.toLocaleString()}`;
+            if (payAmountField) payAmountField.textContent = finalText;
+            if (totalAmountField) totalAmountField.textContent = finalText;
+
+            promoMessage.textContent = "Promo code applied!";
+            promoMessage.className = "success";
+            promoInput.disabled = true;
+            promoApplyBtn.textContent = "Applied";
+        } catch (err) {
+            appliedPromoCode = null;
+            finalPriceKobo = basePriceKobo;
+            promoMessage.textContent = err.message;
+            promoMessage.className = "error";
+            promoApplyBtn.disabled = false;
+        }
+    });
+
+    passengerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (
+            nameField.value.trim() === "" ||
+            emailField.value.trim() === "" ||
+            phoneField.value.trim() === ""
+        ) {
+            showToast("Please fill in your name, email, and phone.");
+            return;
+        }
+
+        if (!emailPattern.test(emailField.value.trim())) {
+            showToast("Please enter a valid email address.");
+            return;
+        }
+
+        const submitBtn = passengerForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+            // Starts a real Flutterwave transaction — no booking
+            // exists yet. Details ride along as metadata, handed
+            // back once payment is verified on payment-callback.html.
+            // TEMP: no travel-date picker exists yet anywhere in the
+            // flow, so this defaults to today.
+            const result = await apiFetch("/api/payments/flutterwave/initialize-passenger", {
+                method: "POST",
+                asCustomer: true,
+                body: JSON.stringify({
+                    tripId,
+                    terminalId,
+                    seatNumbers,
+                    sessionId: getTabSessionId(),
+                    passengerName: nameField.value.trim(),
+                    passengerEmail: emailField.value.trim(),
+                    passengerPhone: phoneField.value.trim(),
+                    travelDate,
+                    promoCode: appliedPromoCode
+                })
+            });
+
+            // Send the customer to Flutterwave's real checkout page
+            window.location.href = result.authorizationUrl;
+        } catch (err) {
+            // Most likely case: someone else booked this exact seat
+            // between when it was held and now (e.g. the 10-minute
+            // hold expired while this form was open).
+            showToast(err.message);
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    });
+}

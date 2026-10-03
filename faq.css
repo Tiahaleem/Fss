@@ -1,0 +1,21 @@
+/* =========================
+   FAQ PAGE
+   (extends .faq-section etc. from style.css)
+========================= */
+
+.faq-category {
+    max-width: 850px;
+    margin: 0 auto 10px;
+
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-navy-deep);
+
+    padding-top: 30px;
+    border-top: 1px solid var(--color-border);
+}
+
+.faq-category:first-child {
+    padding-top: 0;
+    border-top: none;
+}

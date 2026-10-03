@@ -1,0 +1,191 @@
+/* =========================
+   ROUTES HERO
+========================= */
+
+.routes-hero {
+    background-image: var(--gradient-navy);
+
+    padding: 90px 6%;
+
+    text-align: center;
+
+    color: white;
+}
+
+.routes-hero h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.routes-hero p {
+    font-size: 1rem;
+    color: rgba(255,255,255,.85);
+}
+
+/* =========================
+   ROUTES PAGE
+========================= */
+
+.routes-page {
+    padding: 40px 6% 80px;
+    background: var(--color-field-bg);
+}
+
+/* =========================
+   GRID
+========================= */
+
+.routes-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 24px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.route-card {
+    background: white;
+
+    border: 1px solid var(--color-border-light);
+
+    border-radius: var(--radius-lg);
+
+    padding: 18px;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,.04);
+
+    transition: transform var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.route-card:hover {
+    transform: translateY(-5px);
+
+    border-color: var(--color-cyan);
+
+    box-shadow: 0 12px 25px rgba(0,0,0,.08);
+}
+
+.route-top {
+    margin-bottom: 18px;
+}
+
+.route-top span {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.route-cities {
+    margin-bottom: 22px;
+}
+
+.route-cities h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    line-height: 1.5;
+}
+
+.route-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 15px;
+}
+
+.route-bottom span {
+    font-size: .9rem;
+    color: var(--color-text-muted);
+}
+
+.route-bottom strong {
+    font-size: 1rem;
+    color: var(--color-navy-deep);
+    font-weight: 700;
+}
+
+.route-btn {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    text-decoration: none;
+
+    background: var(--color-navy-deep);
+    color: white;
+
+    height: 45px;
+
+    border-radius: var(--radius-sm);
+
+    font-size: .95rem;
+    font-weight: 600;
+
+    transition: background var(--transition-base);
+}
+
+/* Was lightening to #0b2f8a on hover — every other primary button
+   on the site darkens on hover, this brings it back in line. */
+.route-btn:hover {
+    background: var(--color-navy-hover);
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 992px) {
+
+    .routes-grid {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .routes-hero h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+    .routes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .routes-hero {
+        padding: 70px 5%;
+    }
+
+    .routes-hero h1 {
+        font-size: 2rem;
+    }
+
+    .route-cities h3 {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .routes-page {
+        padding: 30px 5% 60px;
+    }
+
+    .route-card {
+        padding: 16px;
+    }
+
+    .route-btn {
+        height: 42px;
+        font-size: .9rem;
+    }
+}

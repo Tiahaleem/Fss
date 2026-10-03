@@ -1,0 +1,428 @@
+/* =========================
+   AUTH PAGE
+========================= */
+
+.auth-page {
+    min-height: calc(100vh - var(--navbar-height));
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 60px 6%;
+
+    background: var(--color-bg-soft);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+
+    background: #fff;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl);
+
+    padding: 40px 36px;
+
+    box-shadow: 0 10px 30px rgba(15,23,42,.06);
+}
+
+.auth-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 22px;
+}
+
+.auth-logo img {
+    max-height: 38px;
+}
+
+.auth-card h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+
+    margin-bottom: 6px;
+}
+
+.auth-card > p.auth-subtitle {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: .92rem;
+
+    margin-bottom: 26px;
+}
+
+/* =========================
+   GOOGLE BUTTON
+========================= */
+
+.google-btn {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    padding: 13px;
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+
+    background: white;
+    color: var(--color-text-dark);
+
+    font-family: inherit;
+    font-size: .92rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background var(--transition-base), border-color var(--transition-base);
+}
+
+.google-btn:hover {
+    background: var(--color-field-bg);
+    border-color: var(--color-border);
+}
+
+.google-btn svg {
+    flex-shrink: 0;
+}
+
+#google-signin-button {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+/* =========================
+   DIVIDER
+========================= */
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    margin: 24px 0;
+
+    color: var(--color-text-muted);
+    font-size: .8rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border-light);
+}
+
+/* =========================
+   FORM
+========================= */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.form-group input {
+    width: 100%;
+    height: 50px;
+    padding: 0 15px;
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+
+    font-family: inherit;
+    font-size: .95rem;
+
+    outline: none;
+
+    transition: border-color var(--transition-base);
+}
+
+.form-group input:focus-visible {
+    border-color: var(--color-cyan);
+}
+
+/* =========================
+   PASSWORD SHOW/HIDE TOGGLE
+========================= */
+
+.password-field {
+    position: relative;
+}
+
+.password-field input {
+    padding-right: 44px;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--color-text-muted);
+}
+
+.password-toggle-btn:hover {
+    color: var(--color-text-dark);
+}
+
+.password-toggle-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.auth-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin: 4px 0 22px;
+
+    font-size: .85rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--color-text-muted);
+}
+
+.remember-me input {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--color-cyan);
+}
+
+.auth-options a {
+    color: var(--color-cyan);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-options a:hover {
+    text-decoration: underline;
+}
+
+.auth-terms {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    margin-bottom: 22px;
+
+    font-size: .85rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.auth-terms input {
+    width: 15px;
+    height: 15px;
+    margin-top: 3px;
+    accent-color: var(--color-cyan);
+    flex-shrink: 0;
+}
+
+.auth-terms a {
+    color: var(--color-cyan);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-submit {
+    width: 100%;
+
+    padding: 15px;
+
+    border: none;
+    border-radius: var(--radius-md);
+
+    background: var(--color-navy-deep);
+    color: white;
+
+    font-size: .95rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background var(--transition-base);
+}
+
+.auth-submit:hover {
+    background: var(--color-navy-hover);
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 24px;
+
+    font-size: .9rem;
+    color: var(--color-text-muted);
+}
+
+.auth-switch a {
+    color: var(--color-cyan);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   SETTINGS PAGE (reuses the auth card)
+========================= */
+
+.settings-section-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+
+    margin: 30px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.settings-section-title:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.settings-hint {
+    font-size: .82rem;
+    color: var(--color-text-muted);
+    margin: -10px 0 18px;
+}
+
+/* =========================
+   EMAIL VERIFICATION STEP
+========================= */
+
+.verify-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 18px;
+
+    border-radius: 50%;
+    background: var(--color-chip-bg);
+    color: var(--color-navy-deep);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.verify-email-target {
+    font-weight: 700;
+    color: var(--color-text-dark);
+}
+
+.demo-code-banner {
+    background: var(--color-field-bg);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+
+    padding: 16px 18px;
+    margin: 20px 0 24px;
+
+    text-align: center;
+}
+
+.demo-code-banner p {
+    margin: 0 0 8px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.demo-code-banner span {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--color-navy-deep);
+}
+
+.otp-input {
+    width: 100%;
+    height: 56px;
+
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 8px;
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+
+    font-family: inherit;
+    outline: none;
+
+    transition: border-color var(--transition-base);
+}
+
+.otp-input:focus-visible {
+    border-color: var(--color-cyan);
+}
+
+.resend-link {
+    background: none;
+    border: none;
+    padding: 0;
+
+    color: var(--color-cyan);
+    font-weight: 600;
+    font-size: .85rem;
+    font-family: inherit;
+
+    cursor: pointer;
+}
+
+.resend-link:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 480px) {
+
+    .auth-card {
+        padding: 30px 22px;
+    }
+
+    .auth-card h1 {
+        font-size: 1.3rem;
+    }
+}

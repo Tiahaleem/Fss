@@ -1,0 +1,111 @@
+.analytics-range-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.analytics-range-btn {
+    padding: 8px 16px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: 50px;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.analytics-range-btn.active {
+    background: var(--color-navy-deep);
+    color: white;
+    border-color: var(--color-navy-deep);
+}
+
+.analytics-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.analytics-stat-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+}
+
+.analytics-stat-card span {
+    display: block;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+}
+
+.analytics-stat-card h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-navy-deep);
+}
+
+#revenue-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 180px;
+    padding-top: 20px;
+}
+
+.revenue-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    position: relative;
+}
+
+.revenue-bar {
+    width: 100%;
+    max-width: 24px;
+    background: var(--color-cyan);
+    border-radius: 4px 4px 0 0;
+    min-height: 2px;
+}
+
+.revenue-bar-wrap:hover .revenue-bar {
+    background: var(--color-navy-deep);
+}
+
+.revenue-bar-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    margin-bottom: 6px;
+    background: var(--color-navy-deep);
+    color: white;
+    font-size: .7rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.revenue-bar-wrap:hover .revenue-bar-tooltip {
+    display: block;
+}
+
+.analytics-empty {
+    padding: 40px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: .9rem;
+}
+
+@media (max-width: 768px) {
+    .analytics-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

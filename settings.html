@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings | FSS Transport</title>
+
+    <meta name="description" content="FSS Transport — comfortable, CNG-powered intercity travel and courier service in Nigeria. Launching Ajah ↔ Ibadan, ₦15,300 per passenger. Book online with secure payment.">
+    <link rel="canonical" href="https://fsstransport.com.ng/settings.html">
+
+    <meta property="og:title" content="Account Settings | FSS Transport">
+    <meta property="og:description" content="FSS Transport — comfortable, CNG-powered intercity travel and courier service in Nigeria. Launching Ajah ↔ Ibadan, ₦15,300 per passenger. Book online with secure payment.">
+    <meta property="og:image" content="https://fsstransport.com.ng/img/og-preview.png">
+    <meta property="og:url" content="https://fsstransport.com.ng/settings.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FSS Transport">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Account Settings | FSS Transport">
+    <meta name="twitter:description" content="FSS Transport — comfortable, CNG-powered intercity travel and courier service in Nigeria. Launching Ajah ↔ Ibadan, ₦15,300 per passenger. Book online with secure payment.">
+    <meta name="twitter:image" content="https://fsstransport.com.ng/img/og-preview.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#081f5c">
+    <link rel="apple-touch-icon" href="img/ffs_bg_removal.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FSS Transport">
+</head>
+<body>
+<nav class="navbar">
+
+    <div class="logo">
+        <img src="img/ffs_bg_removal.png" alt="FSS LOGO">
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="book_a_trip.html">Book a Trip</a></li>
+        <li><a href="route.html">Routes</a></li>
+        <li><a href="pickup.html">Pickup Centers</a></li>
+        <li><a href="courier.html">Courier</a></li>
+        <li><a href="track.html">Track</a></li>
+        <li><a href="about.html">About</a></li>
+    </ul>
+
+    <div class="nav-buttons">
+        <a href="login.html" class="signin">Sign In</a>
+        <a href="signup.html" class="btn-primary">Get Started</a>
+    </div>
+
+    <div class="hamburger">
+        ☰
+    </div>
+
+</nav>
+
+<section class="auth-page">
+
+    <div class="auth-card" style="max-width:460px;">
+
+        <div class="auth-logo">
+            <img src="img/ffs_bg_removal.png" alt="FSS Transport">
+        </div>
+
+        <h1>Account Settings</h1>
+        <p class="auth-subtitle">Update your profile details or change your password.</p>
+
+        <form id="settings-form">
+
+            <p class="settings-section-title">Profile</p>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="settings-name" placeholder="Your name">
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="settings-email" placeholder="you@example.com">
+            </div>
+
+            <p class="settings-section-title">Change Password</p>
+            <p class="settings-hint">Leave these blank if you don't want to change your password.</p>
+
+            <div class="form-group">
+                <label>Current Password</label>
+                <div class="password-field">
+                    <input type="password" id="settings-current-password" placeholder="••••••••">
+                    <button type="button" class="password-toggle-btn"></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>New Password</label>
+                <div class="password-field">
+                    <input type="password" id="settings-new-password" placeholder="At least 8 characters">
+                    <button type="button" class="password-toggle-btn"></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <div class="password-field">
+                    <input type="password" id="settings-confirm-password" placeholder="••••••••">
+                    <button type="button" class="password-toggle-btn"></button>
+                </div>
+            </div>
+
+            <button type="submit" class="auth-submit">Save Changes</button>
+
+        </form>
+
+        <p class="auth-switch">
+            <a href="#" id="settings-logout-link">Log out</a>
+        </p>
+
+    </div>
+
+</section>
+
+<script src="index.js"></script>
+<script src="api.js"></script>
+<script src="chat-widget.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>
