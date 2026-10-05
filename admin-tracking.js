@@ -18,69 +18,222 @@ function money(kobo) {
     return "₦" + (Number(kobo) / 100).toLocaleString();
 }
 
+// ---- DATE GROUPING HELPERS (start) ----
+const LAGOS_TZ = "Africa/Lagos";
+const lagosDateFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: LAGOS_TZ, year: "numeric", month: "2-digit", day: "2-digit"
+});
+
+// "YYYY-MM-DD" for a moment in time, as a calendar date in Lagos. A
+// booking made at 11:30 PM Lagos time is still "that day" there, even
+// though it's already the next day in UTC.
+function lagosDateString(value) {
+    return lagosDateFormatter.format(new Date(value));
+}
+
+function shiftDateString(dateStr, days) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
+
+function formatLongDate(dateStr, includeYear) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-GB", {
+        weekday: "long", day: "numeric", month: "long",
+        ...(includeYear ? { year: "numeric" } : {}),
+        timeZone: "UTC"
+    });
+}
+
+function formatShortDate(dateStr) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-GB", {
+        weekday: "short", day: "numeric", month: "short", timeZone: "UTC"
+    });
+}
+
+function formatDayHeading(dateStr, todayStr) {
+    const longDate = formatLongDate(dateStr, dateStr.slice(0, 4) !== todayStr.slice(0, 4));
+    if (dateStr === todayStr) return `Today — ${longDate}`;
+    if (dateStr === shiftDateString(todayStr, 1)) return `Tomorrow — ${longDate}`;
+    if (dateStr === shiftDateString(todayStr, -1)) return `Yesterday — ${longDate}`;
+    return longDate;
+}
+
+// Today first, then the coming days soonest-first, then past days newest-first.
+function orderDateGroups(dateStrings, todayStr) {
+    const today = dateStrings.filter(d => d === todayStr);
+    const upcoming = dateStrings.filter(d => d > todayStr).sort();
+    const past = dateStrings.filter(d => d < todayStr).sort().reverse();
+    return [...today, ...upcoming, ...past];
+}
+
+// Which day a booking sits under. Parcels have no trip date, so even in
+// "trip" view they fall back to the day they were booked.
+function bookingGroupDate(booking, mode) {
+    if (mode === "trip" && booking.travel_date) return booking.travel_date;
+    return lagosDateString(booking.created_at);
+}
+
+// The OTHER date — shown in its own column so both dates are always visible.
+function otherDateCell(booking, mode) {
+    if (mode === "trip") {
+        return new Date(booking.created_at).toLocaleString("en-GB", {
+            timeZone: LAGOS_TZ, day: "numeric", month: "short",
+            hour: "numeric", minute: "2-digit", hour12: true
+        });
+    }
+    return booking.travel_date ? formatShortDate(booking.travel_date) : "—";
+}
+// ---- DATE GROUPING HELPERS (end) ----
+
+const BOOKING_TABLE_COLUMNS = 11;
+let groupMode = "trip";      // "trip" = group by travel date, "booked" = by booking date
+let showTodayOnly = false;
+
 async function loadBookings() {
     try {
         allBookings = await apiFetch("/api/bookings");
-        renderBookings(allBookings);
+        refreshBookingsView();
     } catch (err) {
         showToast(err.message);
-        bookingsTableBody.innerHTML = `<tr><td colspan="10"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
+        bookingsTableBody.innerHTML = `<tr><td colspan="${BOOKING_TABLE_COLUMNS}"><div class="admin-empty">Couldn't load bookings.</div></td></tr>`;
     }
 }
 
-function renderBookings(bookings) {
-        if (bookings.length === 0) {
-            bookingsTableBody.innerHTML = `
-                <tr>
-                    <td colspan="10">
-                        <div class="admin-empty">No bookings yet — they'll show up here as customers pay on the courier and passenger pages.</div>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
+// Search box + "Today only" together decide which bookings are visible.
+function getVisibleBookings() {
+    const query = bookingSearchInput.value.trim().toLowerCase();
+    let list = allBookings;
 
-        const sorted = [...bookings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        bookingsTableBody.innerHTML = sorted.map(b => {
+    if (query !== "") {
+        list = list.filter(b => {
             const isParcel = b.type === "parcel";
+            const name = (isParcel ? b.sender_name : b.passenger_name) || "";
+            const phone = (isParcel ? b.sender_phone : b.passenger_phone) || "";
 
-            const customer = escapeHtml(isParcel ? b.sender_name : b.passenger_name);
-            const phone = escapeHtml(isParcel ? b.sender_phone : b.passenger_phone);
-            const recipient = isParcel ? `${escapeHtml(b.receiver_name)}<br><span style="color:var(--color-text-muted); font-size:.8rem;">${escapeHtml(b.receiver_phone)}</span>` : "—";
-            const route = b.from_city && b.to_city
-                ? `${escapeHtml(b.from_city)} → ${escapeHtml(b.to_city)}${!isParcel && b.departure_time ? `<br><span style="color:var(--color-text-muted); font-size:.8rem;">${escapeHtml(b.departure_time.slice(0, 5))}</span>` : ""}`
-                : "—";
-            const seats = isParcel ? "—" : escapeHtml(b.seat_numbers || "—");
-            const reference = escapeHtml(b.reference);
+            return (
+                b.reference.toLowerCase().includes(query) ||
+                name.toLowerCase().includes(query) ||
+                phone.toLowerCase().includes(query)
+            );
+        });
+    }
 
-            const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
-            const statusClass = b.status === "confirmed" ? "active" : "inactive";
+    if (showTodayOnly) {
+        const todayStr = lagosDateString(new Date());
+        list = list.filter(b => bookingGroupDate(b, groupMode) === todayStr);
+    }
 
-            let actions = `<button class="admin-btn-secondary" data-manage="${reference}" style="white-space:nowrap;">Manage Timeline</button>`;
+    return list;
+}
 
-            if (b.status === "confirmed") {
-                actions += ` <button class="admin-btn-secondary" data-cancel="${reference}" style="white-space:nowrap;">Cancel</button>`;
-            }
-            if (b.status !== "refunded") {
-                actions += ` <button class="admin-btn-secondary" data-refund="${reference}" style="white-space:nowrap;">Refund</button>`;
-            }
+function refreshBookingsView() {
+    renderBookings(getVisibleBookings());
+}
 
-            return `
-                <tr>
-                    <td>${reference}</td>
-                    <td><span class="status-badge ${isParcel ? "inactive" : "active"}">${isParcel ? "Parcel" : "Passenger"}</span></td>
-                    <td>${customer}</td>
-                    <td>${phone}</td>
-                    <td>${recipient}</td>
-                    <td>${route}</td>
-                    <td>${seats}</td>
-                    <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-                    <td>${money(b.price_kobo)}</td>
-                    <td>${actions}</td>
-                </tr>
-            `;
-        }).join("");
+function buildBookingRow(b) {
+    const isParcel = b.type === "parcel";
+
+    const customer = escapeHtml(isParcel ? b.sender_name : b.passenger_name);
+    const phone = escapeHtml(isParcel ? b.sender_phone : b.passenger_phone);
+    const recipient = isParcel ? `${escapeHtml(b.receiver_name)}<br><span style="color:var(--color-text-muted); font-size:.8rem;">${escapeHtml(b.receiver_phone)}</span>` : "—";
+    const route = b.from_city && b.to_city
+        ? `${escapeHtml(b.from_city)} → ${escapeHtml(b.to_city)}${!isParcel && b.departure_time ? `<br><span style="color:var(--color-text-muted); font-size:.8rem;">${escapeHtml(b.departure_time.slice(0, 5))}</span>` : ""}`
+        : "—";
+    const seats = isParcel ? "—" : escapeHtml(b.seat_numbers || "—");
+    const reference = escapeHtml(b.reference);
+
+    const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
+    const statusClass = b.status === "confirmed" ? "active" : "inactive";
+
+    let actions = `<button class="admin-btn-secondary" data-manage="${reference}" style="white-space:nowrap;">Manage Timeline</button>`;
+
+    if (b.status === "confirmed") {
+        actions += ` <button class="admin-btn-secondary" data-cancel="${reference}" style="white-space:nowrap;">Cancel</button>`;
+    }
+    if (b.status !== "refunded") {
+        actions += ` <button class="admin-btn-secondary" data-refund="${reference}" style="white-space:nowrap;">Refund</button>`;
+    }
+
+    return `
+        <tr>
+            <td>${reference}</td>
+            <td><span class="status-badge ${isParcel ? "inactive" : "active"}">${isParcel ? "Parcel" : "Passenger"}</span></td>
+            <td>${customer}</td>
+            <td>${phone}</td>
+            <td>${recipient}</td>
+            <td>${route}</td>
+            <td>${escapeHtml(otherDateCell(b, groupMode))}</td>
+            <td>${seats}</td>
+            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+            <td>${money(b.price_kobo)}</td>
+            <td>${actions}</td>
+        </tr>
+    `;
+}
+
+function renderBookings(bookings) {
+    const otherDateHeader = document.getElementById("other-date-header");
+    if (otherDateHeader) otherDateHeader.textContent = groupMode === "trip" ? "Booked" : "Trip Date";
+
+    if (allBookings.length === 0) {
+        bookingsTableBody.innerHTML = `
+            <tr>
+                <td colspan="${BOOKING_TABLE_COLUMNS}">
+                    <div class="admin-empty">No bookings yet — they'll show up here as customers pay on the courier and passenger pages.</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    if (bookings.length === 0) {
+        bookingsTableBody.innerHTML = `
+            <tr>
+                <td colspan="${BOOKING_TABLE_COLUMNS}">
+                    <div class="admin-empty">No bookings match${showTodayOnly ? " for today" : ""}.</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    // Sort inside each day: trip view puts the earliest departure first
+    // (parcels, which have no departure time, go last); booked view
+    // puts the newest booking first.
+    const sortWithinDay = (a, b) => {
+        if (groupMode === "trip") {
+            const aTime = a.departure_time || "99:99";
+            const bTime = b.departure_time || "99:99";
+            if (aTime !== bTime) return aTime < bTime ? -1 : 1;
+        }
+        return new Date(b.created_at) - new Date(a.created_at);
+    };
+
+    const groups = {};
+    bookings.forEach(b => {
+        const key = bookingGroupDate(b, groupMode);
+        (groups[key] = groups[key] || []).push(b);
+    });
+
+    const todayStr = lagosDateString(new Date());
+    const orderedDates = orderDateGroups(Object.keys(groups), todayStr);
+
+    bookingsTableBody.innerHTML = orderedDates.map(dateStr => {
+        const rows = groups[dateStr].sort(sortWithinDay);
+        const count = rows.length;
+
+        return `
+            <tr class="date-group-row">
+                <td colspan="${BOOKING_TABLE_COLUMNS}">
+                    ${escapeHtml(formatDayHeading(dateStr, todayStr))}
+                    <span class="date-group-count">${count} booking${count === 1 ? "" : "s"}</span>
+                </td>
+            </tr>
+            ${rows.map(buildBookingRow).join("")}
+        `;
+    }).join("");
 }
 
 const bookingActionModal = document.getElementById("booking-action-modal-overlay");
@@ -410,27 +563,22 @@ document.getElementById("delete-confirm-btn").addEventListener("click", async ()
     }
 });
 
-bookingSearchInput.addEventListener("input", () => {
-    const query = bookingSearchInput.value.trim().toLowerCase();
+bookingSearchInput.addEventListener("input", refreshBookingsView);
 
-    if (query === "") {
-        renderBookings(allBookings);
-        return;
-    }
-
-    const filtered = allBookings.filter(b => {
-        const isParcel = b.type === "parcel";
-        const name = (isParcel ? b.sender_name : b.passenger_name) || "";
-        const phone = (isParcel ? b.sender_phone : b.passenger_phone) || "";
-
-        return (
-            b.reference.toLowerCase().includes(query) ||
-            name.toLowerCase().includes(query) ||
-            phone.toLowerCase().includes(query)
-        );
+document.querySelectorAll("[data-group-mode]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        groupMode = btn.dataset.groupMode;
+        document.querySelectorAll("[data-group-mode]").forEach(b => b.classList.toggle("active", b === btn));
+        refreshBookingsView();
     });
+});
 
-    renderBookings(filtered);
+document.querySelectorAll("[data-day-filter]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        showTodayOnly = btn.dataset.dayFilter === "today";
+        document.querySelectorAll("[data-day-filter]").forEach(b => b.classList.toggle("active", b === btn));
+        refreshBookingsView();
+    });
 });
 
 loadBookings();

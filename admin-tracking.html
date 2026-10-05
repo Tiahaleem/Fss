@@ -116,6 +116,19 @@
                 <input type="text" id="booking-search-input" class="admin-search-input" placeholder="Search by reference, name, or phone…">
             </div>
 
+            <div class="bookings-view-controls">
+                <div class="bookings-toggle-group">
+                    <span class="bookings-toggle-label">Group by:</span>
+                    <button type="button" class="bookings-toggle-btn active" data-group-mode="trip">Trip date</button>
+                    <button type="button" class="bookings-toggle-btn" data-group-mode="booked">Booked date</button>
+                </div>
+                <div class="bookings-toggle-group">
+                    <button type="button" class="bookings-toggle-btn active" data-day-filter="all">All days</button>
+                    <button type="button" class="bookings-toggle-btn" data-day-filter="today">Today only</button>
+                </div>
+            </div>
+            <p class="bookings-view-note">Parcels don't have a trip date, so in "Trip date" view they're listed under the day they were booked.</p>
+
             <div class="admin-table-wrap">
                 <table class="admin-table">
                     <thead>
@@ -126,6 +139,7 @@
                             <th>Phone</th>
                             <th>Recipient</th>
                             <th>Route</th>
+                            <th id="other-date-header">Booked</th>
                             <th>Seats</th>
                             <th>Status</th>
                             <th>Price</th>

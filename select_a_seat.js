@@ -17,9 +17,12 @@ const seatLimitText = document.getElementById('seat-limit-text');
 
 const heroHeading = document.querySelector('.seat-hero h1');
 const heroSubtitle = document.querySelector('.seat-hero p');
-const summaryRoute = document.querySelector('.summary-row:nth-child(1) strong');
-const summaryDeparture = document.querySelector('.summary-row:nth-child(3) strong');
-const summaryArrival = document.querySelector('.summary-row:nth-child(4) strong');
+// Looked up by id, not by position — position-based lookups silently
+// break the moment anything gets added above the rows (which is what
+// made Date show the departure time, and Arrival never fill in).
+const summaryRoute = document.getElementById('summary-route');
+const summaryDeparture = document.getElementById('summary-departure');
+const summaryArrival = document.getElementById('summary-arrival');
 const summaryTotal = document.querySelector('[data-field="seat-total"]');
 
 function addMinutesToTime(time, durationText) {

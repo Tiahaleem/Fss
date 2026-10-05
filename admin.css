@@ -890,3 +890,68 @@
     accent-color: var(--color-cyan);
     cursor: pointer;
 }
+
+
+/* =========================
+   BOOKINGS — DATE GROUPING
+========================= */
+
+.bookings-view-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 28px;
+    margin-bottom: 8px;
+}
+
+.bookings-toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bookings-toggle-label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-right: 2px;
+}
+
+.bookings-toggle-btn {
+    padding: 7px 14px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.bookings-toggle-btn.active {
+    background: var(--color-navy-deep);
+    border-color: var(--color-navy-deep);
+    color: #fff;
+}
+
+.bookings-view-note {
+    font-size: .78rem;
+    color: var(--color-text-muted);
+    margin: 0 0 14px;
+}
+
+.admin-table tr.date-group-row td {
+    background: var(--color-field-bg);
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    padding: 10px 16px;
+}
+
+.date-group-count {
+    margin-left: 8px;
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
