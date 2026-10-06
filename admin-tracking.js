@@ -581,5 +581,49 @@ document.querySelectorAll("[data-day-filter]").forEach(btn => {
     });
 });
 
+// ---- Google Sheet buttons ----
+const sheetSyncBtn = document.getElementById("sheet-sync-btn");
+const sheetOpenLink = document.getElementById("sheet-open-link");
+let sheetConfigured = false;
+
+async function loadSheetStatus() {
+    try {
+        const status = await apiFetch("/api/sheets/status");
+        sheetConfigured = status.configured;
+
+        if (status.configured && status.sheetUrl) {
+            sheetOpenLink.href = status.sheetUrl;
+            sheetOpenLink.style.display = "";
+        }
+    } catch (err) {
+        // Backend not updated yet, or nothing to show — the buttons just
+        // stay in their "not connected" state rather than shouting about it.
+        sheetConfigured = false;
+    }
+}
+
+sheetSyncBtn.addEventListener("click", async () => {
+    if (!sheetConfigured) {
+        showToast("Google Sheets isn't connected yet. Add the two Google settings on Render first.");
+        return;
+    }
+
+    const originalLabel = sheetSyncBtn.textContent;
+    sheetSyncBtn.disabled = true;
+    sheetSyncBtn.textContent = "Syncing…";
+
+    try {
+        const result = await apiFetch("/api/sheets/sync", { method: "POST" });
+        showToast(`Sheet updated — ${result.rowsWritten} booking${result.rowsWritten === 1 ? "" : "s"} written.`, "success");
+    } catch (err) {
+        showToast(err.message);
+    } finally {
+        sheetSyncBtn.disabled = false;
+        sheetSyncBtn.textContent = originalLabel;
+    }
+});
+
+loadSheetStatus();
+
 loadBookings();
 loadEvents();

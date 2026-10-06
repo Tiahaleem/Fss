@@ -955,3 +955,18 @@
     font-weight: 500;
     color: var(--color-text-muted);
 }
+
+
+.bookings-sheet-group {
+    margin-left: auto;
+}
+
+a.bookings-toggle-btn {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.bookings-toggle-btn:disabled {
+    opacity: .6;
+    cursor: default;
+}
