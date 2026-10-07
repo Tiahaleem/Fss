@@ -592,7 +592,7 @@ input:focus-visible {
     /* Stats */
     .stats {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
 
         gap: 12px;
 
@@ -602,6 +602,7 @@ input:focus-visible {
 
     .stat-card {
         min-height: auto;
+        min-width: 0;
         padding: 14px;
     }
 
@@ -725,7 +726,7 @@ input:focus-visible {
     }
 
     .stat-card p {
-        font-size: 0.65rem;
+        font-size: 0.75rem;   /* was 0.65rem = 10.4px, too small to read comfortably */
     }
 }
 
@@ -2190,4 +2191,17 @@ input:focus-visible {
 
 .testimonials-see-all:hover {
     text-decoration: underline;
+}
+
+/* On phones, make the whole search box tappable, not just the thin line of
+   text inside it: the control grows an invisible margin of padding that is
+   cancelled out by a negative margin, so nothing moves on screen. */
+@media (max-width: 768px) {
+    .field select,
+    .field input {
+        padding-top: 14px;
+        padding-bottom: 14px;
+        margin-top: -14px;
+        margin-bottom: -14px;
+    }
 }

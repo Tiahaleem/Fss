@@ -576,6 +576,12 @@
     .booking-card-right {
         width: 100%;
         justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+    }
+
+    .booking-card-main {
+        min-width: 0;
     }
 }
 

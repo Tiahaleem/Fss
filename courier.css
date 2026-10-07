@@ -496,7 +496,7 @@ COURIER FEATURES
 
     .quote-container {
 
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
 
     }
 
@@ -633,6 +633,7 @@ COURIER FEATURES
 
 .promo-code-row input {
     flex: 1;
+    min-width: 0;   /* without this the field can't shrink, and pushes the page wider than a phone */
     padding: 10px 14px;
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
@@ -641,6 +642,8 @@ COURIER FEATURES
 }
 
 .promo-code-row button {
+    flex-shrink: 0;
+    white-space: nowrap;
     padding: 10px 18px;
     background: var(--color-navy-deep);
     color: white;
@@ -667,4 +670,9 @@ COURIER FEATURES
 
 #promo-message.success {
     color: var(--color-cyan);
+}
+
+/* Same safeguard as the passenger page: grid children may shrink. */
+.quote-container > * {
+    min-width: 0;
 }

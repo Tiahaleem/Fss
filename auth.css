@@ -172,13 +172,13 @@
 .password-toggle-btn {
     position: absolute;
     top: 50%;
-    right: 12px;
+    right: 5px;
     transform: translateY(-50%);
 
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px;
+    padding: 11px;   /* 40px tap area; the icon itself stays where it was */
 
     display: flex;
     align-items: center;
