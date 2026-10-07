@@ -1,7 +1,7 @@
 {
     "name": "FSS Transport",
     "short_name": "FSS Transport",
-    "description": "Book intercity trips and send parcels across Nigeria, with real-time tracking.",
+    "description": "Book intercity trips and send parcels, starting with Ajah to Ibadan, with trip tracking.",
     "start_url": "./index.html",
     "scope": "./",
     "display": "standalone",
