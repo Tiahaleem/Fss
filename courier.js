@@ -6,49 +6,14 @@
 
 const routes = {
 
-    "Lagos-Abuja": {
-        base: 2500,
-        perKg: 850
-    },
-
     "Lagos-Ibadan": {
         base: 1800,
         perKg: 450
     },
 
-    "Lagos-Port Harcourt": {
-        base: 3000,
-        perKg: 950
-    },
-
-    "Lagos-Benin City": {
-        base: 2200,
-        perKg: 650
-    },
-
-    "Abuja-Lagos": {
-        base: 2500,
-        perKg: 850
-    },
-
-    "Abuja-Port Harcourt": {
-        base: 2800,
-        perKg: 900
-    },
-
     "Ibadan-Lagos": {
         base: 1800,
         perKg: 450
-    },
-
-    "Port Harcourt-Lagos": {
-        base: 3000,
-        perKg: 950
-    },
-
-    "Benin City-Lagos": {
-        base: 2200,
-        perKg: 650
     }
 
 };
@@ -200,9 +165,16 @@ function updateQuote(){
    EVENTS
 ===================================== */
 
-from.addEventListener("change", updateQuote);
+// Only two cities, so changing one box flips the other automatically
+from.addEventListener("change", () => {
+    to.value = from.value === "Lagos" ? "Ibadan" : "Lagos";
+    updateQuote();
+});
 
-to.addEventListener("change", updateQuote);
+to.addEventListener("change", () => {
+    from.value = to.value === "Lagos" ? "Ibadan" : "Lagos";
+    updateQuote();
+});
 
 weight.addEventListener("input", updateQuote);
 

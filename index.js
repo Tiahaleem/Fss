@@ -581,6 +581,12 @@ if (bookingBox) {
 
         swapBtn.addEventListener("click", swapFields);
 
+        // With only two cities, keep the other box in sync automatically.
+        // This is what makes it work on phones, where the swap button is hidden.
+        const otherCity = (city) => (city === "Lagos" ? "Ibadan" : "Lagos");
+        fromSelect.addEventListener("change", () => { toSelect.value = otherCity(fromSelect.value); });
+        toSelect.addEventListener("change", () => { fromSelect.value = otherCity(toSelect.value); });
+
         // Keyboard support since .swap is a div acting as a button
         swapBtn.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") {
